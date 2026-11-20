@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breathe Strong</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* VOICE: gym-floor coach, short and direct
+   IDEA: a training log card from a strength gym, chalk on iron
+   PICTURE: the working app itself; airway drawings in the routine player
+   COLOUR and TYPE: iron #17181B, steel cards, chalk text, plate-orange actions, air-green progress; Barlow Condensed + Barlow
+   LAYOUT: one phone column, max 520px, bottom tab bar */
+:root{color-scheme:dark;--bg:#17181B;--card:#2B2E33;--deep:#0F1012;--ink:#F2F0EC;--mut:#B9B6B0;--dim:#9A9791;--acc:#FF5A1F;--air:#7FB7A4;--line:#3A3D43;--edge:#4A4E55}
+:root[data-theme=light]{color-scheme:dark}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px 120px}
+.wrap.full{padding-bottom:40px}
+h1{font:800 clamp(34px,9vw,44px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:6px 0 12px;text-wrap:balance}
+h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:22px 0 8px}
+.cond{font-family:'Barlow Condensed',sans-serif;font-weight:800}
+.mut{color:var(--mut)}.small{font-size:14px}.tiny{font-size:13px}
+.card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0}
+.warn{border:1px solid var(--acc);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:15px}
+.row{display:flex;align-items:center;gap:12px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:27px;background:var(--acc);color:#17181B;border:0;font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase;width:100%;margin:10px 0;padding:0 18px}
+.btn2{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:24px;background:transparent;color:var(--ink);border:1px solid var(--edge);font-weight:600;width:100%;margin:8px 0;padding:0 16px}
+.chip{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--edge);background:transparent;font-size:14px}
+.chip[aria-pressed=true]{border-color:var(--air);background:#24332F}
+.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:0;border-radius:14px;padding:14px;margin:8px 0;min-height:64px}
+.dot{width:28px;height:28px;border-radius:14px;border:2px solid var(--edge);flex:none;display:flex;align-items:center;justify-content:center}
+.dot.on{background:var(--air);border-color:var(--air)}
+.grow{flex:1;display:flex;flex-direction:column}
+.t1{font-weight:600}.t2{font-size:13px;color:var(--mut)}
+label{display:block}
+input[type=number],input[type=date]{font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%}
+input[type=range]{width:100%;accent-color:var(--acc);height:32px}
+input[type=checkbox],input[type=radio]{accent-color:var(--acc);width:22px;height:22px;flex:none}
+.check{display:flex;gap:12px;align-items:center;min-height:48px;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.lab{font-size:13px;color:var(--mut);margin-bottom:4px}
+.big{font:800 64px/1 'Barlow Condensed',sans-serif}
+.huge{font:800 88px/1 'Barlow Condensed',sans-serif}
+.bars{display:flex;align-items:flex-end;gap:6px;height:64px}
+.bars div{flex:1;border-radius:4px;background:var(--edge);min-height:3px}
+.seg{display:flex;gap:4px}.seg div{height:10px;border-radius:5px;background:var(--edge)}
+.top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0}
+.fig{position:relative;height:220px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.art{width:100%;height:240px;background:#1F2125;border-radius:20px;display:block}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--deep);border-top:1px solid var(--card);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{background:none;border:0;color:var(--dim);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:62px}
+nav button[aria-current=page]{color:var(--acc)}
+.setrow{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;margin-top:8px}
+summary{list-style:none}summary::-webkit-details-marker{display:none}summary::after{content:' +';color:var(--acc)}details[open] summary::after{content:' −'}
+textarea{width:100%;min-height:200px;font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:10px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#17181B;padding:10px 16px;border-radius:20px;font-weight:600;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="view"><p class="mut">Loading Breathe Strong…</p></div>
+<nav id="nav" aria-label="Main">
+  <button data-act="tab" data-v="today"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 L12 4 L20 11 V20 H4 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Today</button>
+  <button data-act="tab" data-v="plan"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6 H20 V20 H4 Z M4 10 H20 M8 3 V7 M16 3 V7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>Plan</button>
+  <button data-act="tab" data-v="log"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14 A8 8 0 1 1 10 4 A6 6 0 0 0 19 14 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Log</button>
+  <button data-act="tab" data-v="progress"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 H20 M6 16 L10 11 L14 14 L19 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>Progress</button>
+  <button data-act="tab" data-v="retest"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4 H18 V20 H6 Z M9 12 L11.5 14.5 L15.5 9.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>Health</button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>window.FIREBASE_CONFIG={apiKey:"AIzaSyDaPTF0p4L-hFVs_yzoMpMCgCmqBfi58kg",authDomain:"breathe-strong-a0c3a.firebaseapp.com",projectId:"breathe-strong-a0c3a",storageBucket:"breathe-strong-a0c3a.firebasestorage.app",messagingSenderId:"830158514136",appId:"1:830158514136:web:17ac675d1955bc44f1f4ad"};</script>
+<script>
+{
+/* ---------- data: program ---------- */
+const PH={F:{n:'Foundation',lift:'3 × 10–12',z2:30},B:{n:'Build',lift:'4 × 6–8',z2:40},S:{n:'Strength',lift:'4–5 × 4–6',z2:45},R:{n:'Progression',lift:'4–5 × 4–6, add small loads',z2:45},M:{n:'Maintenance',lift:'4–5 × 4–6',z2:45}};
+const phaseOf=w=>w<=2?'F':w<=5?'B':w<=8?'S':w<=24?'R':'M';
+const pick=(p,a)=>a[p==='F'?0:p==='B'?1:2];
+/* alt: home versions [name, tip] for db = dumbbells, home = water jugs / backpack, bw = bodyweight only */
+const NECK={db:['Neck holds + posture','4-way neck holds, foam roller or rolled towel, wall angels'],home:['Neck holds + posture','4-way neck holds, rolled towel, wall angels'],bw:['Neck holds + posture','4-way neck holds, rolled towel, wall angels']};
+const WK={
+ A:{t:'Workout A: pull and press',ex:[
+  {n:'Trap-bar deadlift',s:'P',log:1,tip:'Heaviest brace: big belly breath, chin tucked',alt:{db:['Dumbbell Romanian deadlift','Hinge at the hips, brace, chin tucked'],home:['Water-jug or backpack deadlift','Two 10 L jugs are about 20 kg. Brace hard'],bw:['Single-leg Romanian deadlift','Slow 3 s lowering, light hand on a wall if needed']}},
+  {n:'Standing overhead press',s:'P',log:1,tip:'Head neutral, exhale at the top',alt:{db:['Standing dumbbell press','Squeeze glutes, ribs down, exhale at the top'],home:['Water-jug press','One jug at a time if it’s heavy'],bw:['Pike push-up','Hips high, head between your hands']}},
+  {n:'Barbell or dumbbell row',s:'P',log:1,tip:'Chin tucked throughout',alt:{db:['One-arm dumbbell row','Hand on a bench or chair, chin tucked'],home:['Backpack or jug row','Bent over, pull to your hip'],bw:['Table row','Lie under a sturdy table, pull your chest to the edge']}},
+  {n:"Farmer's carry",s:['3 × 30 m','3 × 40 m','4 × 40 m'],tip:'Steady breathing under load',alt:{db:["Dumbbell farmer's carry",'Tall posture, steady breathing'],home:['Water-jug carry','Walk the hallway or yard'],bw:['Loaded backpack walk','Fill a backpack with books or water bottles']}},
+  {n:'Dumbbell shrugs',s:['3 × 12','3 × 12','3 × 12'],log:1,alt:{db:['Dumbbell shrugs','Pause at the top'],home:['Jug shrugs','Pause at the top'],bw:['Prone Y-raises','Face down, thumbs up, lift arms in a Y']}},
+  {n:'Band neck extension + flexion',s:['2 × 15 each','2 × 15 each','2 × 15 each'],tip:'Keep it light',alt:{db:['Hand-resisted neck work','Push into your own hand, front and back'],home:['Hand-resisted neck work','Push into your own hand, front and back'],bw:['Hand-resisted neck work','Push into your own hand, front and back']}},
+  {n:'Neck holds + posture',s:['5 min','5 min','5 min'],tip:'4-way neck holds, foam roller, wall angels',alt:NECK}]},
+ B:{t:'Workout B: push and pull',ex:[
+  {n:'Bench press or weighted push-up',s:'P',log:1,tip:'Brace lying flat',alt:{db:['Dumbbell floor press','Lie on the floor, elbows touch down each rep'],home:['Push-ups','Feet up on a step or chair to make it harder'],bw:['Push-ups','Feet up on a step or chair to make it harder']}},
+  {n:'Chin-ups or lat pulldown',s:['3 × 8–10','4 × 6–8','4–5 × 4–6'],log:1,tip:'Hanging brace',alt:{db:['Chest-supported dumbbell row','Chest on an incline bench or sturdy box'],home:['Table row','Lie under a sturdy table, pull your chest to the edge'],bw:['Table row','Lie under a sturdy table, pull your chest to the edge']}},
+  {n:'Goblet squat',s:['3 × 10–12','4 × 8','4 × 6–8'],log:1,tip:'Upright torso',alt:{db:['Dumbbell goblet squat','Upright torso'],home:['Water-jug goblet squat','Hug the jug to your chest'],bw:['Split squat','Slow 3 s lowering, back knee to the floor']}},
+  {n:'Suitcase carry',s:['3 × 30 m/side','3 × 40 m/side','4 × 40 m/side'],tip:'Side brace',alt:{db:['One-arm dumbbell carry','Don’t lean, brace the side'],home:['One-arm jug carry','Don’t lean, brace the side'],bw:['Side plank','Hips high, steady breathing',['3 × 30 s/side','3 × 40 s/side','3 × 45 s/side']]}},
+  {n:'Face pulls',s:['3 × 15','3 × 15','3 × 15'],tip:'Counters head-forward slump',alt:{db:['Bent-over reverse fly','Light weights, squeeze shoulder blades'],home:['Prone T-raises','Face down, arms out in a T, lift'],bw:['Prone T-raises','Face down, arms out in a T, lift']}},
+  {n:'Plank with chin tuck',s:['3 × 30 s','3 × 40 s','3 × 45 s']},
+  {n:'Neck holds + posture',s:['5 min','5 min','5 min'],tip:'4-way neck holds, foam roller, wall angels',alt:NECK}]}
+};
+const EQUIP={gym:'Gym',db:'Dumbbells at home',home:'Water jugs, backpack, household',bw:'Bodyweight only'};
+const BUY=[
+ ['Worldwide','POWERbreathe (official store)','The standard handheld trainer. Pick the Plus Medium resistance for most men.','https://www.powerbreathe.com'],
+ ['USA','POWERbreathe US store','US site of the same brand.','https://www.powerbreathe.com/us/'],
+ ['USA','POWERbreathe Plus on eBay','Sold by Creative Health Products, about US$88 with free shipping.','https://www.ebay.com/p/18012033124'],
+ ['Australia','The Breather (Luxemed)','A$118, TGA-listed, ships from Australia. Trains breathing in and out.','https://www.luxemed.com.au/collections/all/products/the-breather'],
+ ['Australia','Philips Threshold IMT (The CPAP Clinic)','Simple threshold trainer from a CPAP supplier.','https://www.thecpapclinic.com.au/products/philips-respironics-threshold-imt-1-each'],
+ ['Europe','POWERbreathe Medic (Oxycare)','About €39 plus shipping, from Germany.','https://www.oxycare.eu/en/respiratory-care/breathing-training/powerbreathe-medic-respiratory-trainer/'],
+ ['Worldwide','Airofit','App-connected trainer, free worldwide shipping, much pricier.','https://www.airofit.com']];
+
+/* ---------- personal checks (original wording, not licensed questionnaires) ---------- */
+const YN=[['yes','Yes'],['no','No']];
+const FREQ=[['0','Never'],['1','Sometimes'],['2','Often'],['3','Most days']];
+const CK=[
+ {k:'risk',t:'Sleep risk check',why:'Spots signs that your snoring could be sleep apnoea, so you know if you should see a doctor.',time:'1 min',q:[
+  ['c','loud','Is your snoring loud enough to hear through a closed door?',YN],
+  ['c','pause','Has anyone seen you stop breathing, choke or gasp in your sleep?',YN],
+  ['c','drive','Have you felt drowsy while driving in the past month?',YN],
+  ['c','tired','Do you often feel tired during the day, even after a full night?',YN],
+  ['c','bp','Have you been told you have high blood pressure?',YN],
+  ['c','head','Do you often wake up with a headache?',YN],
+  ['c','night','Do you usually get up 2 or more times a night to pee?',YN],
+  ['c','age','Are you over 50?',YN],
+  ['c','male','Are you male?',YN],
+  ['c','neck','Is your neck over 40 cm around? (Use a tape, or a collar size of 16 or more.)',YN]],
+  res:a=>{const y=Object.values(a).filter(v=>v==='yes').length,urg=a.pause==='yes'||a.drive==='yes';
+   const lv=urg?'urgent':y>=4?'high':y>=2?'some':'low';
+   return{lv,sum:{urgent:'You have a sign that needs a doctor soon',high:'Several signs of possible sleep apnoea',some:'A few signs to mention to your GP',low:'Few signs right now'}[lv],
+    ch:{urgent:'Please see your GP about a sleep study soon. You can still start gently. Don’t drive if you feel drowsy.',high:'Ask your GP about a sleep study. Today will remind you until you confirm.',some:'Mention your snoring at your next GP visit.',low:'Redo this check if anything changes.'}[lv]}}},
+ {k:'alert',t:'Daytime energy check',why:'Tracks how alert you feel. Better energy is one of the best signs the program is working.',time:'1 min',every:28,q:[
+  ['c','nap','In the past 2 weeks, how often did you need a nap or lie-down to get through the day?',FREQ],
+  ['c','focus','…struggle to concentrate at work or while reading?',FREQ],
+  ['c','fresh','…wake up feeling unrefreshed?',FREQ],
+  ['c','caff','…lean on caffeine to stay alert?',FREQ],
+  ['c','nod','…nod off without meaning to?',FREQ]],
+  res:a=>{const s=Object.values(a).reduce((x,v)=>x+(+v||0),0);return{score:s,sum:'Energy score '+s+' out of 15 (lower is better)',ch:s>=10?'That’s a lot of daytime tiredness. Mention it to your GP. We’ll recheck every 4 weeks.':'We’ll recheck every 4 weeks and show the trend in Progress.'}}},
+ {k:'nose',t:'Nose check',why:'A blocked nose pushes you to mouth-breathe at night, which makes snoring worse.',time:'30 s',q:[
+  ['c','nose','Press one nostril shut and breathe in through the other. Then swap. How was it?',[['clear','Both clear'],['left','Left blocked'],['right','Right blocked'],['both','Both blocked']]]],
+  res:a=>a.nose==='clear'||!a.nose?{sum:'Both sides clear',ch:'No nose changes needed.'}:{sum:(a.nose==='both'?'Both sides':'Your '+a.nose+' side')+' felt blocked',ch:'Added a nose-care tip to your Today screen.'}},
+ {k:'mouth',t:'Snore source check',why:'Shows which part of your throat is likely vibrating, so your routine focuses there.',time:'1 min',q:[
+  ['c','palate','Keep your mouth closed and try to make your snoring sound through your nose. Can you?',[['yes','Yes'],['no','No'],['unsure','Not sure']]],
+  ['c','jaw','Push your lower jaw forward and try to snore. Does the sound stop?',[['yes','Yes'],['no','No'],['unsure','Not sure']]],
+  ['c','dry','Do you usually wake with a dry mouth?',YN]],
+  res:a=>{const f=[];if(a.palate==='yes')f.push('soft palate');if(a.jaw==='yes')f.push('tongue base');
+   return{sum:f.length?'Likely source: '+f.join(' and '):'No clear source yet',ch:(f.length?'Your airway routine now has extra reps on the '+f.join(' and ')+' moves. ':'Your routine stays balanced. ')+(a.dry==='yes'?'Added a nose-breathing tip.':'')}}},
+ {k:'tongue',art:'press',t:'Tongue strength hold',why:'Sets your hold times and shows your tongue getting stronger.',time:'1 min',every:28,q:[
+  ['n','secs','Press your whole tongue hard against the roof of your mouth. How many seconds until it fades?','s',1]],
+  res:a=>{const s=num(a.secs);return s==null?{sum:'Not measured',ch:'Default hold times kept.'}:{sum:'Held '+s+' s',ch:'Tongue press holds set to '+Math.min(10,Math.max(3,Math.round(s/3)))+' s. Retest in 4 weeks.'}}},
+ {k:'fitness',t:'Starting fitness',why:'Picks your starting level so the first weeks aren’t too easy or too hard.',time:'3 min',every:28,q:[
+  ['n','push','Push-ups in a row with good form (knees down is fine)','reps',0],
+  ['n','plank','Plank hold on your forearms','s',1],
+  ['c','walk','Can you walk briskly for 30 minutes without stopping?',[['yes','Yes'],['no','Not yet']]]],
+  res:a=>{const ch=[];if(num(a.push)!=null&&num(a.push)<8)ch.push('incline push-ups to start');if(num(a.plank)!=null&&num(a.plank)<30)ch.push('20 s planks to start');if(a.walk==='no')ch.push('20 min walks in weeks 1–2');
+   return{sum:[num(a.push)!=null?a.push+' push-ups':null,num(a.plank)!=null?a.plank+' s plank':null].filter(Boolean).join(' · ')||'Saved',ch:ch.length?'Adjusted: '+ch.join(', ')+'.':'Standard starting levels. Retest in 4 weeks.'}}},
+ {k:'body',t:'Body measures',why:'Neck size and weight are linked to snoring, so tracking them shows change.',time:'2 min',every:28,q:[
+  ['n','h','Height','cm',0],['n','w','Weight','kg',0],['n','neck','Neck, just below the Adam’s apple','cm',0],['n','waist','Waist, at the belly button','cm',0]],
+  res:a=>{const h=num(a.h),w=num(a.w),b=h&&w?w/((h/100)**2):null;return{sum:b?'BMI '+r1(b):'Saved',ch:b&&b>=30?'Losing 5–10% of body weight often helps snoring. Added a tip to Today.':'We’ll track these every 4 weeks.'}}}
+];
+const ckOf=k=>CK.find(c=>c.k===k);
+const lastCk=k=>{const a=S.checks&&S.checks[k];return a&&a.length?a[a.length-1]:null};
+const myChecks=()=>CK.filter(c=>!(c.k==='risk'&&S.profile.path==='retest'));
+function pers(){const m=lastCk('mouth'),tg=lastCk('tongue'),f=lastCk('fitness'),n=lastCk('nose'),b=lastCk('body'),r=lastCk('risk');
+ const h=b&&num(b.a.h),w=b&&num(b.a.w);
+ return{palate:!!m&&m.a.palate==='yes',base:m?m.a.jaw==='yes':S.profile.jaw==='yes',dry:!!m&&m.a.dry==='yes',nose:n&&n.a.nose&&n.a.nose!=='clear'?n.a.nose:null,
+  hold:tg?num(tg.a.secs):null,push:f?num(f.a.push):null,plank:f?num(f.a.plank):null,walk:f?f.a.walk:null,bmi:h&&w?w/((h/100)**2):null,
+  risk:r?ckOf('risk').res(r.a).lv:null,quick:S.profile.quickFlag||null}}
+function posInsight(){const ks=scored();const bk=ks.filter(k=>(S.nights[k].tags||[]).includes('Slept on back')).map(k=>S.nights[k].snore),ot=ks.filter(k=>!(S.nights[k].tags||[]).includes('Slept on back')).map(k=>S.nights[k].snore);
+ if(bk.length<2||ot.length<2)return null;const a=med(bk),b=med(ot);return a>b*1.3?'Back-sleeping nights score '+Math.round((a/b-1)*100)+'% higher. Try side-sleeping: a pillow behind your back helps.':null}
+const MOVES=p=>{const S=p!=='F'&&p!=='B';return[
+ {k:'press',n:'Tongue press',how:'Suck the whole tongue flat against the roof of your mouth, front to back. Hold.',reps:S?40:20,hold:5,rest:2},
+ {k:'slide',n:'Tongue slide',how:'Tip just behind your top teeth, slide it back along the roof of your mouth. One slide each beep.',reps:S?40:20,hold:2,rest:0},
+ {k:'down',n:'Tongue push-down',how:'Tip on your lower teeth, press the back of your tongue down hard. Hold.',reps:S?40:20,hold:3,rest:2},
+ {k:'ahh',n:'Soft-palate “Ahh”',how:'Say a loud, long “Ahh” and feel the back of your throat lift.',reps:S?15:10,hold:5,rest:3},
+ {k:'cheek',n:'Cheek press',how:'Clean finger inside your cheek: push out while the cheek pulls in. Swap sides halfway.',reps:S?30:20,hold:2,rest:0},
+ {k:'shaker',n:'Shaker head lift',how:'Lie flat. Lift only your head to look at your toes, shoulders down. After the holds, do 20–30 quick lifts.',reps:3,hold:p==='F'?30:60,rest:30},
+ {k:'chin',n:'Chin tuck press',how:'Small ball or fist under your chin, press down into it. Hold.',reps:S?15:10,hold:5,rest:2},
+ {k:'exhale',n:'Pursed-lip exhale',how:'Slow breaths out through pursed lips or a straw. Relax.',reps:1,hold:S?180:120,rest:0}]};
+const TAGS=['Training day','Drinks','Late meal','Blocked nose','Slept on back','Poor sleep'];
+const DAYN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const pd=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(a,b-1,c)};
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return iso(d)};
+const TODAY=()=>iso(new Date());
+const fmt=s=>pd(s).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+const med=a=>{if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),m=b.length>>1;return b.length%2?b[m]:(b[m-1]+b[m])/2};
+const num=v=>{if(v===''||v==null)return null;const n=Number(v);return isFinite(n)?n:null};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r1=v=>Math.round(v*10)/10;
+const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+pad(s%60)};
+const dayIdx=s=>Math.round((pd(s)-pd(S.profile.start))/864e5);
+const weekOf=s=>Math.floor(dayIdx(s)/7)+1;
+const checkSvg='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12 L10 17 L19 7" fill="none" stroke="#17181B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const back='<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+
+/* ---------- state + saving ---------- */
+const blank=()=>({v:1,at:0,health:null,profile:null,nights:{},done:{},sessions:[],weekly:{},imtLevel:4,imtEasy:0});
+const FBC=window.FIREBASE_CONFIG||null;
+let S=blank(),mode='memory',dbRef=null,saveT=null,writing=false,dirty=false,FB=null,USER=null,FBERR=null,LKEY='bs-state';
+function loadLocal(){try{const s=localStorage.getItem(LKEY);if(s){S=Object.assign(blank(),JSON.parse(s));mode='device'}}catch(e){}}
+if(!FBC)loadLocal();
+function save(){S.at=Date.now();const js=JSON.stringify(S);try{localStorage.setItem(LKEY,js);if(mode==='memory')mode='device'}catch(e){}dirty=true;clearTimeout(saveT);saveT=setTimeout(flush,800)}
+async function flush(){if(!dbRef||writing||!dirty)return;writing=true;dirty=false;
+ try{const body={s:JSON.stringify(S),at:S.at};if(FB)await FB.F.setDoc(dbRef,body);else await dbRef.set(body);mode='account'}
+ catch(e){const c=e&&e.code;if(FB||c==='unavailable'||c==='resource_exhausted'){dirty=true;setTimeout(flush,3000+Math.random()*3000)}else{dbRef=null}}
+ writing=false;if(dirty&&dbRef)flush()}
+function adopt(d){if(d&&typeof d.s==='string'){const r=JSON.parse(d.s);if(!S.at||(r.at||0)>=S.at){S=Object.assign(blank(),r);try{localStorage.setItem(LKEY,d.s)}catch(e){}}else{dirty=true;flush()}}}
+if(FBC){(async()=>{try{const b='https://www.gstatic.com/firebasejs/10.12.2/';
+  const[A,Au,F]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')]);
+  const app=A.initializeApp(FBC),auth=Au.getAuth(app);FB={auth,Au,F,db:F.getFirestore(app)};
+  Au.getRedirectResult(auth).catch(()=>{});
+  Au.onAuthStateChanged(auth,async u=>{USER=u;W=R=I=N=null;
+   if(!u){S=blank();dbRef=null;mode='memory';V={s:'today'};render();return}
+   LKEY='bs-state-'+u.uid;S=blank();loadLocal();dbRef=F.doc(FB.db,'users',u.uid);
+   try{const snap=await F.getDoc(dbRef);if(snap.exists())adopt(snap.data());else if(S.profile){dirty=true;flush()}mode='account'}catch(e){toast('Can’t reach the server. Saving on this phone for now.')}
+   render()})}catch(e){FBERR='Sign-in couldn’t load. Check your internet connection and refresh.';render()}})()}
+else(async()=>{const C=window.claude;if(!C||!C.use)return;
+ try{const[db,user]=await Promise.all([C.use('db'),C.use('user')]);const uid=user?await user.id():null;
+  if(db&&uid){dbRef=db.doc('data/users/'+uid+'/state');const snap=await dbRef.get();
+   if(snap.exists)adopt(snap.data());
+   else if(S.profile){dirty=true;flush()}
+   mode='account';render()}}catch(e){}})();
+function login(){return`<div style="min-height:70vh;display:flex;flex-direction:column;justify-content:center">
+ <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong</div>
+ <h1>Lift heavy. Breathe strong. Sleep quiet.</h1>
+ <p class="mut">A 6-month strength, breathing and airway program for snoring and sleep health. Sign in to keep your logs safe across devices.</p>
+ ${FBERR?`<div class="warn">${esc(FBERR)}</div>`:''}
+ <label class="check" style="border:0;align-items:flex-start"><input type="checkbox" id="consent" style="margin-top:3px"><span class="small">I understand my logs are stored securely in the cloud, are only visible to me, and are used only to run this app. I can delete them at any time in Settings.</span></label>
+ <button class="btn" data-act="glogin" ${FB?'':'disabled style="opacity:.55"'}>${FB?'Continue with Google':FBERR?'Sign-in unavailable':'Loading…'}</button>
+ <p class="tiny mut">Breathe Strong is a training and tracking program. It doesn’t diagnose or treat sleep apnoea.</p></div>`}
+
+/* ---------- sound + timers ---------- */
+let ac=null;
+function unlock(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}}
+function beep(f=880,d=.15){try{unlock();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.18;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}try{navigator.vibrate&&navigator.vibrate(80)}catch(e){}}
+let T=null;
+function startT(sec,end){T={end:Date.now()+sec*1000,left:sec,cb:end,paused:false}}
+setInterval(()=>{if(SW)document.querySelectorAll('[data-swd]').forEach(el=>el.textContent=Math.floor((Date.now()-SW.start)/1000));if(!T||T.paused)return;T.left=(T.end-Date.now())/1000;document.querySelectorAll('[data-tmr]').forEach(el=>el.textContent=mmss(T.left));if(T.left<=0){const f=T.cb;T=null;f&&f()}},200);
+let wake=null;async function keepAwake(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),1800)}
+async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copied')}catch(e){const ta=$('#copytext');if(ta){ta.focus();ta.select()}toast('Select the text below and copy it')}}
+
+/* ---------- plan logic ---------- */
+function dayPlan(s){const w=weekOf(s),p=phaseOf(Math.max(1,w)),wd=(pd(s).getDay()+6)%7,L=w%2?['A','B','A']:['B','A','B'];
+ const m=[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},{k:p==='F'?'z2':'int'},{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}][wd];return{w,p,wd,m}}
+function info(m,p){if(m.k==='w')return{t:WK[m.x].t,s:WK[m.x].ex.length+' exercises · '+(S.profile&&S.profile.equip&&S.profile.equip!=='gym'?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:50,day:'Workout '+m.x+' day'};
+ if(m.k==='z2')return{t:'Zone 2 cardio',s:'Talking pace, nose breathing only',min:p==='F'&&S.profile&&pers().walk==='no'?20:PH[p].z2,day:'Zone 2 day'};
+ if(m.k==='z2long')return{t:'Zone 2 or loaded carry walk',s:'Long walk with a weighted pack, nose breathing',min:45,day:'Long walk day'};
+ if(m.k==='int')return{t:'Intervals + breath-hold walk',s:pick(p,[6,6,8])+' × 30 s hard / 90 s easy, then '+pick(p,[5,5,8])+' holds',min:30,day:'Intervals day'};
+ return{t:'Rest + mobility',s:'Foam roller, wall angels, daily routine',min:15,day:'Rest day'}}
+function scored(){const src=(S.profile&&S.profile.scoreSrc)||'snorelab';return Object.keys(S.nights).sort().filter(k=>num(S.nights[k].snore)!=null&&(S.nights[k].src||'snorelab')===src)}
+function stats(){const ks=scored(),t=TODAY(),pre=ks.filter(k=>k<S.profile.start),first=(pre.length>=3?pre.slice(-14):ks.slice(0,14)).map(k=>S.nights[k].snore),base=med(first);
+ const last=med(ks.filter(k=>k>=addD(t,-7)).map(k=>S.nights[k].snore));
+ return{n:ks.length,base,prov:first.length<10,last,change:base&&last!=null?(base-last)/base:null}}
+function weekly(){const g={};scored().forEach(k=>{const w=Math.max(0,weekOf(k));(g[w]=g[w]||[]).push(S.nights[k].snore)});
+ return Object.keys(g).map(Number).sort((a,b)=>a-b).map(w=>({w,label:w?'Wk '+w:'Base',v:med(g[w])}))}
+const dn=s=>S.done[s]||(S.done[s]={});
+
+/* ---------- navigation ---------- */
+let V={s:'today'},W=null,R=null,I=null,N=null;
+function go(s,a){T=null;V=Object.assign({s},a||{});render();window.scrollTo(0,0)}
+
+/* ---------- screens ---------- */
+const CPAPNOTE='<div class="warn" style="background:var(--acc);color:#17181B;border:0;font-weight:600">Keep using your CPAP or mouthguard every night, under your doctor’s supervision. Don’t change your treatment without them.</div>';
+const radios=(name,opts,cur)=>`<div class="card" style="padding:4px 14px">${opts.map(([v,l,s,dis])=>`<label class="check" style="${dis?'opacity:.55':''}"><input type="radio" name="${name}" value="${v}" ${cur===v&&!dis?'checked':''} ${dis?'disabled':''}><span class="grow"><span>${l}</span>${s?`<span class="t2">${s}</span>`:''}</span></label>`).join('')}</div>`;
+const gear='<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+const EQX={gym:'Barbells, a trap bar, a bench and a pull-up bar.',db:'A pair of adjustable dumbbells. Bench press becomes a floor press; pull-ups become dumbbell rows.',home:'Water jugs (10 L ≈ 10 kg), a backpack filled with books, a sturdy table. Deadlifts use jugs; pull-ups become table rows.',bw:'No equipment. Push-ups, split squats, table rows and single-leg deadlifts, made harder with slow lowering.'};
+const SRC={snorelab:'SnoreLab',app:'Breathe Strong recorder'};
+const WATCH={
+ apple:{n:'Apple Watch',hr:'Health app › Browse › Heart › Resting Heart Rate',br:'Health app › Browse › Respiratory › Respiratory Rate › Show More Data, then the Sleep entry',ox:'Health app › Browse › Respiratory › Blood Oxygen (overnight readings)',bd:'Health app › Browse › Respiratory › Breathing Disturbances (turn on Sleep Apnoea Notifications)',sync:'Apple Health'},
+ samsung:{n:'Samsung Galaxy Watch',hr:'Samsung Health › Heart rate',br:'Samsung Health › Sleep, scroll to respiratory rate',ox:'Samsung Health › Sleep, scroll to blood oxygen',sync:'Health Connect'},
+ garmin:{n:'Garmin',hr:'Garmin Connect › Resting Heart Rate',br:'Garmin Connect › Sleep › average Respiration',ox:'Garmin Connect › Pulse Ox (turn on sleep tracking for it)',sync:'Apple Health or Health Connect (heart rate only)'},
+ fitbit:{n:'Fitbit or Pixel Watch',hr:'Fitbit app › Resting heart rate',br:'Fitbit app › Health Metrics › Breathing rate',ox:'Fitbit app › Health Metrics › Oxygen saturation',sync:'Health Connect'},
+ other:{n:'Another watch or ring',hr:'Its app: resting heart rate',br:'Its app: sleep breathing or respiratory rate',ox:'Its app: blood oxygen during sleep',sync:'Apple Health or Health Connect, if it shares there'},
+ none:{n:'No watch'}};
+const NOWATCH='Before you get out of bed, count your pulse at the wrist for 30 seconds and double it. Then count your breaths for 60 seconds while lying still. Same time every morning.';
+const srcOpts=()=>[['snorelab','SnoreLab app','Free on iPhone and Android. Record each night, type the score in here each morning.'],['app','Breathe Strong recorder','Built-in overnight recording, no second app. Coming with the phone app.',true]];
+const equipOpts=()=>Object.entries(EQUIP).map(([k,l])=>[k,l,EQX[k]]);
+const imtOpts=()=>[['yes','I have a breathing trainer','A handheld IMT device, such as POWERbreathe'],['no','Not yet','Until it arrives: straw breathing. Pinch your nose and breathe in hard through a drinking straw']];
+function swaps(){const eqs=['gym','db','home','bw'];return`<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">See every exercise swap</summary>
+ ${['A','B'].map(x=>`<div class="lab" style="margin-top:12px">${WK[x].t}</div>${WK[x].ex.filter(e=>e.alt&&e.alt!==NECK).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="small t1">${esc(e.n)}</div><div class="tiny mut">Dumbbells: ${esc(e.alt.db[0])} · Household: ${esc(e.alt.home[0])} · Bodyweight: ${esc(e.alt.bw[0])}</div></div>`).join('')}`).join('')}
+</details>`}
+const imtInfo='<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">What’s an IMT trainer?</summary><p class="small">A small handheld device with a one-way valve. You breathe in hard against its resistance for 30 breaths a day, like weights for your breathing muscles. Trials in people with sleep apnoea found 5 minutes a day improved sleep and blood pressure.</p><p class="small">No trainer yet? You’ll do straw breathing instead: pinch your nose and breathe in hard through an ordinary drinking straw. It’s weaker than a trainer, so it’s a stopgap. The where-to-buy list is in Settings.</p></details>';
+
+function setup2(){return`
+ <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong · new options</div>
+ <h1>Two quick questions</h1>
+ <p class="mut small">We’ve added home workouts and a no-trainer option. Pick what suits you; you can change it later in Settings.</p>
+ <h2>Where you’ll train</h2>
+ ${radios('equip',equipOpts(),S.profile.equip||'gym')}
+ ${swaps()}
+ <h2>Breathing trainer</h2>
+ ${radios('imtq',imtOpts(),S.profile.imt||'no')}
+ ${imtInfo}
+ <button class="btn" data-act="setup2">Save and continue</button>`}
+
+function setup(){const t=TODAY(),pth=V.path||'snorer';return`
+ <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong</div>
+ <h1>Let’s set you up</h1>
+ <p class="mut small">Five quick choices and you’re in. You can change any of them later in Settings.</p>
+ <h2>1 · Your path</h2>
+ ${radios('path',[['snorer','I’ve started snoring','A 6-month program to reduce snoring, plus help getting tested if you need it'],['retest','I already use CPAP or a mouthguard','The same 6-month program, then a repeat sleep study. Your doctor decides any change to treatment']],pth)}
+ <div id="cpapnote" ${pth==='retest'?'':'hidden'}>${CPAPNOTE}</div>
+ <div id="quickq" ${pth==='retest'?'hidden':''}>
+  <h2>Safety question</h2>
+  <p class="mut small">Has anyone seen you stop breathing or gasp in your sleep, or have you felt drowsy while driving?</p>
+  ${radios('quick',[['no','No'],['yes','Yes'],['skip','Skip for now']],'skip')}
+ </div>
+ <h2>2 · Where you’ll train</h2>
+ ${radios('equip',equipOpts(),'gym')}
+ ${swaps()}
+ <h2>3 · Breathing trainer</h2>
+ ${radios('imtq',imtOpts(),'no')}
+ ${imtInfo}
+ <h2>4 · Snore score</h2>
+ <p class="mut small" style="margin-top:0">Where your nightly snore score comes from.</p>
+ ${radios('src',srcOpts(),'snorelab')}
+ <h2>5 · Start date</h2>
+ <label class="card"><div class="lab">Program start date</div><input type="date" id="start" value="${t}"></label>
+ <p class="tiny mut">Tip: log your snore score for a week or two before you start, so you have a baseline.</p>
+ <button class="btn" data-act="setup" data-v="go">Start now</button>
+ <button class="btn2" data-act="setup" data-v="pers">Personalise first (about 5 min)</button>`}
+
+function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.path==='retest',flags=S.profile.flags||[];
+ const head=`<div class="top"><span class="small mut">${di<0?'Starts '+fmt(S.profile.start):fmt(t)+' · Day '+(di+1)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>`;
+ const urgent=(P.risk==='urgent'||P.quick==='yes'||flags.length)&&!S.profile.gpOk&&!rt;
+ const tips=[];
+ if(!rt&&P.risk==='high'&&!S.profile.gpOk)tips.push('Several signs of possible sleep apnoea: ask your GP about a sleep study.');
+ if(!rt&&P.risk==='some')tips.push('Mention your snoring to your GP at your next visit.');
+ if(P.nose)tips.push((P.nose==='both'?'Both sides of your nose':'Your '+P.nose+' nostril')+' felt blocked. A saline rinse before bed can help; see your GP if it’s always blocked.');
+ if(P.dry)tips.push('Dry mouth on waking: practise breathing through your nose during the day and on walks.');
+ if(P.bmi&&P.bmi>=30)tips.push('Losing 5–10% of body weight often helps snoring as much as any exercise.');
+ const pi=posInsight();if(pi)tips.push(pi);
+ const todo=myChecks().filter(c=>!lastCk(c.k)).length,due=myChecks().filter(c=>c.every&&lastCk(c.k)&&dayIdx(t)>=0&&(pd(t)-pd(lastCk(c.k).date))/864e5>=c.every);
+ const extras=`${rt?CPAPNOTE:''}
+ ${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}
+ ${alerts().filter(a=>a.lv!=='low'&&a.t!=='See your GP soon about a sleep study').slice(0,2).map(alertCard).join('')}
+ ${todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acc)">Go</span></button>`:''}
+ ${due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acc)">Go</span></button>`:''}
+ ${!S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acc)">Set up</span></button>`:''}
+ ${tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''}`;
+ if(di<0)return`${head}<h1>Baseline time</h1><p class="mut">Your program starts ${fmt(S.profile.start)}. Log your snore score each morning until then.</p>${extras}<button class="btn" data-act="tab" data-v="log">Log last night</button>`;
+ const d=dayPlan(t),i=info(d.m,d.p),done=S.done[t]||{},y=addD(t,-1),days=[...Array(7)].map((_,k)=>addD(t,k-7));
+ const vals=days.map(k=>S.nights[k]?num(S.nights[k].snore):null),mx=Math.max(st.base||0,...vals.filter(v=>v!=null),10);
+ const row=(act,key,title,sub,right)=>`<button class="item" data-act="${act}"><span class="dot${done[key]?' on':''}">${done[key]?checkSvg:''}</span><span class="grow"><span class="t1">${title}</span><span class="t2">${sub}</span></span><span class="small ${done[key]?'':'mut'}" style="${done[key]?'color:var(--air)':''}">${done[key]?'Done':right}</span></button>`;
+ return`${head}
+ <div class="small mut">Week ${d.w} of 24 · ${PH[d.p].n}</div>
+ <h1>${i.day}</h1>
+ ${extras}
+ <button class="card" data-act="tab" data-v="progress" style="display:block;width:100%;text-align:left;border:0">
+  <div class="between small mut"><span>Snore score, last 7 nights</span><span>Progress</span></div>
+  <div class="between" style="align-items:flex-end;margin-top:6px">
+   <div><div class="big">${st.last!=null?Math.round(st.last):'–'}</div><div class="small" style="color:var(--air)">${st.change!=null?(st.change>=0?Math.round(st.change*100)+'% below baseline':Math.round(-st.change*100)+'% above baseline'):(st.n?'Baseline: '+st.n+' of 10 nights':'No nights logged yet')}</div></div>
+   <div class="bars" style="width:55%" role="img" aria-label="Snore score for the last 7 nights">${vals.map((v,k)=>`<div style="height:${v==null?4:Math.max(6,v/mx*100)}%;${k===6&&v!=null?'background:var(--air)':''}"></div>`).join('')}</div>
+  </div></button>
+ ${S.nights[y]?'':`<button class="item" data-act="tab" data-v="log" style="border:1px solid var(--acc)"><span class="grow"><span class="t1">Log last night</span><span class="t2">Snore score from SnoreLab, plus how you feel</span></span><span class="small" style="color:var(--acc)">1 min</span></button>`}
+ <h2>Today’s sessions</h2>
+ ${S.profile.imt!=='no'?row('imt','imt','IMT breathing trainer','30 breaths · level '+S.imtLevel,'5 min'):row('imt','imt','Breathing session','Straw breathing until your trainer arrives','5 min')}
+ ${row('routine','routine','Airway routine','8 moves'+(P.palate||P.base?' · focused on your '+[P.palate?'palate':null,P.base?'tongue':null].filter(Boolean).join(' and '):' · tongue, throat, neck'),'10 min')}
+ ${row('main','main',i.t,i.s,i.min+' min')}`}
+
+function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w),mon=addD(t,-((pd(t).getDay()+6)%7));
+ const segs=[['F','Foundation','wk 1–2',2],['B','Build','wk 3–5',3],['S','Strength','wk 6–8',3],['R','Progression','wk 9–24',6]];
+ return`<div class="top"><span></span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
+ <h1>Your plan</h1>
+ <div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
+ <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acc);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>
+ <h2>${di<0?'First week':'This week · week '+w}</h2>
+ <div class="card" style="padding:4px 14px">${DAYN.map((n,k)=>{const s=addD(di<0?S.profile.start:mon,k),d=dayPlan(s),i=info(d.m,d.p),ok=S.done[s]&&S.done[s].main;
+  return`<div class="check"><span class="small" style="width:36px;${s===t?'color:var(--acc);font-weight:600':'color:var(--mut)'}">${n}</span><span class="grow"><span class="t1" style="font-size:15px">${i.t}</span></span><span class="tiny" style="color:${ok?'var(--air)':'var(--mut)'}">${ok?'Done':s===t?'Today':i.min+' min'}</span></div>`}).join('')}</div>
+ <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing session + the airway routine, about 15 min.<br>This phase: lifts at ${PH[p].lift}, stopping with 1–2 reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
+ ${S.profile.path==='retest'?CPAPNOTE:''}
+ <button class="btn2" data-act="go" data-v="settings">Settings and checks</button>`}
+
+function watch(){const cur=S.profile.watch||'';return`
+ <div class="top"><button class="icon" data-act="tab" data-v="${V.from&&V.from!=='watch'?V.from:'today'}" aria-label="Close">${back}</button><span class="small mut">Watch and data</span><span style="width:44px"></span></div>
+ <h1>Your watch</h1>
+ <p class="mut small" style="margin-top:0">Pick yours and the Log will show exactly where to find each number. Wearing it to bed matters most.</p>
+ ${radios('watch',Object.entries(WATCH).map(([k,w])=>[k,w.n,w.sync?'Syncs later through '+w.sync:k==='none'?'You can measure by hand each morning':'']),cur)}
+ <button class="btn" data-act="savewatch">Save</button>
+ <button class="btn2" disabled style="opacity:.55">Connect automatically · coming in the phone app</button>
+ <h2>What the numbers show</h2>
+ <div class="card small"><b>Resting heart rate:</b> drops as your cardio fitness improves. Alcohol, poor sleep and illness push it up. Watch the trend, not single nights.</div>
+ <div class="card small"><b>Sleep breathing rate:</b> usually about 12–20 breaths a minute and steady for you. A jump often means illness, alcohol or stress. It’s an average, so it can’t show breathing pauses.</div>
+ <div class="card small"><b>Blood oxygen during sleep:</b> repeated dips below your normal can go with breathing problems. Watch readings are rough, so use it as a trend.</div>
+ <div class="card small"><b>Breathing disturbances (Apple Watch):</b> counts breathing interruptions overnight. If it’s often “elevated”, talk to your GP. It’s the closest a watch gets to sleep apnoea.</div>`}
+
+function settings(){const pr=S.profile;return`
+ <div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close settings">${back}</button><span class="small mut">Settings</span><span style="width:44px"></span></div>
+ <h1>Settings</h1>
+ <h2>Your path</h2>
+ ${radios('path',[['snorer','Snoring program'],['retest','Road to retest','For CPAP or mouthguard users']],pr.path||'snorer')}
+ ${pr.path==='retest'?CPAPNOTE:''}
+ <h2>Where you train</h2>
+ ${radios('equip',equipOpts(),pr.equip||'gym')}
+ ${swaps()}
+ <h2>Breathing trainer</h2>
+ ${radios('imtq',imtOpts(),pr.imt==='no'?'no':'yes')}
+ ${imtInfo}
+ <button class="btn2" data-act="buy">Where to buy a breathing trainer</button>
+ <h2>Watch and data</h2>
+ <button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">${esc((WATCH[pr.watch]||{n:'Not set'}).n)}</span><span class="t2">Where to find each number, and automatic sync later</span></span><span class="small" style="color:var(--acc)">Change</span></button>
+ <h2>Snore score source</h2>
+ ${radios('src',srcOpts(),pr.scoreSrc||'snorelab')}
+ <label class="card"><div class="lab">Program start date</div><input type="date" id="start" value="${pr.start}"></label>
+ <button class="btn" data-act="saveplan">Save settings</button>
+ <h2>Your checks</h2>
+ <p class="tiny mut" style="margin-top:0">Each one takes a minute and fine-tunes your plan. Skip any you like.</p>
+ ${myChecks().map(c=>{const l=lastCk(c.k);return`<button class="item" data-act="ck" data-v="${c.k}"><span class="dot${l?' on':''}">${l?checkSvg:''}</span><span class="grow"><span class="t1">${c.t}</span><span class="t2">${l?esc(c.res(l.a).sum)+' · '+fmt(l.date):esc(c.why)}</span></span><span class="small" style="color:var(--acc)">${l?'Redo':'Take'}</span></button>`}).join('')}
+ <h2>Account</h2>
+ ${FBC?`<div class="card small">Signed in as <b>${esc(USER&&USER.email||'')}</b>. Your logs are private to your account.</div>
+ <button class="btn2" data-act="signout">Sign out</button>
+ ${V.confirmDel?`<div class="warn">This permanently deletes your account data from the cloud and this phone.<button class="btn" data-act="delacct" data-v="yes">Yes, delete my data</button><button class="btn2" data-act="delacct" data-v="no">Cancel</button></div>`:`<button class="btn2" data-act="delacct">Delete my account data</button>`}`
+ :`<div class="card small">Each person signs in with their own Claude account, and their logs are private to them. Nobody else can see them, including you as the app’s owner. The standalone version uses Google sign-in instead, for testers without Claude.</div>`}
+ <h2>Your data</h2>
+ <p class="small mut">${mode==='account'?'Saved to your Claude account.':mode==='device'?'Saved in this browser only.':'Can’t be saved in this view yet.'}</p>
+ ${V.confirm?`<div class="warn">This deletes all your logs, workouts and checks. It can’t be undone.<button class="btn" data-act="reset" data-v="yes">Yes, delete everything</button><button class="btn2" data-act="reset" data-v="no">Cancel</button></div>`:`<button class="btn2" data-act="reset">Reset all data</button>`}`}
+
+function checks(){return`
+ <div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Personalise</span><span style="width:44px"></span></div>
+ <h1>Quick checks</h1>
+ <p class="mut small">Each one tunes your plan. Do them all now, one at a time, or skip and come back later.</p>
+ ${myChecks().map(c=>{const l=lastCk(c.k);return`<button class="item" data-act="ck" data-v="${c.k}"><span class="dot${l?' on':''}">${l?checkSvg:''}</span><span class="grow"><span class="t1">${c.t} <span class="t2">· ${c.time}</span></span><span class="t2">${esc(c.why)}</span></span></button>`}).join('')}
+ <button class="btn" data-act="wiz">${myChecks().some(c=>!lastCk(c.k))?'Go through the rest':'Redo them all'}</button>
+ <button class="btn2" data-act="tab" data-v="today">Later, take me to today</button>`}
+
+let CKD={},SW=null;
+function check(){const c=ckOf(V.k),q=V.wiz?V.wiz.list:null,pos=q?q.indexOf(V.k)+1:0;
+ return`<div class="top"><button class="icon" data-act="ckclose" aria-label="Close check">${back}</button><span class="small mut">${q?'Check '+pos+' of '+q.length:c.time}</span><span style="width:44px"></span></div>
+ <h1>${c.t}</h1>
+ <p class="mut small" style="margin-top:0">${c.why}</p>
+ ${c.art?art(c.art)+'<p class="tiny mut" style="text-align:center;margin:6px 0 0">Press the whole tongue flat up against the roof of your mouth, front to back</p>':''}
+ ${c.q.map(([ty,id,txt,o,sw])=>ty==='c'?`<div class="card"><div class="small" style="margin-bottom:8px">${txt}</div><div class="row" style="flex-wrap:wrap;gap:8px">${o.map(([v,l])=>`<button class="chip" data-act="ans" data-q="${id}" data-v="${v}" aria-pressed="${CKD[id]===v}">${l}</button>`).join('')}</div></div>`
+  :`<div class="card"><label class="small" for="ck-${id}">${txt}</label><div class="row" style="margin-top:8px"><input id="ck-${id}" type="number" inputmode="decimal" data-num="${id}" value="${esc(CKD[id]??'')}" style="width:120px"><span class="small mut">${o}</span>${sw?`<button class="chip" data-act="sw" data-v="ck-${id}" style="margin-left:auto">${SW&&SW.id==='ck-'+id?'Stop <span data-swd>0</span> s':'Stopwatch'}</button>`:''}</div></div>`).join('')}
+ <p class="tiny mut">Leave anything blank you’re not sure about. This isn’t a medical test.</p>
+ <button class="btn" data-act="cksave">Save${q?' and next':''}</button>
+ <button class="btn2" data-act="ckskip">${q?'Skip this one':'Cancel'}</button>
+ ${q?`<button class="btn2" data-act="tab" data-v="today">Finish later</button>`:''}`}
+
+function ckres(){const c=ckOf(V.k),l=lastCk(V.k),r=c.res(l.a),more=V.wiz&&V.wiz.list.indexOf(V.k)<V.wiz.list.length-1;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">${c.t}</span><span style="width:44px"></span></div>
+ <h1>${esc(r.sum)}</h1>
+ <div class="card"><div class="lab">What this changes</div><div>${esc(r.ch)}</div></div>
+ ${more?`<button class="btn" data-act="cknext">Next check</button><button class="btn2" data-act="tab" data-v="today">Finish later</button>`:`<button class="btn" data-act="tab" data-v="today">Done</button>`}`}
+
+function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.equip||'gym',kgc=eq!=='bw';
+ if(!W||W.x!==x||W.date!==t||W.eq!==eq){W={x,eq,date:t,ex:wk.ex.map(e=>{const a=eq!=='gym'&&e.alt?e.alt[eq]:null;let sc=a&&a[2]?pick(p,a[2]):e.s==='P'?PH[p].lift:pick(p,e.s);const n=parseInt(sc)||3;
+  const P=pers();let nm=a?a[0]:e.n,tp=a?a[1]:e.tip;if(a&&e.log&&!a[2])sc=n+' × 8–15, slow lowering';
+  if(nm==='Push-ups'&&P.push!=null&&P.push<8){nm='Incline push-ups';tp='Hands on a kitchen bench or sturdy table. Lower the incline as you get stronger'}
+  if(e.n==='Plank with chin tuck'&&p==='F'&&P.plank!=null&&P.plank<30)sc='3 × 20 s';
+  return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(n)].map(()=>({kg:'',reps:''})):[]}})}}
+ const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
+ <h1>${esc(wk.t)}</h1>
+ <div class="card small"><b style="color:var(--acc)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
+ ${W.ex.map((e,i)=>{const L=e.log?lastOf(e.n):null,tip=e.tip;return`<div class="card">
+  <div class="between"><span class="t1">${esc(e.n)}</span><span class="small mut" style="text-align:right">${esc(e.sc)}</span></div>
+  ${tip?`<div class="tiny mut">${esc(tip)}</div>`:''}
+  ${e.log?`${L?`<div class="tiny" style="color:var(--air)">Last time: ${esc(L)}</div>`:''}<div class="setrow tiny mut" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span>Set</span>${kgc?'<span>kg</span>':''}<span>Reps</span></div>${e.sets.map((s,j)=>`<div class="setrow" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span class="small">${j+1}</span>${kgc?`<input type="number" inputmode="decimal" aria-label="${esc(e.n)} set ${j+1} kg" data-set="${i}:${j}:kg" value="${esc(s.kg)}">`:''}<input type="number" inputmode="numeric" aria-label="${esc(e.n)} set ${j+1} reps" data-set="${i}:${j}:reps" value="${esc(s.reps)}"></div>`).join('')}`
+  :`<label class="check" style="border:0"><input type="checkbox" data-exdone="${i}" ${e.done?'checked':''}>Done</label>`}
+ </div>`}).join('')}
+ <button class="btn" data-act="finish">Finish workout</button>
+ <div style="position:sticky;bottom:0;background:var(--deep);border-top:1px solid var(--card);margin:0 -16px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))" class="row"><span class="cond" style="font-size:30px;width:72px" data-tmr>${T?mmss(T.left):'1:30'}</span><button class="btn2" style="margin:0" data-act="rest" data-v="90">Rest 90 s</button><button class="btn2" style="margin:0" data-act="rest" data-v="180">Rest 3 min</button></div>`}
+
+function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
+ if(d.m.k!=='int')return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div>
+  <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.min} minutes.</p>
+  <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
+  <button class="btn2" data-act="ctimer" data-v="${i.min*60}">${T?'Restart timer':'Start timer'}</button>
+  ${d.m.k==='rest'?`<div class="card small">Foam roller thoracic extension × 10, wall angels 2 × 10, then your daily routine and IMT.</div>`:`<div class="card small">Talking pace: you could chat but not sing. If you have to open your mouth to breathe, slow down. A brisk walk outside counts; a backpack with a few water bottles makes it a loaded walk.</div>`}
+  <button class="btn" data-act="cdone">Mark done</button>`;
+ const R0=pick(d.p,[6,6,8]),H0=pick(d.p,[5,5,8]);if(!N)N={r:1,ph:'ready',R:R0,H:H0,steps:[]};
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
+ ${N.ph==='holds'||N.ph==='done'?`<h1>Breath-hold walk</h1>
+  <p class="mut small">Breathe out normally, pinch your nose and walk until a moderate urge to breathe. Count your steps, then breathe calmly through your nose for a minute.</p>
+  <div class="warn">Never in water, while driving or near traffic. Skip this if you have heart problems.</div>
+  <div class="card">${[...Array(N.H)].map((_,k)=>`<label class="between" style="margin:6px 0"><span>Hold ${k+1} steps</span><input type="number" inputmode="numeric" style="width:110px" data-step="${k}" value="${esc(N.steps[k]||'')}"></label>`).join('')}</div>
+  <button class="btn" data-act="idone">Save session</button>`
+ :`<h1>${N.ph==='hard'?'Go hard':N.ph==='easy'?'Easy, nose breathing':'Intervals'}</h1>
+  <p class="mut small">${N.R} rounds of 30 s hard and 90 s easy on a rower, bike, sled or hill. No gym? Stair climbs, a skipping rope, burpees or a steep hill walk all work. In each easy block, slow your breathing back down.</p>
+  <div class="card" style="text-align:center"><div class="small mut">Round ${N.r} of ${N.R}</div><div class="huge" data-tmr style="color:${N.ph==='hard'?'var(--acc)':'var(--ink)'}">${T?mmss(T.left):'0:30'}</div></div>
+  ${N.ph==='ready'?`<button class="btn" data-act="istart">Start round 1</button>`:`<button class="btn2" data-act="iskip">Skip to breath-hold walk</button>`}`}`}
+
+function art(k){const head='<path d="M62,26 C92,4 158,6 178,40 C184,52 184,62 186,70 L199,92 C200,95 198,97 195,97 L186,98 C187,104 188,108 187,112 L183,117 L187,122 C186,128 184,134 180,140 C174,148 160,152 142,150 C138,162 136,176 136,196 M78,196 C76,170 66,150 58,128 C50,104 48,74 52,52 C54,42 57,32 62,26" fill="none" stroke="#F2F0EC" stroke-width="3" stroke-linejoin="round"/>',
+ pal='<path d="M180,111 C168,104 146,100 126,104 C116,106 110,112 106,120" fill="none" stroke="#B9B6B0" stroke-width="2"/>',
+ rest='<path d="M176,121 C164,116 144,114 128,118 C116,122 108,132 106,148 L118,150 C122,138 132,132 146,132 C160,132 170,130 176,126 Z" fill="',
+ O='#FF5A1F',G='#7FB7A4',A=(d,h)=>`<path d="${d}" fill="none" stroke="${O}" stroke-width="3" stroke-linecap="round"/><path d="${h}" fill="${O}"/>`;
+ const b={
+  press:`<path d="M178,114 C166,106 146,103 128,107 C116,110 109,120 106,134 L118,148 C124,134 134,128 148,128 C162,128 172,124 178,119 Z" fill="${G}"/>${pal}${head}${A('M134,136 L134,120 M152,134 L152,118 M168,128 L168,116','M129,122 L134,113 L139,122 Z M147,120 L152,111 L157,120 Z M163,118 L168,110 L173,118 Z')}`,
+  slide:`${rest}${G}"/>${pal}${head}${A('M172,110 C158,103 144,102 132,105','M136,99 L126,106 L137,111 Z')}<circle cx="174" cy="114" r="4" fill="${O}"/>`,
+  down:`<path d="M176,121 C166,120 150,124 138,132 C126,140 116,148 110,156 L122,158 C130,150 142,144 154,140 C166,136 172,130 176,126 Z" fill="${G}"/>${pal}${head}${A('M132,116 L126,138','M119,135 L124,146 L131,137 Z')}<circle cx="177" cy="124" r="4" fill="${O}"/>`,
+  ahh:`${rest}#3C4A45"/>${pal}<path d="M126,104 C116,106 110,112 106,122" fill="none" stroke="${G}" stroke-width="7" stroke-linecap="round"/>${head}${A('M112,146 L113,126','M107,129 L113,118 L119,129 Z')}<text x="200" y="160" fill="#F2F0EC" font-family="Barlow Condensed" font-weight="800" font-size="22">AHH</text>`,
+  cheek:`<ellipse cx="110" cy="98" rx="60" ry="78" fill="none" stroke="#F2F0EC" stroke-width="3"/><ellipse cx="146" cy="116" rx="16" ry="20" fill="${G}" opacity=".55"/><path d="M86,78 L100,78 M120,78 L134,78 M110,86 L106,112 L114,114 M90,138 Q110,146 130,138" fill="none" stroke="#F2F0EC" stroke-width="3" stroke-linecap="round"/><path d="M132,198 L134,142" stroke="#B9B6B0" stroke-width="12" stroke-linecap="round"/>${A('M166,112 L186,106','M183,100 L194,104 L186,113 Z')}`,
+  shaker:`<path d="M10,170 L230,170" stroke="#5A5E66" stroke-width="2"/><path d="M62,158 L150,158 L222,160" fill="none" stroke="#F2F0EC" stroke-width="10" stroke-linecap="round"/><path d="M60,156 L47,140" stroke="${G}" stroke-width="9" stroke-linecap="round"/><circle cx="40" cy="126" r="15" fill="#1F2125" stroke="#F2F0EC" stroke-width="3"/><path d="M54,122 L220,148" stroke="#5A5E66" stroke-width="2" stroke-dasharray="4 6"/>${A('M18,140 L19,112','M13,116 L19,105 L25,116 Z')}`,
+  chin:`${rest}#3C4A45"/>${head}<path d="M178,141 C170,149 158,152 142,150" fill="none" stroke="${G}" stroke-width="6" stroke-linecap="round"/><circle cx="164" cy="166" r="13" fill="none" stroke="${O}" stroke-width="3"/>${A('M204,118 L198,140','M191,137 L196,148 L203,139 Z')}`,
+  exhale:`${rest}#3C4A45"/>${pal}${head}<path d="M196,114 C210,110 222,118 234,112" fill="none" stroke="${G}" stroke-width="3" stroke-dasharray="5 6" stroke-linecap="round"/>`};
+ return`<svg class="art" viewBox="0 0 240 200" role="img" aria-label="Illustration of the move">${b[k]}</svg>`}
+
+function myMoves(p){const P=pers(),M=MOVES(p);M.forEach(m=>{if(P.palate&&m.k==='ahh'){m.reps=Math.round(m.reps*1.5);m.focus=1}if(P.base&&['press','slide','down','chin'].includes(m.k)){m.reps=Math.round(m.reps*1.25);m.focus=1}if(P.hold!=null){if(m.k==='press')m.hold=Math.min(10,Math.max(3,Math.round(P.hold/3)));if(m.k==='down')m.hold=Math.min(8,Math.max(3,Math.round(P.hold/4)))}});return M}
+function routine(){const p=dayPlan(TODAY()).p,M=myMoves(p);if(!R)R={i:0,rep:1,ph:'ready'};const m=M[R.i];
+ if(R.ph==='done')return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div><h1>Routine done</h1><p class="mut">Eight moves, about 10 minutes. Same again tomorrow.</p><button class="btn" data-act="rdone">Save and close</button>`;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close routine">${back}</button><span class="small mut">Airway routine · ${R.i+1} of ${M.length}</span><span style="width:44px"></span></div>
+ <div style="display:grid;grid-template-columns:repeat(${M.length},minmax(0,1fr));gap:4px;margin:4px 0 12px">${M.map((_,k)=>`<div style="height:5px;border-radius:3px;background:${k<R.i?'var(--air)':k===R.i?'var(--acc)':'var(--card)'}"></div>`).join('')}</div>
+ ${art(m.k)}
+ <h1 style="margin-top:14px">${m.n}</h1>${m.focus?'<div class="tiny" style="color:var(--air);margin-top:-6px">Your focus move: extra reps</div>':''}
+ <p class="mut" style="margin-top:0">${m.how}</p>
+ <div class="card between"><div><div class="small mut">${R.ph==='rest'?'Rest':m.rest?'Hold':'Pace'}</div><div class="big" data-tmr style="color:${R.ph==='rest'?'var(--ink)':'var(--acc)'}">${T?mmss(T.left):mmss(m.hold)}</div></div><div style="text-align:right"><div class="small mut">Rep</div><div class="cond" style="font-size:40px;line-height:1">${R.rep} <span style="font-size:22px;color:var(--dim)">/ ${m.reps}</span></div></div></div>
+ <div class="grid2">${R.ph==='ready'?`<button class="btn" data-act="rgo">Start</button>`:`<button class="btn2" data-act="rpause">${T&&T.paused?'Resume':'Pause'}</button>`}<button class="btn2" data-act="rnext">${R.i===M.length-1?'Finish':'Next move'}</button></div>
+ <p class="tiny mut" style="text-align:center">A beep marks each hold and rep. Turn your volume up.</p>`}
+
+function imt(){if(!I)I={set:1,b:0,ph:'go'};const has=S.profile.imt!=='no';
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">${has?'IMT trainer · level '+S.imtLevel:'Breathing session · no trainer yet'}</span><span style="width:44px"></span></div>
+ ${I.ph==='ask'?(has?`<h1>All 30 done</h1><p class="mut">Did the last few breaths feel easy?</p><div class="grid2"><button class="btn2" data-act="imtans" data-v="1">Yes, easy</button><button class="btn2" data-act="imtans" data-v="0">No, hard</button></div>`
+  :`<h1>All 30 done</h1><p class="mut">Finish with 2 minutes of slow breathing through your nose: in for 4, out for 6.</p><button class="btn" data-act="imtans" data-v="0">Save session</button>`)
+ :`<h1>${I.ph==='rest'?'Rest':'Breathe in hard'}</h1>
+ ${has?`<p class="mut">Fast and forceful through the trainer, then out slow and full. Tap once per breath.</p>`
+ :`<p class="mut">Pinch your nose. Breathe in as hard and fast as you can through an ordinary drinking straw, then breathe out slowly through your mouth. Tap once per breath.</p>
+ <div class="card tiny mut">A straw gives some resistance but much less than a trainer, so treat this as a stopgap until yours arrives. Stop if you feel dizzy.</div>`}
+ <div style="position:relative;height:280px;display:flex;align-items:center;justify-content:center">
+  <svg viewBox="0 0 260 260" width="260" height="260" aria-hidden="true"><circle cx="130" cy="130" r="110" fill="none" stroke="#2B2E33" stroke-width="18"/><circle cx="130" cy="130" r="110" fill="none" stroke="#7FB7A4" stroke-width="18" stroke-linecap="round" transform="rotate(-90 130 130)" stroke-dasharray="${((I.set-1)*6+I.b)/30*691} 691"/></svg>
+  <div style="position:absolute;text-align:center">${I.ph==='rest'?`<div class="huge" data-tmr>${T?mmss(T.left):'1:00'}</div><div class="small mut">before set ${I.set+1}</div>`:`<div class="huge">${(I.set-1)*6+I.b}</div><div class="small mut">of 30 · set ${I.set} of 5</div>`}</div>
+ </div>
+ ${I.ph==='rest'?`<button class="btn2" data-act="imtskip">Skip rest</button>`:`<button class="btn" data-act="breath" style="min-height:72px;font-size:24px">Tap for each breath</button>`}`}
+ ${has?`<div class="card between"><span class="small">Trainer level</span><span class="row"><button class="chip" data-act="lvl" data-v="-1" aria-label="Lower level">−</button><span class="cond" style="font-size:26px">${S.imtLevel}</span><button class="chip" data-act="lvl" data-v="1" aria-label="Raise level">+</button></span></div>
+ ${S.imtEasy>=2?`<div class="warn">Easy two sessions running: move up a level.</div>`:''}`
+ :`<div class="grid2"><button class="btn2" data-act="buy">Where to buy one</button><button class="btn2" data-act="gotimt">I’ve got my trainer</button></div>`}`}
+
+function buy(){const regions=[...new Set(BUY.map(b=>b[0]))];
+ return`<div class="top"><button class="icon" data-act="tab" data-v="${V.from&&V.from!=='buy'?V.from:'plan'}" aria-label="Back">${back}</button><span class="small mut">Breathing trainers</span><span style="width:44px"></span></div>
+ <h1>Where to buy a trainer</h1>
+ <p class="mut small">Look for an <b>inspiratory muscle trainer (IMT)</b> with adjustable resistance. For most men, a medium-resistance model is the right start.</p>
+ ${regions.map(r=>`<h2>${esc(r)}</h2>${BUY.filter(b=>b[0]===r).map(b=>`<a class="item" href="${b[3]}" target="_blank" rel="noopener" style="text-decoration:none;color:var(--ink)"><span class="grow"><span class="t1">${esc(b[1])}</span><span class="t2">${esc(b[2])}</span></span><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 L16 12 L9 19" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round"/></svg></a>`).join('')}`).join('')}
+ <div class="card small"><b>Also on Amazon</b> in most countries: search “POWERbreathe Plus Medium”.</div>
+ <div class="warn small">Not the same thing: “lung flutter” devices such as AirPhysio train breathing <i>out</i> with vibration (OPEP). They aren’t IMT trainers. Prices and stock change, so check before you buy.</div>`}
+
+function log(){const t=TODAY(),dsel=V.date||addD(t,-1),n=S.nights[dsel]||{},w=Math.max(0,weekOf(t)),wk=S.weekly['w'+w]||{},rt=S.profile.path==='retest',tags=n.tags||[];
+ const sl=(id,lab,v)=>`<div style="margin:6px 0"><div class="between"><label for="${id}" class="t1" style="font-size:15px">${lab}</label><span class="small" style="color:var(--acc);font-weight:600" id="${id}v">${v==null?'–':v} / 10</span></div><input id="${id}" type="range" min="0" max="10" value="${v==null?5:v}" data-out="${id}v"></div>`;
+ return`<h1>Log last night</h1>
+ <label class="card"><div class="lab">Night of</div><input type="date" id="ld" value="${dsel}" max="${t}"></label>
+ <div class="card"><div class="lab">Score from</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${srcOpts().map(([k,l,s,dis])=>`<label class="chip row" style="gap:8px;${dis?'opacity:.55':''}"><input type="radio" name="nsrc" value="${k}" ${(n.src||S.profile.scoreSrc||'snorelab')===k&&!dis?'checked':''} ${dis?'disabled':''} style="width:18px;height:18px">${l}${dis?' · soon':''}</label>`).join('')}</div>
+ <label for="snore" class="t1" style="font-size:15px">Snore score</label><div class="row" style="margin-top:6px"><input id="snore" type="number" inputmode="decimal" style="width:120px;font:800 28px 'Barlow Condensed';height:54px" value="${esc(n.snore??'')}"><span class="tiny mut">Copy it from SnoreLab’s morning report. The built-in recorder will fill this in automatically once it’s ready.</span></div></div>
+ <div class="card">${sl('partner','Partner rating (how bad was it?)',n.partner)}${sl('tired','Daytime tiredness',n.tired)}</div>
+ <div class="grid3">
+  <label class="card" style="margin:0;padding:10px"><div class="lab">Resting HR</div><input id="hr" type="number" inputmode="numeric" value="${esc(n.hr??'')}"></label>
+  <label class="card" style="margin:0;padding:10px"><div class="lab">Breaths/min</div><input id="br" type="number" inputmode="decimal" value="${esc(n.br??'')}"></label>
+  <label class="card" style="margin:0;padding:10px"><div class="lab">Drinks</div><input id="dr" type="number" inputmode="numeric" value="${esc(n.drinks??'')}"></label>
+ </div>
+ ${(()=>{const w=WATCH[S.profile.watch];if(!w)return`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Where do I find these?</span><span class="t2">Tell us your watch, or measure by hand</span></span><span class="small" style="color:var(--acc)">Set up</span></button>`;
+  if(S.profile.watch==='none')return`<div class="card tiny mut">${NOWATCH}</div>`;
+  return`<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Where to find these on your ${esc(w.n)}</summary><p class="small"><b>Resting HR:</b> ${esc(w.hr)}</p><p class="small"><b>Breathing rate:</b> ${esc(w.br)}</p><p class="small"><b>Blood oxygen:</b> ${esc(w.ox)}</p>${w.bd?`<p class="small"><b>Breathing disturbances:</b> ${esc(w.bd)}</p>`:''}<p class="tiny mut">Automatic sync through ${esc(w.sync)} is coming in the phone app.</p></details>`})()}
+ ${S.profile.watch&&S.profile.watch!=='none'?`<div class="grid2"><label class="card" style="margin:0;padding:10px"><div class="lab">Blood oxygen avg (%)</div><input id="ox" type="number" inputmode="decimal" value="${esc(n.ox??'')}"></label>${S.profile.watch==='apple'?`<label class="card" style="margin:0;padding:10px"><div class="lab">Breathing disturbances</div><select id="bd" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px"><option value="">Not shown</option><option value="no" ${n.bd==='no'?'selected':''}>Not elevated</option><option value="yes" ${n.bd==='yes'?'selected':''}>Elevated</option></select></label>`:''}</div>`:''}
+ <div class="card"><div class="lab">That night</div><div class="row" style="flex-wrap:wrap;gap:8px">${TAGS.map(g=>`<button class="chip" data-act="tag" data-v="${g}" aria-pressed="${tags.includes(g)}">${g}</button>`).join('')}</div>
+</div>
+ ${onCPAP()?`<div class="card"><div class="lab">CPAP last night</div><p class="tiny mut" style="margin-top:0">From myAir, DreamMapper or your machine’s screen.</p>
+  <div class="grid2"><label><div class="lab">Hours used</div><input id="cph" type="number" inputmode="decimal" value="${esc(n.cpapH??'')}"></label><label><div class="lab">Events per hour (AHI)</div><input id="cpa" type="number" inputmode="decimal" value="${esc(n.ahi??'')}"></label>
+  <label><div class="lab">Mask seal</div><select id="cps" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px"><option value="">–</option>${['good','fair','poor'].map(x=>`<option value="${x}" ${n.seal===x?'selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('')}</select></label><label><div class="lab">Mask off (times)</div><input id="cpo" type="number" inputmode="numeric" value="${esc(n.offs??'')}"></label></div></div>`:''}
+ <button class="btn" data-act="savenight">Save night</button>
+ <h2>Weekly check · week ${w||'0'}</h2>
+ <div class="card">
+  <p class="tiny mut" style="margin-top:0">BOLT: after a normal breath out, pinch your nose and count the seconds until the first clear urge to breathe.</p>
+  <div class="grid2"><label><div class="lab">BOLT (s)</div><input id="bolt" type="number" inputmode="numeric" value="${esc(wk.bolt??'')}"></label><label><div class="lab">Neck (cm)</div><input id="neck" type="number" inputmode="decimal" value="${esc(wk.neck??'')}"></label></div>
+  
+  <button class="btn2" data-act="saveweek">Save weekly check</button>
+ </div>`}
+
+function progress(){const st=stats(),pts=weekly(),ks=scored(),wks=Object.keys(S.weekly).sort((a,b)=>+a.slice(1)-+b.slice(1));
+ const avg=(f,from)=>{const v=Object.keys(S.nights).sort().filter(k=>from?k>=addD(TODAY(),-7):true).map(k=>num(S.nights[k][f])).filter(v=>v!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null};
+ const firstOf=f=>{const k=Object.keys(S.nights).sort().find(k=>num(S.nights[k][f])!=null);return k?num(S.nights[k][f]):null};
+ const tile=(lab,now,first,unit,better)=>{const d=now!=null&&first!=null?r1(now-first):null;return`<div class="card" style="margin:0"><div class="tiny mut">${lab}</div><div class="cond" style="font-size:32px;line-height:1.1">${now==null?'–':r1(now)} <span style="font-size:16px;color:var(--mut)">${unit}</span></div><div class="tiny" style="color:${d==null?'var(--mut)':(better(d)?'var(--air)':'var(--acc)')}">${d==null?'not enough data':(d>0?'+':'')+d+' since start'}</div></div>`};
+ const bf=wks.length?num(S.weekly[wks[0]].bolt):null,bl=wks.length?num(S.weekly[wks[wks.length-1]].bolt):null;
+ return`<div class="small mut">${ks.length} night${ks.length===1?'':'s'} logged</div>
+ <h1>${st.change!=null?(st.change>=0?'Snoring down '+Math.round(st.change*100)+'% since baseline':'Snoring up '+Math.round(-st.change*100)+'% on baseline'):'Log nights to see your trend'}</h1>
+ <p class="tiny mut">Scores from ${esc(SRC[(S.profile.scoreSrc)||'snorelab'])}. Scores from different apps aren’t mixed, because they measure differently.</p>
+ ${st.base&&st.prov?`<p class="tiny mut">Baseline is provisional until you’ve logged 10 nights (${st.n} so far).</p>`:''}
+ <div class="card"><div class="between tiny mut"><span>Average snore score by week</span><span style="color:var(--air)">${st.change!=null&&st.change>=1/3?'Target reached':'Target: 33% below baseline'}</span></div><div class="fig"><svg id="chart" role="img" aria-label="Weekly snore score against baseline and target"></svg></div></div>
+ ${insights()}
+ <h2>Measures</h2>
+ <div class="grid2">
+  ${tile('Resting HR (last 7)',avg('hr',1),firstOf('hr'),'bpm',d=>d<=0)}
+  ${tile('Night breathing (last 7)',avg('br',1),firstOf('br'),'/min',d=>d<=0)}
+  ${tile('BOLT breath-hold',bl,bf,'s',d=>d>=0)}
+  ${tile('Partner rating (last 7)',avg('partner',1),firstOf('partner'),'/ 10',d=>d<=0)}
+  ${avg('ox')!=null?tile('Blood oxygen (last 7)',avg('ox',1),firstOf('ox'),'%',d=>d>=0):''}
+ </div>
+ ${(()=>{const b=Object.values(S.nights).filter(n=>n.bd);if(!b.length)return'';const y=b.filter(n=>n.bd==='yes').length;return`<div class="card small">Breathing disturbances elevated on <b>${y}</b> of ${b.length} logged nights.${y/b.length>=.3?' <span style="color:var(--acc)">That’s often: please talk to your GP.</span>':''}</div>`})()}
+ <div class="card small">Workouts and cardio logged: <b>${Object.values(S.done).filter(d=>d.main).length}</b> · Routines: <b>${Object.values(S.done).filter(d=>d.routine).length}</b> · IMT sessions: <b>${Object.values(S.done).filter(d=>d.imt).length}</b></div>
+ ${(()=>{const L=[];const tr=(k,f,lab,unit,lower)=>{const a=(S.checks&&S.checks[k])||[];const v=a.map(x=>typeof f==='function'?f(x.a):num(x.a[f])).filter(x=>x!=null);if(!v.length)return;const d=v.length>1?r1(v[v.length-1]-v[0]):null;L.push(`<div class="check"><span class="grow"><span class="t1" style="font-size:15px">${lab}</span><span class="t2">${v.length} check${v.length>1?'s':''}</span></span><span class="small">${r1(v[v.length-1])} ${unit}${d!=null&&d!==0?` <span style="color:${(lower?d<0:d>0)?'var(--air)':'var(--acc)'}">(${d>0?'+':''}${d})</span>`:''}</span></div>`)};
+ tr('alert',x=>Object.values(x).reduce((s,v)=>s+(+v||0),0),'Energy score','/ 15',true);tr('tongue','secs','Tongue hold','s',false);tr('fitness','push','Push-ups','reps',false);tr('fitness','plank','Plank','s',false);tr('body','w','Weight','kg',true);tr('body','neck','Neck','cm',true);
+ return L.length?`<h2>Checkpoints</h2><div class="card" style="padding:4px 14px">${L.join('')}</div>`:''})()}
+ <button class="btn2" data-act="csv">Copy my nights as CSV</button>
+ <textarea id="copytext" readonly aria-label="CSV of your nights">${esc(csv())}</textarea>`}
+function csv(){return'date,source,snore_score,partner,tiredness,drinks,resting_hr,breaths_per_min,blood_oxygen,breathing_disturbances,cpap_hours,cpap_events_per_hr,mask_seal,mask_off,tags\n'+Object.keys(S.nights).sort().map(k=>{const n=S.nights[k];return[k,n.src||'snorelab',n.snore??'',n.partner??'',n.tired??'',n.drinks??'',n.hr??'',n.br??'',n.ox??'',n.bd??'',n.cpapH??'',n.ahi??'',n.seal??'',n.offs??'','"'+(n.tags||[]).join('; ')+'"'].join(',')}).join('\n')}
+function drawChart(){const s=$('#chart');if(!s)return;const pts=weekly(),st=stats(),W=s.clientWidth,H=s.clientHeight;
+ if(!pts.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" fill="#B9B6B0" text-anchor="middle" font-size="14">Your weekly scores will appear here</text>`;return}
+ const mx=Math.max(...pts.map(p=>p.v),st.base||0)*1.18||10,x=i=>pts.length===1?W/2:28+i*(W-56)/(pts.length-1),y=v=>H-30-(v/mx)*(H-56);let h='';
+ if(st.base){const yb=y(st.base),yt=y(st.base*2/3);h+=`<line x1="10" x2="${W-10}" y1="${yb}" y2="${yb}" stroke="#5A5E66" stroke-dasharray="4 5"/><text x="${W-10}" y="${yb-6}" fill="#B9B6B0" font-size="12" text-anchor="end">baseline ${Math.round(st.base)}</text><line x1="10" x2="${W-10}" y1="${yt}" y2="${yt}" stroke="#FF5A1F" stroke-dasharray="4 5"/><text x="${W-10}" y="${yt+16}" fill="#FF5A1F" font-size="12" text-anchor="end">target −33%</text>`}
+ h+=`<polyline points="${pts.map((p,i)=>x(i)+','+y(p.v)).join(' ')}" fill="none" stroke="#7FB7A4" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+ const step=Math.ceil(pts.length/(W<400?5:8));
+ pts.forEach((p,i)=>{h+=`<circle cx="${x(i)}" cy="${y(p.v)}" r="${i===pts.length-1?6:4}" fill="#7FB7A4"/>`;if(i%step===0||i===pts.length-1)h+=`<text x="${x(i)}" y="${H-8}" fill="#B9B6B0" font-size="12" text-anchor="middle">${p.label}</text>`});
+ const L=pts[pts.length-1];h+=`<text x="${x(pts.length-1)-12}" y="${y(L.v)+24}" fill="#F2F0EC" font-family="Barlow Condensed, sans-serif" font-weight="800" font-size="20" text-anchor="end">${Math.round(L.v)}</text>`;
+ s.innerHTML=h}
+
+/* ---------- Phase 1: health record, CPAP, insights, alerts, doctor summary ---------- */
+const STATUS={'':'Not tested yet',none:'Tested: no sleep apnoea',mild:'Mild sleep apnoea',moderate:'Moderate sleep apnoea',severe:'Severe sleep apnoea',unsure:'Tested, not sure of result'};
+const TREAT={'':'No treatment',cpap:'CPAP',apap:'Auto-CPAP (APAP)',mouth:'Mouthguard (oral appliance)',other:'Other treatment'};
+const HL=()=>S.health||(S.health={status:'',treatment:'',pressure:'',tStart:'',clinic:'',studies:[],appts:[],qs:[]});
+const onCPAP=()=>S.profile.path==='retest'||['cpap','apap'].includes(HL().treatment);
+const nightsSince=d=>Object.keys(S.nights).sort().filter(k=>k>=d);
+const mean=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const sd=a=>{const m=mean(a);return a.length>1?Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/(a.length-1)):0};
+function cpapStats(days){const t=TODAY(),ks=nightsSince(addD(t,-days)),hrs=ks.map(k=>num(S.nights[k].cpapH)).filter(v=>v!=null),ahi=ks.map(k=>num(S.nights[k].ahi)).filter(v=>v!=null),seal=ks.map(k=>S.nights[k].seal).filter(Boolean);
+ return{n:hrs.length,good:hrs.filter(h=>h>=4).length,avgH:mean(hrs),ahi:med(ahi),ahiN:ahi.length,poor:seal.filter(s=>s==='poor').length}}
+function triggers(){const ks=scored(),out=[];TAGS.forEach(g=>{const w=ks.filter(k=>(S.nights[k].tags||[]).includes(g)).map(k=>S.nights[k].snore),o=ks.filter(k=>!(S.nights[k].tags||[]).includes(g)).map(k=>S.nights[k].snore);
+ if(w.length>=3&&o.length>=3){const a=med(w),b=med(o);if(b>0)out.push({g,d:(a/b-1),n:w.length})}});return out.sort((x,y)=>Math.abs(y.d)-Math.abs(x.d))}
+function unusual(){const t=TODAY(),ks=nightsSince(addD(t,-45)),out=[];[['hr','Resting HR','bpm'],['br','Breathing rate','/min'],['ox','Blood oxygen','%']].forEach(([f,l,u])=>{const all=ks.filter(k=>num(S.nights[k][f])!=null);if(all.length<7)return;const v=all.map(k=>num(S.nights[k][f])),m=mean(v),s=sd(v);if(!s)return;
+ all.filter(k=>k>=addD(t,-7)).forEach(k=>{const x=num(S.nights[k][f]);if(Math.abs(x-m)>2*s&&(f!=='ox'||x<m))out.push({k,l,x,u,m:r1(m),tags:S.nights[k].tags||[]})})});return out}
+function effort(){const g={};Object.keys(S.done).forEach(k=>{if(S.done[k].main){const w=weekOf(k);if(w>0)g[w]=(g[w]||0)+1}});const sc={};weekly().forEach(p=>sc[p.w]=p.v);
+ return Object.keys(Object.assign({},g,sc)).map(Number).filter(w=>w>0).sort((a,b)=>a-b).slice(-8).map(w=>({w,s:g[w]||0,v:sc[w]}))}
+function alerts(){const t=TODAY(),A=[],P=pers(),cs=cpapStats(14),c7=cpapStats(7),st=stats(),rt=S.profile.path==='retest';
+ const al=lastCk('alert'),en=al?ckOf('alert').res(al.a).score:null;
+ if(!rt&&(P.risk==='urgent'||P.quick==='yes')&&!S.profile.gpOk)A.push({lv:'high',t:'See your GP soon about a sleep study',why:'You reported breathing pauses or drowsy driving. Don’t drive if you feel drowsy.'});
+ if(c7.ahiN>=3&&c7.ahi>10)A.push({lv:'high',t:'Contact your sleep clinic',why:'Your CPAP events per hour have averaged '+r1(c7.ahi)+' this week (above 10).'});
+ if(cs.n>=5&&cs.good/cs.n<.7)A.push({lv:'med',t:'CPAP use has slipped',why:'Only '+cs.good+' of your last '+cs.n+' logged nights reached 4 hours. If the mask or pressure is the problem, your sleep clinic can help.'});
+ if(c7.poor>=3)A.push({lv:'med',t:'Mask seal is often poor',why:'Poor seal on '+c7.poor+' nights this week. Check the cushion, the strap tension and your sleeping position, or ask your clinic about a refit.'});
+ const bd=nightsSince(addD(t,-14)).map(k=>S.nights[k].bd).filter(Boolean);if(bd.length>=4&&bd.filter(x=>x==='yes').length/bd.length>=.3)A.push({lv:'med',t:'Breathing disturbances often elevated',why:'Elevated on '+bd.filter(x=>x==='yes').length+' of your last '+bd.length+' nights. Worth showing your GP.'});
+ const ox=nightsSince(addD(t,-14)).map(k=>num(S.nights[k].ox)).filter(v=>v!=null);if(ox.filter(v=>v<92).length>=3)A.push({lv:'med',t:'Low overnight oxygen readings',why:ox.filter(v=>v<92).length+' nights below 92% in two weeks. Watch readings are rough, but this is worth showing your GP.'});
+ if(en!=null&&en>=10)A.push({lv:'med',t:'High daytime tiredness',why:'Your energy score is '+en+' out of 15. Tiredness this high is worth raising with your GP.'});
+ if(!rt&&!HL().status&&(P.risk==='high'))A.push({lv:'med',t:'Ask your GP about a sleep study',why:'Your sleep risk check showed several signs. A test gives you a clear answer.'});
+ const w=weekOf(t);if(w>=8&&st.change!=null&&st.change<.1)A.push({lv:'low',t:'Snoring isn’t improving yet',why:'After 8 weeks it’s down less than 10%. Keep going, but if you haven’t been tested, ask your GP about a sleep study.'});
+ if(nightsSince(addD(t,-7)).filter(k=>S.nights[k].snore!=null).length<4&&dayIdx(t)>=7)A.push({lv:'low',t:'Not many nights logged this week',why:'Trends need at least 4 nights a week to be reliable.'});
+ return A}
+const LVC={high:'var(--acc)',med:'#E8B04B',low:'var(--mut)'};
+const alertCard=a=>`<div class="card" style="border-left:0;box-shadow:inset 3px 0 0 ${LVC[a.lv]}"><div class="t1" style="color:${a.lv==='high'?'var(--acc)':'var(--ink)'}">${esc(a.t)}</div><div class="small mut">${esc(a.why)}</div></div>`;
+
+function insights(){const T=triggers().filter(x=>Math.abs(x.d)>=.15),U=unusual(),E=effort(),A=alerts(),c=cpapStats(30),pi=posInsight();
+ return`<h2>Insights</h2>
+ ${A.length?A.map(alertCard).join(''):`<div class="card small">No warning signs in your recent logs.</div>`}
+ ${onCPAP()&&c.n?`<div class="card"><div class="lab">CPAP, last 30 days</div><div class="grid3"><div><div class="cond" style="font-size:28px">${c.good}/${c.n}</div><div class="tiny mut">nights 4 h+</div></div><div><div class="cond" style="font-size:28px">${c.avgH!=null?r1(c.avgH):'–'} h</div><div class="tiny mut">average use</div></div><div><div class="cond" style="font-size:28px">${c.ahi!=null?r1(c.ahi):'–'}</div><div class="tiny mut">events / hr</div></div></div></div>`:''}
+ <div class="card"><div class="lab">Your triggers</div>${T.length?T.slice(0,5).map(x=>`<div class="between small" style="padding:4px 0"><span>${esc(x.g)} <span class="mut">(${x.n} nights)</span></span><b style="color:${x.d>0?'var(--acc)':'var(--air)'}">${x.d>0?'+':''}${Math.round(x.d*100)}% snoring</b></div>`).join(''):`<div class="small mut">${triggers().length?'No clear triggers yet: none of your tags changes snoring by 15% or more.':'Tag your nights in the Log. After 3 nights with and without a tag, you’ll see its effect here.'}</div>`}${pi?`<div class="small" style="margin-top:6px">${esc(pi)}</div>`:''}</div>
+ ${U.length?`<div class="card"><div class="lab">Unusual nights this week</div>${U.map(u=>`<div class="small" style="padding:4px 0">${fmt(u.k)}: ${u.l} ${u.x}${u.u} <span class="mut">(your usual ${u.m})</span>${u.tags.length?' · '+esc(u.tags.join(', ')):''}</div>`).join('')}</div>`:''}
+ ${E.length?`<div class="card"><div class="lab">Effort vs results</div>${E.map(e=>`<div class="between small" style="padding:3px 0"><span>Week ${e.w}</span><span>${e.s} session${e.s===1?'':'s'}</span><span>${e.v!=null?'score '+Math.round(e.v):'–'}</span></div>`).join('')}</div>`:''}`}
+
+function health(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),w=Math.max(0,weekOf(t)),last=H.studies.length?H.studies.slice().sort((a,b)=>a.date<b.date?1:-1)[0]:null,A=alerts();
+ const steps=rt?[[0,'Week 0','Tell your doctor you’re starting, and enter your last sleep study'],[1,'Weeks 1–24','Train, and use CPAP every night'],[12,'Week 12','Midpoint: review your events per hour and symptoms'],[22,'Week 22','Ask your doctor for a repeat sleep study'],[25,'After','Your doctor reviews: keep, adjust, switch or stop treatment']]
+  :[[0,'Now','Log your snoring and take the quick checks'],[2,'Week 2','Show your GP visit summary. Your GP does the official screening and can refer you'],[4,'Next','Home or lab sleep study'],[6,'Then','Enter your result here. Your plan adjusts to it']];
+ return`<div class="small mut">${rt?'Road to retest · 6 months':'Your sleep health'}</div>
+ <h1>${rt?'Train for your retest':'Sleep health'}</h1>
+ ${rt?CPAPNOTE:''}
+ ${A.filter(a=>a.lv==='high').map(alertCard).join('')}
+ <button class="item" data-act="go" data-v="record"><span class="grow"><span class="t1">${!H.status&&!H.treatment&&rt?'Add your diagnosis and treatment':esc(STATUS[H.status]||STATUS[''])}</span><span class="t2">${last?'Last study '+fmt(last.date)+(last.ahi!=null&&last.ahi!==''?' · AHI '+esc(last.ahi):''):'No sleep study entered'} · ${esc(TREAT[H.treatment]||TREAT[''])}</span></span><span class="small" style="color:var(--acc)">Edit</span></button>
+ <h2>${rt?'Your 6-month road':'Getting tested'}</h2>
+ ${rt?`<p class="small mut" style="margin-top:0">Muscle and fitness changes take months at our age, so this runs for 24 weeks before a repeat sleep study. Some people end up needing less treatment. Your doctor makes that call.</p>`:''}
+ <div class="card">${steps.map((s,k)=>{const cur=w>=s[0]&&(k===steps.length-1||w<steps[k+1][0]),past=k<steps.length-1&&w>=steps[k+1][0];return`<div class="row" style="align-items:flex-start;padding:8px 0"><span class="dot${past?' on':''}" style="${cur?'border-color:var(--acc);border-width:3px':''}">${past?checkSvg:''}</span><span class="grow"><span class="tiny" style="color:${cur?'var(--acc)':'var(--mut)'}">${s[1]}${cur?' · now':''}</span><span class="t1" style="font-size:15px">${s[2]}</span></span></div>`}).join('')}</div>
+ <button class="btn" data-act="go" data-v="report">${rt?'Doctor summary':'GP visit summary'}</button>
+ <button class="btn2" data-act="go" data-v="record">Appointments and questions</button>
+ <p class="tiny mut" style="text-align:center">Breathe Strong is a training and tracking program. It doesn’t diagnose or treat sleep apnoea.</p>`}
+
+function record(){const H=HL(),sel=(id,obj,cur)=>`<select id="${id}" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px">${Object.entries(obj).map(([k,l])=>`<option value="${k}" ${cur===k?'selected':''}>${l}</option>`).join('')}</select>`;
+ const inp=(id,ph,ty,v)=>`<input id="${id}" type="${ty||'text'}" ${ty==='number'?'inputmode="decimal"':''} placeholder="${ph}" value="${esc(v??'')}" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%">`;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="retest" aria-label="Close">${back}</button><span class="small mut">Sleep health record</span><span style="width:44px"></span></div>
+ <h1>Your record</h1>
+ <div class="card"><label><div class="lab">Diagnosis</div>${sel('hstatus',STATUS,H.status)}</label>
+  <label style="margin-top:10px"><div class="lab">Treatment</div>${sel('htreat',TREAT,H.treatment)}</label>
+  <div class="grid2" style="margin-top:10px"><label><div class="lab">Pressure (cmH₂O, optional)</div>${inp('hpress','e.g. 9','text',H.pressure)}</label><label><div class="lab">Treatment started</div><input id="htstart" type="date" value="${esc(H.tStart||'')}"></label></div>
+  <label style="margin-top:10px"><div class="lab">Sleep clinic or doctor</div>${inp('hclinic','Name and phone','text',H.clinic)}</label>
+  <button class="btn2" data-act="hsave">Save</button></div>
+ <h2>Sleep studies</h2>
+ ${H.studies.slice().sort((a,b)=>a.date<b.date?1:-1).map(s=>`<div class="card between"><div><div class="t1">${fmt(s.date)} · ${s.type==='lab'?'Lab':'Home'}</div><div class="small mut">AHI ${esc(s.ahi||'–')} · lowest oxygen ${esc(s.low||'–')}%${s.odi?' · ODI '+esc(s.odi):''}${s.notes?' · '+esc(s.notes):''}</div></div><button class="chip" data-act="hdel" data-v="studies:${H.studies.indexOf(s)}" aria-label="Delete study">✕</button></div>`).join('')||'<p class="small mut">None yet. Your report lists AHI (events per hour) and lowest oxygen.</p>'}
+ <details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Add a sleep study</summary>
+  <div class="grid2" style="margin-top:8px"><label><div class="lab">Date</div><input id="sdate" type="date"></label><label><div class="lab">Type</div>${sel('stype',{home:'Home study',lab:'Lab study'},'home')}</label>
+  <label><div class="lab">AHI (events/hr)</div>${inp('sahi','e.g. 18','number')}</label><label><div class="lab">Lowest oxygen %</div>${inp('slow','e.g. 84','number')}</label>
+  <label><div class="lab">ODI (optional)</div>${inp('sodi','','number')}</label><label><div class="lab">Notes</div>${inp('snotes','e.g. worse on back')}</label></div>
+  <button class="btn2" data-act="sadd">Add study</button></details>
+ <h2>Appointments</h2>
+ ${H.appts.slice().sort((a,b)=>a.date<b.date?-1:1).map(a=>`<div class="card between"><div><div class="t1">${fmt(a.date)}</div><div class="small mut">${esc(a.who)}${a.why?' · '+esc(a.why):''}</div></div><button class="chip" data-act="hdel" data-v="appts:${H.appts.indexOf(a)}" aria-label="Delete appointment">✕</button></div>`).join('')||'<p class="small mut">None yet.</p>'}
+ <details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Add an appointment</summary>
+  <div class="grid2" style="margin-top:8px"><label><div class="lab">Date</div><input id="adate" type="date"></label><label><div class="lab">With</div>${inp('awho','GP, sleep clinic…')}</label></div>
+  <label style="margin-top:8px"><div class="lab">What for</div>${inp('awhy','e.g. sleep study results')}</label>
+  <button class="btn2" data-act="aadd">Add appointment</button></details>
+ <h2>Questions for your doctor</h2>
+ ${H.qs.map((q,i)=>`<div class="card between"><span class="small">${esc(q)}</span><button class="chip" data-act="hdel" data-v="qs:${i}" aria-label="Delete question">✕</button></div>`).join('')}
+ <div class="card row">${inp('qnew','e.g. Could I try a mouthguard instead?')}<button class="chip" data-act="qadd">Add</button></div>`}
+
+function report(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),st=stats(),c=cpapStats(30),w=Math.max(0,weekOf(t)),P=pers(),r=lastCk('risk'),al=lastCk('alert');
+ const avg7=f=>{const v=nightsSince(addD(t,-7)).map(k=>num(S.nights[k][f])).filter(v=>v!=null);return v.length?r1(mean(v)):null};
+ const riskYes=r?ckOf('risk').q.filter(q=>r.a[q[1]]==='yes').map(q=>'- '+q[2].replace(/\?.*$/,'?')):[];
+ const studies=H.studies.slice().sort((a,b)=>a.date<b.date?-1:1).map(s=>`- ${s.date} ${s.type==='lab'?'lab':'home'} study: AHI ${s.ahi||'?'}, lowest SpO2 ${s.low||'?'}%${s.odi?', ODI '+s.odi:''}${s.notes?' ('+s.notes+')':''}`);
+ const txt=`${rt?'DOCTOR SUMMARY':'GP VISIT SUMMARY'} · Breathe Strong · ${t}
+Self-recorded by the patient. Not a diagnosis.
+
+WHY I'M HERE
+${rt?'I use '+(TREAT[H.treatment]||'CPAP')+' and am doing a 6-month airway and fitness training program. I’d like to review my progress and plan a repeat sleep study.':'I’ve started snoring and I’m doing an airway and fitness training program. I’d like to know whether I should have a sleep study.'}
+
+SLEEP HEALTH
+Diagnosis: ${STATUS[H.status]||STATUS['']}
+Treatment: ${TREAT[H.treatment]||TREAT['']}${H.pressure?' · pressure '+H.pressure:''}${H.tStart?' · since '+H.tStart:''}
+${studies.length?'Sleep studies:\n'+studies.join('\n'):'No sleep studies recorded.'}
+${onCPAP()&&c.n?`\nCPAP (last 30 days, ${c.n} nights logged): ${c.good} nights 4 h+, average ${r1(c.avgH)} h/night, median events/hr ${c.ahi!=null?r1(c.ahi):'n/a'}, poor seal on ${c.poor} nights`:''}
+
+SYMPTOMS
+${rt?'':riskYes.length?'From my risk check ('+r.date+'):\n'+riskYes.join('\n'):'Risk check not completed.'}
+${al?'Daytime energy score: '+ckOf('alert').res(al.a).score+'/15 (higher = more tired), '+al.date:''}
+
+SNORING (${SRC[S.profile.scoreSrc||'snorelab']} app score)
+Baseline ${st.base!=null?Math.round(st.base):'n/a'} · last 7 nights ${st.last!=null?Math.round(st.last):'n/a'}${st.change!=null?' · change '+(st.change>=0?'-':'+')+Math.abs(Math.round(st.change*100))+'%':''} · ${st.n} nights logged
+${triggers().filter(x=>Math.abs(x.d)>=.15).slice(0,3).map(x=>'Worse with '+x.g.toLowerCase()+': '+(x.d>0?'+':'')+Math.round(x.d*100)+'%').join('\n')}
+
+WATCH / MORNING MEASURES (7-night average)
+Resting HR ${avg7('hr')??'n/a'} bpm · breathing ${avg7('br')??'n/a'}/min · SpO2 ${avg7('ox')??'n/a'}%${(()=>{const b=nightsSince(addD(t,-14)).map(k=>S.nights[k].bd).filter(Boolean);return b.length?' · breathing disturbances elevated '+b.filter(x=>x==='yes').length+'/'+b.length+' nights':''})()}
+${(()=>{const b=lastCk('body');return b?'Neck '+(b.a.neck||'?')+' cm · weight '+(b.a.w||'?')+' kg'+(P.bmi?' · BMI '+r1(P.bmi):''):''})()}
+
+TRAINING
+Program week ${w} of 24 · ${Object.values(S.done).filter(d=>d.main).length} workouts/cardio · ${Object.values(S.done).filter(d=>d.routine).length} airway routines · ${Object.values(S.done).filter(d=>d.imt).length} breathing sessions
+${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="retest" aria-label="Close">${back}</button><span class="small mut">${rt?'Doctor summary':'GP visit summary'}</span><span style="width:44px"></span></div>
+ <h1>${rt?'Doctor summary':'GP visit summary'}</h1>
+ <p class="small mut" style="margin-top:0">${rt?'Take this to your sleep clinic or GP.':'Show this to your GP. They do the official screening questionnaires and decide whether to refer you for a sleep study.'} Copy it into an email or note, or show this screen.</p>
+ <button class="btn" data-act="copysum">Copy summary</button>
+ <textarea id="copytext" readonly aria-label="Summary for your doctor" style="min-height:460px">${esc(txt)}</textarea>`}
+
+function retest(){return health()}
+
+/* ---------- render ---------- */
+const TABS=['today','plan','log','progress','retest'];
+function render(){const v=$('#view'),nav=$('#nav');
+ if(FBC&&!USER){v.innerHTML=login();nav.style.display='none';v.className='wrap full';return}
+ if(!S.profile){v.innerHTML=setup();nav.style.display='none';v.className='wrap full';return}
+ if(S.profile.equip==null||S.profile.imt==null){v.innerHTML=setup2();nav.style.display='none';v.className='wrap full';return}
+ const fn={today,plan,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres}[V.s]||today;
+ v.innerHTML=fn();const tab=TABS.includes(V.s);nav.style.display=tab?'':'none';v.className='wrap'+(tab?'':' full');
+ nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
+ const c=$('#chart');if(c){drawChart();new ResizeObserver(drawChart).observe(c)}}
+
+/* ---------- routine / imt / interval engines ---------- */
+function rMoves(){return myMoves(dayPlan(TODAY()).p)}
+function rHold(){const m=rMoves()[R.i];R.ph='hold';beep(880);startT(m.hold,rHoldEnd);render()}
+function rHoldEnd(){const m=rMoves()[R.i];beep(m.rest?560:700,.1);
+ if(R.rep>=m.reps){rNext(true);return}
+ if(m.rest){R.ph='rest';startT(m.rest,()=>{R.rep++;rHold()});render()}else{R.rep++;startT(m.hold,rHoldEnd);render()}}
+function rNext(auto){const M=rMoves();T=null;if(auto)beep(990,.3);if(R.i>=M.length-1){R.ph='done';render();return}R.i++;R.rep=1;R.ph='ready';render()}
+function nRound(){N.ph='hard';beep(990,.3);startT(30,()=>{N.ph='easy';beep(560,.3);startT(90,()=>{if(N.r>=N.R){N.ph='holds';beep(990,.4);render()}else{N.r++;nRound()}});render()});render()}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;unlock();const a=b.dataset.act,v=b.dataset.v,t=TODAY();
+ if(a==='tab'){go(v);return}
+ if(a==='setup'){const g=n=>{const el=document.querySelector('[name='+n+']:checked');return el?el.value:null};S.profile={start:$('#start').value||t,scoreSrc:g('src')||'snorelab',path:g('path')||'snorer',equip:g('equip')||'gym',imt:g('imtq')||'no',quickFlag:g('path')==='retest'?null:(g('quick')==='skip'?null:g('quick')),gpOk:false};S.checks=S.checks||{};save();if(v==='pers'){V={s:'check',k:myChecks()[0].k,wiz:{list:myChecks().map(c=>c.k)}};CKD={};render();window.scrollTo(0,0)}else go('today');return}
+ if(a==='setup2'){S.profile.equip=document.querySelector('[name=equip]:checked').value;S.profile.imt=document.querySelector('[name=imtq]:checked').value;W=null;save();go('today');return}
+ if(a==='savewatch'){const w=document.querySelector('[name=watch]:checked');if(w){S.profile.watch=w.value;save();toast('Saved')}go(V.from&&V.from!=='watch'?V.from:'today');return}
+ if(a==='hsave'){const H=HL();H.status=$('#hstatus').value;H.treatment=$('#htreat').value;H.pressure=$('#hpress').value;H.tStart=$('#htstart').value;H.clinic=$('#hclinic').value;save();toast('Record saved');return}
+ if(a==='sadd'){const d=$('#sdate').value;if(!d){toast('Add the study date');return}HL().studies.push({date:d,type:$('#stype').value,ahi:$('#sahi').value,low:$('#slow').value,odi:$('#sodi').value,notes:$('#snotes').value});save();toast('Study added');render();return}
+ if(a==='aadd'){const d=$('#adate').value;if(!d){toast('Add the date');return}HL().appts.push({date:d,who:$('#awho').value,why:$('#awhy').value});save();render();return}
+ if(a==='qadd'){const q=$('#qnew').value.trim();if(q){HL().qs.push(q);save();render()}return}
+ if(a==='hdel'){const[k,i]=v.split(':');HL()[k].splice(+i,1);save();render();return}
+ if(a==='glogin'){if(!FB)return;if(!$('#consent').checked){toast('Please tick the box first');return}const p=new FB.Au.GoogleAuthProvider();FB.Au.signInWithPopup(FB.auth,p).catch(err=>{if(err&&/popup/.test(err.code||''))FB.Au.signInWithRedirect(FB.auth,p);else toast('Sign-in didn’t finish. Try again.')});return}
+ if(a==='signout'){if(FB){try{localStorage.removeItem(LKEY)}catch(e){}FB.Au.signOut(FB.auth)}return}
+ if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
+ if(a==='go'){V.confirm=false;go(v,{from:V.s});return}
+ if(a==='ck'){CKD=Object.assign({},(lastCk(v)||{}).a||{});go('check',{k:v,from:V.s});return}
+ if(a==='wiz'||a==='checkpoint'){const list=a==='wiz'?(myChecks().some(c=>!lastCk(c.k))?myChecks().filter(c=>!lastCk(c.k)):myChecks()).map(c=>c.k):myChecks().filter(c=>c.every&&lastCk(c.k)&&(pd(t)-pd(lastCk(c.k).date))/864e5>=c.every).map(c=>c.k);if(!list.length){go('today');return}CKD=Object.assign({},(lastCk(list[0])||{}).a||{});go('check',{k:list[0],wiz:{list}});return}
+ if(a==='ans'){CKD[b.dataset.q]=v;b.parentElement.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));return}
+ if(a==='sw'){const inp=document.getElementById(v);if(SW&&SW.id===v){inp.value=Math.round((Date.now()-SW.start)/1000);CKD[inp.dataset.num]=inp.value;SW=null}else{document.querySelectorAll('[data-num]').forEach(x=>CKD[x.dataset.num]=x.value);SW={id:v,start:Date.now()}}render();return}
+ if(a==='cksave'){document.querySelectorAll('[data-num]').forEach(x=>CKD[x.dataset.num]=x.value);SW=null;S.checks=S.checks||{};(S.checks[V.k]=S.checks[V.k]||[]).push({date:t,a:Object.assign({},CKD)});if(V.k==='risk'||V.k==='quick')S.profile.gpOk=S.profile.gpOk&&ckOf('risk').res(CKD).lv!=='urgent';W=null;save();V={s:'ckres',k:V.k,wiz:V.wiz};render();window.scrollTo(0,0);return}
+ if(a==='ckskip'||a==='cknext'){SW=null;const w=V.wiz;if(!w){go(V.from==='settings'?'settings':'today');return}const i=w.list.indexOf(V.k);if(i>=w.list.length-1){go('today');return}const k=w.list[i+1];CKD=Object.assign({},(lastCk(k)||{}).a||{});V={s:'check',k,wiz:w};render();window.scrollTo(0,0);return}
+ if(a==='ckclose'){SW=null;go(V.from==='settings'?'settings':'today');return}
+ if(a==='reset'){if(!V.confirm&&!v){V.confirm=true;render();return}if(v==='yes'){S=blank();try{localStorage.removeItem('bs-state')}catch(e){}W=R=I=N=null;save();V={s:'today'};render();window.scrollTo(0,0);toast('All data deleted');return}V.confirm=false;render();return}
+ if(a==='gpok'){S.profile.gpOk=true;save();render();return}
+ if(a==='saveplan'){S.profile.start=$('#start').value||S.profile.start;S.profile.path=document.querySelector('[name=path]:checked').value;S.profile.equip=document.querySelector('[name=equip]:checked').value;S.profile.imt=document.querySelector('[name=imtq]:checked').value;const sr=document.querySelector('[name=src]:checked');if(sr)S.profile.scoreSrc=sr.value;W=null;save();toast('Settings saved');V.confirm=false;render();window.scrollTo(0,0);return}
+ if(a==='buy'){go('buy',{from:V.s});return}
+ if(a==='gotimt'){S.profile.imt='yes';save();toast('Trainer sessions on');I=null;render();return}
+ if(a==='imt'){I=null;keepAwake();go('imt');return}
+ if(a==='routine'){R=null;keepAwake();go('routine');return}
+ if(a==='main'){const d=dayPlan(t);if(d.m.k==='w'){go('workout',{x:d.m.x})}else{N=null;keepAwake();go('cardio')}return}
+ if(a==='rest'){startT(+v,()=>{beep(990,.4);document.querySelectorAll('[data-tmr]').forEach(el=>el.textContent='Go')});render();return}
+ if(a==='finish'){S.sessions.push({date:t,type:'W'+W.x,ex:W.ex});dn(t).main=true;W=null;save();toast('Workout saved');go('today');return}
+ if(a==='ctimer'){startT(+v,()=>{beep(990,.5)});render();return}
+ if(a==='cdone'){dn(t).main=true;S.sessions.push({date:t,type:dayPlan(t).m.k});save();toast('Saved');go('today');return}
+ if(a==='istart'){nRound();return}
+ if(a==='iskip'){T=null;N.ph='holds';render();return}
+ if(a==='idone'){S.sessions.push({date:t,type:'int',rounds:N.R,holdSteps:N.steps.map(num)});dn(t).main=true;N=null;save();toast('Session saved');go('today');return}
+ if(a==='rgo'){rHold();return}
+ if(a==='rpause'){if(!T)return;if(T.paused){T.end=Date.now()+T.rem;T.paused=false}else{T.rem=T.end-Date.now();T.paused=true}render();return}
+ if(a==='rnext'){rNext(false);return}
+ if(a==='rdone'){dn(t).routine=true;R=null;save();toast('Routine saved');go('today');return}
+ if(a==='breath'){I.b++;beep(740,.06);if(I.b>=6){if(I.set>=5){I.ph='ask'}else{I.ph='rest';startT(60,()=>{I.set++;I.b=0;I.ph='go';beep(990,.3);render()})}}render();return}
+ if(a==='imtskip'){T=null;I.set++;I.b=0;I.ph='go';render();return}
+ if(a==='imtans'){S.imtEasy=v==='1'?S.imtEasy+1:0;dn(t).imt=true;I=null;save();toast(S.imtEasy>=2?'Time to raise your level':'IMT saved');go('today');return}
+ if(a==='lvl'){S.imtLevel=Math.min(12,Math.max(1,S.imtLevel+(+v)));if(+v>0)S.imtEasy=0;save();render();return}
+ if(a==='tag'){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');return}
+ if(a==='savenight'){const d=$('#ld').value||addD(t,-1),c=$('#cpap');const ns=document.querySelector('[name=nsrc]:checked');S.nights[d]={src:ns?ns.value:(S.profile.scoreSrc||'snorelab'),snore:num($('#snore').value),partner:$('#partner').dataset.touched||S.nights[d]&&S.nights[d].partner!=null?num($('#partner').value):null,tired:$('#tired').dataset.touched||S.nights[d]&&S.nights[d].tired!=null?num($('#tired').value):null,cpapH:$('#cph')?num($('#cph').value):null,ahi:$('#cpa')?num($('#cpa').value):null,seal:$('#cps')?($('#cps').value||null):null,offs:$('#cpo')?num($('#cpo').value):null,hr:num($('#hr').value),br:num($('#br').value),ox:$('#ox')?num($('#ox').value):null,bd:$('#bd')?($('#bd').value||null):null,drinks:num($('#dr').value),tags:[...document.querySelectorAll('[data-act=tag][aria-pressed=true]')].map(x=>x.dataset.v),cpap:c?c.checked:null};save();toast('Night saved');V.date=null;go('today');return}
+ if(a==='saveweek'){const w='w'+Math.max(0,weekOf(t)),ah=$('#ahi');S.weekly[w]={bolt:num($('#bolt').value),neck:num($('#neck').value),ahi:ah?num(ah.value):null,imt:S.imtLevel};save();toast('Weekly check saved');return}
+ if(a==='csv'){copy(csv());return}
+ if(a==='copysum'){copy($('#copytext').value);return}
+});
+document.addEventListener('input',e=>{const el=e.target;
+ if(el.dataset.set&&W){const[i,j,f]=el.dataset.set.split(':');W.ex[+i].sets[+j][f]=el.value}
+ if(el.dataset.step!=null&&N){N.steps[+el.dataset.step]=el.value}
+ if(el.dataset.out){el.dataset.touched='1';const o=document.getElementById(el.dataset.out);if(o)o.textContent=el.value+' / 10'}});
+document.addEventListener('change',e=>{const el=e.target;
+ if(el.name==='path'&&!S.profile){const r=el.value==='retest',a=$('#cpapnote'),q=$('#quickq');if(a)a.hidden=!r;if(q)q.hidden=r}
+ if(el.dataset.exdone!=null&&W){W.ex[+el.dataset.exdone].done=el.checked}
+ if(el.id==='ld'){V.date=el.value;render()}});
+render();
+}
+</script>
+</body>
+</html>
