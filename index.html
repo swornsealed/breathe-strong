@@ -12,18 +12,18 @@
    PICTURE: the working app itself; airway drawings in the routine player
    COLOUR and TYPE: iron #17181B, steel cards, chalk text, plate-orange actions, air-green progress; Barlow Condensed + Barlow
    LAYOUT: one phone column, max 520px, bottom tab bar */
-:root{color-scheme:dark;--bg:#17181B;--card:#2B2E33;--deep:#0F1012;--ink:#F2F0EC;--mut:#B9B6B0;--dim:#9A9791;--acc:#FF5A1F;--acct:#FF7A45;--amb:#E8B04B;--air:#7FB7A4;--line:#3A3D43;--edge:#4A4E55}
+:root{color-scheme:dark;--bg:#17181B;--card:#24272C;--card2:#2B2E33;--deep:#0F1012;--ink:#F2F0EC;--mut:#B9B6B0;--dim:#9A9791;--acc:#FF5A1F;--acct:#FF7A45;--amb:#E8B04B;--air:#7FB7A4;--line:#3A3D43;--edge:#4A4E55}
 :root[data-theme=light]{color-scheme:dark}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html{background:var(--bg)}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
 .wrap{max-width:520px;margin:0 auto;padding:20px 16px 120px}
 .wrap.full{padding-bottom:40px}
-h1{font:800 clamp(34px,9vw,44px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:6px 0 12px;text-wrap:balance}
-h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:22px 0 8px}
+h1{font:800 clamp(32px,8.5vw,40px)/1.02 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:6px 0 12px;text-wrap:balance}
+h2{font:700 13px/1.3 Barlow,system-ui,sans-serif;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin:26px 2px 10px}
 .cond{font-family:'Barlow Condensed',sans-serif;font-weight:800}
 .mut{color:var(--mut)}.small{font-size:15px}.tiny{font-size:14px}
-.card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:10px 0}
 .warn{border:1px solid var(--amb);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:15px}
 .row{display:flex;align-items:center;gap:12px}
 .between{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -31,21 +31,22 @@ h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;marg
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 button{font:inherit;color:inherit;cursor:pointer}
 .btn{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:27px;background:var(--acc);color:#17181B;border:0;font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase;width:100%;margin:10px 0;padding:0 18px}
-.btn2{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:24px;background:transparent;color:var(--ink);border:1px solid var(--edge);font-weight:600;width:100%;margin:8px 0;padding:0 16px}
+.btn2{display:flex;align-items:center;justify-content:center;min-height:50px;border-radius:25px;background:transparent;color:var(--ink);border:1px solid var(--edge);font-weight:600;width:100%;margin:8px 0;padding:0 16px}
 .chip{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--edge);background:transparent;font-size:15px}
 .chip[aria-pressed=true]{border-color:var(--air);background:#24332F}
-.item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:0;border-radius:14px;padding:14px;margin:8px 0;min-height:64px}
+.item{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--card);border:0;border-radius:18px;padding:14px 16px;margin:8px 0;min-height:64px}
 .dot{width:28px;height:28px;border-radius:14px;border:2px solid var(--edge);flex:none;display:flex;align-items:center;justify-content:center}
 .dot.on{background:var(--air);border-color:var(--air)}
 .grow{flex:1;display:flex;flex-direction:column}
 .t1{font-weight:600}.t2{font-size:14px;color:var(--mut)}
 label{display:block}
-input[type=number],input[type=date]{font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%}
+input[type=number],input[type=date]{font:inherit;font-size:17px;background:#1B1D21;color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}input[type=number]{-moz-appearance:textfield}
 input[type=range]{width:100%;accent-color:var(--acct);height:32px}
 input[type=checkbox],input[type=radio]{accent-color:var(--acct);width:22px;height:22px;flex:none}
-.check{display:flex;gap:12px;align-items:center;min-height:48px;border-bottom:1px solid var(--line)}
+.check{display:flex;gap:12px;align-items:center;min-height:54px;border-bottom:1px solid var(--line)}
 .check:last-child{border-bottom:0}
-.lab{font-size:14px;color:var(--mut);margin-bottom:4px}
+.lab{font-size:13px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
 .big{font:800 64px/1 'Barlow Condensed',sans-serif}
 .huge{font:800 88px/1 'Barlow Condensed',sans-serif}
 .bars{display:flex;align-items:flex-end;gap:6px;height:64px}
@@ -54,8 +55,8 @@ input[type=checkbox],input[type=radio]{accent-color:var(--acct);width:22px;heigh
 .top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
 .icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0}
 .fig{position:relative;height:220px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.lthumb{width:92px;height:77px;background:#1F2125;border-radius:12px;display:block}
-.art{width:100%;height:240px;background:#1F2125;border-radius:20px;display:block}
+.lthumb{width:92px;height:77px;background:#0B0B0C;border-radius:12px;display:block}
+.art{width:100%;height:240px;background:#0B0B0C;border-radius:20px;display:block}
 nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:496px;margin:0 auto;background:rgba(15,16,18,.72);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);border:1px solid rgba(255,255,255,.09);border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));z-index:5;transition:transform .25s,opacity .25s}nav.mini{transform:scale(.9) translateY(6px);opacity:.92}
 nav button{background:none;border:0;color:var(--dim);font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px}
 nav button[aria-current=page]{color:var(--acct)}
@@ -266,7 +267,7 @@ function dayPlan(s){const w=weekOf(s),p=phaseOf(Math.max(1,w)),wd=(pd(s).getDay(
  const m=[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},{k:p==='F'?'z2':'int'},{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}][wd];return{w,p,wd,m}}
 function info(m,p){if(m.k==='w')return{t:WK[m.x].t,s:WK[m.x].ex.length+' exercises · '+(S.profile&&S.profile.equip&&S.profile.equip!=='gym'?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:50,day:'Workout '+m.x+' day'};
  if(m.k==='z2')return{t:'Zone 2 cardio',s:'Talking pace, nose breathing only',min:p==='F'&&S.profile&&pers().walk==='no'?20:PH[p].z2,day:'Zone 2 day'};
- if(m.k==='z2long')return{t:'Zone 2 or loaded carry walk',s:'Long walk with a weighted pack, nose breathing',min:45,day:'Long walk day'};
+ if(m.k==='z2long')return{t:'Long easy walk',s:'Zone 2 pace, with or without a loaded backpack',min:45,day:'Long walk day'};
  if(m.k==='int')return{t:'Intervals + breath-hold walk',s:pick(p,[6,6,8])+' × 30 s hard / 90 s easy, then '+pick(p,[5,5,8])+' holds',min:30,day:'Intervals day'};
  return{t:'Rest + mobility',s:'Foam roller, wall angels, daily routine',min:15,day:'Rest day'}}
 function scored(){const src=(S.profile&&S.profile.scoreSrc)||'snorelab';return Object.keys(S.nights).sort().filter(k=>num(S.nights[k].snore)!=null&&(S.nights[k].src||'snorelab')===src)}
@@ -373,7 +374,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
   !S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`:'',
   tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''].filter(Boolean);
  const must=`${rt?CPAPNOTE:''}${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}`;
- const moreBox=more.length?`<details class="card" style="padding:4px 14px"><summary class="t1" style="cursor:pointer;min-height:48px;display:flex;align-items:center">More for you · ${more.length}</summary>${more.join('')}</details>`:'';
+ const moreBox=more.length?`<details class="card" style="padding:4px 14px"><summary class="t1" style="cursor:pointer;min-height:48px;display:flex;align-items:center">More for you (${more.length})</summary>${more.join('')}</details>`:'';
  if(di<0)return`${head}<h1>Baseline time</h1><p class="mut">Your program starts ${fmt(S.profile.start)}. Log your snore score each morning until then.</p>${must}<button class="btn" data-act="tab" data-v="log">Log last night</button>${moreBox}`;
  const d=dayPlan(t),i=info(d.m,d.p),done=S.done[t]||{},y=addD(t,-1),days=[...Array(7)].map((_,k)=>addD(t,k-7));
  const vals=days.map(k=>S.nights[k]?num(S.nights[k].snore):null),mx=Math.max(st.base||0,...vals.filter(v=>v!=null),10);
@@ -381,25 +382,36 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const ch=st.change,stc=ch==null?'var(--edge)':ch>=.1?'var(--air)':ch>-.1?'var(--amb)':'var(--acc)',stl=ch==null?(st.n?'Building your baseline · '+st.n+' of 10 nights':'Log your first night to start'):ch>=.1?'Improving · '+Math.round(ch*100)+'% below baseline':ch>-.1?'Holding steady':'Worse · '+Math.round(-ch*100)+'% above baseline';
  const frac=ch==null?(st.n?Math.min(1,st.n/10):0):Math.max(.06,Math.min(1,.5+ch));
  const ring=`<svg viewBox="0 0 200 200" width="188" height="188" aria-hidden="true"><circle cx="100" cy="100" r="84" fill="none" stroke="#2B2E33" stroke-width="16"/><circle cx="100" cy="100" r="84" fill="none" stroke="${stc}" stroke-width="16" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="${(frac*527.8).toFixed(1)} 527.8"/></svg>`;
- return`${head}
- <div class="small mut">Week ${d.w} of 24 · ${PH[d.p].n}</div>
- <h1>${i.day}</h1>
+ const SES=[
+  {k:'imt',t:S.profile.imt!=='no'?'Breathing trainer':'Breathing session',s:(S.profile.imt!=='no'?'30 breaths in · level '+S.imtLevel:'30 straw breaths in')+(emstOn()?' + '+emstSets()*5+' hard breaths out':''),m:emstOn()?8:5},
+  {k:'routine',t:done.sing?'Singing session':'Airway routine',s:done.sing?'Swapped in for today':myMoves(d.p).length+' moves'+(P.palate||P.base?' · focused on your '+[P.palate?'palate':null,P.base?'tongue':null].filter(Boolean).join(' and '):' · tongue, throat, neck'),m:12},
+  {k:'main',t:i.t,s:i.s,m:i.min},
+  {k:'evening',t:'Evening wind-down',s:'Walk, calf raises, legs up · less fluid round your throat overnight',m:15}];
+ const left=SES.filter(x=>!done[x.k]),nx=left[0],nd=SES.length-left.length;
+ const logged=!!S.nights[y];
+ const sring=`<svg viewBox="0 0 200 200" width="104" height="104" aria-hidden="true"><circle cx="100" cy="100" r="82" fill="none" stroke="#2B2E33" stroke-width="20"/><circle cx="100" cy="100" r="82" fill="none" stroke="${stc}" stroke-width="20" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="${(frac*515.2).toFixed(1)} 515.2"/><text x="100" y="${st.last!=null?120:114}" text-anchor="middle" fill="#F2F0EC" font-size="${st.last!=null?64:44}" font-weight="800" font-family="Barlow Condensed,Arial Narrow,sans-serif">${st.last!=null?Math.round(st.last):'–'}</text></svg>`;
+ const word=ch==null?(st.n?'Building baseline':'No score yet'):ch>=.1?'Improving':ch>-.1?'Holding steady':'Worse';
+ const sub=ch==null?(st.n?st.n+' of 10 nights logged':'Log your first night to start'):Math.abs(Math.round(ch*100))+'% '+(ch>=0?'below':'above')+' where you started';
+ const tag=(x,c)=>`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c||'var(--dim)'}">${x}</div>`;
+ const hero=!logged?{act:'tab" data-v="log',tag:'First · 1 min',t:'Log last night',s:'Snore score and how you feel',btn:'Log it'}
+  :nx?{act:nx.k,tag:'Next up · '+nx.m+' min',t:nx.t,s:nx.s,btn:'Start'}:null;
+ return`${head.replace(fmt(t)+' · Day '+(di+1),fmt(t)+' · Week '+d.w+' · '+PH[d.p].n)}
  ${must}
- <button data-act="tab" data-v="progress" style="display:block;width:100%;background:none;border:0;padding:0;margin:4px 0 6px" aria-label="Snore score: ${st.last!=null?Math.round(st.last):'none yet'}. ${stl}. Open Progress">
-  <div style="position:relative;width:188px;height:188px;margin:0 auto">${ring}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="small mut">Snore score</div><div class="cond" style="font-size:64px;line-height:1">${st.last!=null?Math.round(st.last):'–'}</div><div class="tiny mut">last 7 nights</div></div></div>
-  <div class="small" style="text-align:center;margin-top:8px;color:${ch==null?'var(--mut)':stc};font-weight:600">${stl}</div>
-  <div class="bars" style="width:60%;height:34px;margin:10px auto 0" role="img" aria-label="Snore score for the last 7 nights">${vals.map((v,k)=>`<div style="height:${v==null?4:Math.max(6,v/mx*100)}%;${k===6&&v!=null?'background:'+stc:''}"></div>`).join('')}</div>
+ <button data-act="tab" data-v="progress" class="row" style="width:100%;background:none;border:0;padding:0;margin:6px 0 16px;gap:16px;text-align:left" aria-label="Snore score ${st.last!=null?Math.round(st.last):'none yet'}, ${word}. Open Progress">
+  ${sring}<span class="grow">${tag('Snore score')}<span style="display:block;font-size:24px;font-weight:700;line-height:1.2;color:${ch==null?'var(--ink)':stc}">${word}</span><span class="small mut">${sub}</span></span>
  </button>
- ${S.nights[y]?'':`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
- <h2>Today’s sessions</h2>
- ${row('imt','imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session',(S.profile.imt!=='no'?'30 breaths in · level '+S.imtLevel:'30 straw breaths in')+(emstOn()?' + '+emstSets()*5+' hard breaths out':''),emstOn()?'8 min':'5 min')}
- ${row('routine','routine',done.sing?'Singing session':'Airway routine',done.sing?'Swapped in for today':myMoves(d.p).length+' moves'+(P.palate||P.base?' · focused on your '+[P.palate?'palate':null,P.base?'tongue':null].filter(Boolean).join(' and '):' · tongue, throat, neck'),'12 min')}
- ${row('evening','evening','Evening wind-down','Walk, calf raises, legs up · less fluid round your throat overnight','15 min')}
- ${row('main','main',i.t,i.s,i.min+' min')}
+ ${hero?`<div class="card" style="padding:18px;background:linear-gradient(160deg,#33261F,#24272C 62%);border:1px solid #4a3328">
+  ${tag(hero.tag,'var(--acct)')}
+  <h1 style="margin:6px 0 4px;font-size:34px">${esc(hero.t)}</h1>
+  <div class="small mut" style="margin-bottom:6px">${esc(hero.s)}</div>
+  <button class="btn" data-act="${hero.act}" style="margin-bottom:0">${hero.btn}</button></div>`
+ :`<div class="card" style="padding:18px;background:linear-gradient(160deg,#213530,#24272C 62%);border:1px solid #2f4a42">${tag('All done','var(--air)')}<h1 style="margin:6px 0 4px;font-size:34px">Day complete</h1><div class="small mut">Every session ticked off. Sleep well, and log your score in the morning.</div></div>`}
+ <div style="margin:20px 0 8px">${tag('Today · '+nd+' of '+SES.length+' done')}</div>
+ <div class="card" style="padding:2px 16px">${SES.filter(x=>!hero||x.k!==hero.act).map((x,j,arr)=>`<button data-act="${x.k}" class="row" style="width:100%;background:none;border:0;${j<arr.length-1?'border-bottom:1px solid var(--line);':''}min-height:58px;padding:8px 0;text-align:left"><span class="dot${done[x.k]?' on':''}">${done[x.k]?checkSvg:''}</span><span class="grow" style="${done[x.k]?'color:var(--dim);text-decoration:line-through':''}">${esc(x.t)}</span><span class="tiny ${done[x.k]?'':'mut'}" style="${done[x.k]?'color:var(--air)':''}">${done[x.k]?'Done':x.m+' min'}</span></button>`).join('')}</div>
  ${moreBox}`}
 
 function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w),mon=addD(t,-((pd(t).getDay()+6)%7));
- const segs=[['F','Foundation','wk 1–2',2],['B','Build','wk 3–5',3],['S','Strength','wk 6–8',3],['R','Progression','wk 9–24',6]];
+ const segs=[['F','Start','wk 1–2',3],['B','Build','wk 3–5',3],['S','Strength','wk 6–8',3],['R','Progress','wk 9–24',6]];
  return`<div class="top"><span></span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
  <h1>Your plan</h1>
  <div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
@@ -517,7 +529,8 @@ function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
   <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.min} minutes.</p>
   <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
   <button class="btn2" data-act="ctimer" data-v="${i.min*60}">${T?'Restart timer':'Start timer'}</button>
-  ${d.m.k==='rest'?`<div class="card small">Foam roller thoracic extension × 10, wall angels 2 × 10, then your daily routine and IMT.</div>`:`<div class="card small">Talking pace: you could chat but not sing. If you have to open your mouth to breathe, slow down. A brisk walk outside counts; a backpack with a few water bottles makes it a loaded walk.</div>`}
+  ${d.m.k==='rest'?`<div class="card small">Foam roller thoracic extension × 10, wall angels 2 × 10, then your daily routine and IMT.</div>`:`<div class="card small"><b>What’s Zone 2?</b> An easy, steady pace you can hold for a long time: you could chat but not sing, and you can breathe through your nose the whole way. If you have to open your mouth to breathe, slow down. On a watch it’s roughly 60–70% of your maximum heart rate (about 180 minus your age).</div>
+  <div class="card small"><b>${d.m.k==='z2long'?'Pick one today':'Ways to do it'}:</b><br>• <b>Plain walk:</b> brisk walk, bike or rower at Zone 2 pace.<br>• <b>Loaded walk:</b> the same walk wearing a backpack with 5–10 kg (a few water bottles or books). Stand tall, chin tucked. It adds strength to the cardio.${d.m.k==='z2long'?'<br>New to it? Start without the pack and add weight from week 3.':''}</div>`}
   <button class="btn" data-act="cdone">Mark done</button>`;
  const R0=pick(d.p,[6,6,8]),H0=pick(d.p,[5,5,8]);if(!N)N={r:1,ph:'ready',R:R0,H:H0,steps:[]};
  return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
@@ -702,7 +715,7 @@ function log(){const t=TODAY(),dsel=V.date||addD(t,-1),n=S.nights[dsel]||{},w=Ma
  return`<h1>Log last night</h1>
  <label class="card"><div class="lab">Night of</div><input type="date" id="ld" value="${dsel}" max="${t}"></label>
  <div class="card"><div class="lab">Score from</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${srcOpts().map(([k,l,s,dis])=>`<label class="chip row" style="gap:8px;${dis?'opacity:.55':''}"><input type="radio" name="nsrc" value="${k}" ${(n.src||S.profile.scoreSrc||'snorelab')===k&&!dis?'checked':''} ${dis?'disabled':''} style="width:18px;height:18px">${l}${dis?' · soon':''}</label>`).join('')}</div>
- <label for="snore" class="t1" style="font-size:15px">Snore score</label><div class="row" style="margin-top:6px"><input id="snore" type="number" inputmode="decimal" style="width:120px;font:800 28px 'Barlow Condensed';height:54px" value="${esc(n.snore??'')}"><span class="tiny mut">Copy it from SnoreLab’s morning report. The built-in recorder will fill this in automatically once it’s ready.</span></div></div>
+ <label for="snore" class="t1" style="font-size:15px">Snore score</label><div class="row" style="margin-top:6px"><input id="snore" type="number" inputmode="decimal" style="width:140px;flex:none;font:800 30px 'Barlow Condensed',sans-serif;height:56px;padding:0 12px" value="${esc(n.snore??'')}"><span class="tiny mut">Copy it from SnoreLab’s morning report. The built-in recorder will fill this in automatically once it’s ready.</span></div></div>
  <div class="card">${sl('partner','Partner rating (how bad was it?)',n.partner)}${sl('tired','Daytime tiredness',n.tired)}</div>
  <div class="grid3">
   <label class="card" style="margin:0;padding:10px"><div class="lab">Resting HR</div><input id="hr" type="number" inputmode="numeric" value="${esc(n.hr??'')}"></label>
