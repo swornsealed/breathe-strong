@@ -72,7 +72,7 @@ textarea{width:100%;min-height:200px;font:14px/1.5 ui-monospace,Menlo,monospace;
 <body>
 <div class="wrap" id="view"><p class="mut">Loading Breathe Strong…</p></div>
 <nav id="nav" aria-label="Main">
-  <button data-act="tab" data-v="today"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 L12 4 L20 11 V20 H4 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Today</button>
+  <button data-act="tab" data-v="today"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 L12 4 L20 11 V20 H4 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Home</button>
   <button data-act="tab" data-v="plan"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6 H20 V20 H4 Z M4 10 H20 M8 3 V7 M16 3 V7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>Plan</button>
   <button data-act="tab" data-v="log"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 14 A8 8 0 1 1 10 4 A6 6 0 0 0 19 14 Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Log</button>
   <button data-act="tab" data-v="progress"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 H20 M6 16 L10 11 L14 14 L19 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>Progress</button>
@@ -349,7 +349,75 @@ function setup(){const t=TODAY(),pth=V.path||'snorer';return`
  <button class="btn2" data-act="setup" data-v="pers">Personalise first (about 5 min)</button>`}
 
 function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.path==='retest',flags=S.profile.flags||[];
- const head=`<div class="top"><span class="small mut">${di<0?'Starts '+fmt(S.profile.start):fmt(t)+' · Day '+(di+1)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>`;
+ const urgent=(P.risk==='urgent'||P.quick==='yes'||flags.length)&&!S.profile.gpOk&&!rt;
+ const must=`${rt?CPAPNOTE:''}${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}`;
+ const tips=[];
+ if(!rt&&P.risk==='high'&&!S.profile.gpOk)tips.push('Several signs of possible sleep apnoea: ask your GP about a sleep study.');
+ if(!rt&&P.risk==='some')tips.push('Mention your snoring to your GP at your next visit.');
+ if(P.nose)tips.push((P.nose==='both'?'Both sides of your nose':'Your '+P.nose+' nostril')+' felt blocked. A saline rinse before bed can help; see your GP if it’s always blocked.');
+ if(P.dry)tips.push('Dry mouth on waking: practise breathing through your nose during the day and on walks. Skip mouth tape: a 2025 review found little benefit and a possible choking risk.');
+ if(P.bmi&&P.bmi>=30)tips.push('Losing 5–10% of body weight often helps snoring as much as any exercise.');
+ const pi=posInsight();if(pi)tips.push(pi);
+ if(LOCAL&&S.profile&&Object.keys(S.nights).length>=3&&(!S.backupAt||(pd(t)-pd(S.backupAt))/864e5>=14))tips.push('Your logs are only on this phone. Back them up to iCloud Drive: Settings, then Back up to a file.');
+ const fs=fshift(14);if(fs&&fs.n>=3&&fs.d>=.5)tips.push('Your neck grows '+r1(fs.d)+' cm overnight on average. That’s fluid moving up from your legs. The evening wind-down targets it.');
+ const todo=myChecks().filter(c=>!lastCk(c.k)).length,due=myChecks().filter(c=>c.every&&lastCk(c.k)&&dayIdx(t)>=0&&(pd(t)-pd(lastCk(c.k).date))/864e5>=c.every);
+ const extras=`${rt?CPAPNOTE:''}
+ ${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}
+ ${alerts().filter(a=>a.lv!=='low'&&a.t!=='See your GP soon about a sleep study').slice(0,2).map(alertCard).join('')}
+ ${todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:''}
+ ${due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:''}
+ ${!S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`:''}
+ ${tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''}`;
+ const more=[...alerts().filter(a=>a.lv!=='low'&&a.t!=='See your GP soon about a sleep study').slice(0,2).map(alertCard),
+  todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:'',
+  due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:'',
+  !S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`:'',
+  tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''].filter(Boolean);
+
+ const moreBox=more.length?`<details class="card" style="padding:4px 14px"><summary class="t1" style="cursor:pointer;min-height:48px;display:flex;align-items:center">More for you (${more.length})</summary>${more.join('')}</details>`:'';
+ const tag=(x,c)=>`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c||'var(--dim)'}">${x}</div>`;
+ const w=Math.max(1,weekOf(t)),p=phaseOf(w),d=di>=0?dayPlan(t):null,done=S.done[t]||{};
+ const ch=st.change,stc=ch==null?'var(--edge)':ch>=.1?'var(--air)':ch>-.1?'var(--amb)':'var(--acc)';
+ const word=ch==null?(st.n?'Building baseline':'No score yet'):ch>=.1?'Improving':ch>-.1?'Holding steady':'Worse';
+ const sub=ch==null?(st.n?st.n+' of 10 baseline nights logged':'Log your first night to start'):Math.abs(Math.round(ch*100))+'% '+(ch>=0?'below':'above')+' where you started';
+ const pts=weekly().slice(-8),pmx=Math.max(...pts.map(x=>x.v),1),pmn=Math.min(...pts.map(x=>x.v),pmx);
+ const spark=pts.length>1?`<svg viewBox="0 0 120 44" width="120" height="44" aria-hidden="true"><polyline points="${pts.map((x,k)=>(k*120/(pts.length-1)).toFixed(1)+','+(6+(1-(x.v-pmn)/((pmx-pmn)||1))*32).toFixed(1)).join(' ')}" fill="none" stroke="${stc}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`:'';
+ const keys=['imt','routine','main','evening'];
+ const mon=addD(t,-((pd(t).getDay()+6)%7)),wk=[...Array(7)].map((_,k)=>addD(mon,k));
+ const cnt=k=>{const x=S.done[k]||{};return keys.filter(z=>x[z]).length};
+ const wkDone=wk.filter(k=>k<=t).reduce((a,k)=>a+cnt(k),0),wkAll=wk.filter(k=>k<=t).length*4;
+ let streak=0;for(let k=t;;k=addD(k,-1)){if(cnt(k)>0)streak++;else if(k!==t)break;if(streak>365||k<S.profile.start)break}
+ const nights=Object.keys(S.nights).filter(k=>num(S.nights[k].snore)!=null).length;
+ const tdn=cnt(t),nxt=d?(()=>{const i=info(d.m,d.p);const L=[['imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session'],['routine',done.sing?'Singing session':'Airway routine'],['main',i.t],['evening','Evening wind-down']];const f=L.find(x=>!done[x[0]]);return f?f[1]:null})():null;
+ const logged=!!S.nights[addD(t,-1)];
+ const tile=(v,l)=>`<div class="card" style="margin:0;padding:14px 12px;text-align:center"><div class="cond" style="font-size:32px;line-height:1">${v}</div><div class="tiny mut" style="margin-top:4px">${l}</div></div>`;
+ return`<div class="top"><span class="small mut">${fmt(t)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
+ <h1 style="margin-top:2px">${di<0?'Baseline time':'Week '+w+' of 24'}</h1>
+ <div class="small mut" style="margin:-6px 0 12px">${di<0?'Program starts '+fmt(S.profile.start)+'. Log your snore score each morning until then.':PH[p].n+' phase'}</div>
+ ${must}
+ <button data-act="tab" data-v="progress" class="card" style="display:block;width:100%;text-align:left;border:0;padding:18px;background:linear-gradient(150deg,${ch==null?'#24272C':ch>=.1?'#213530':ch>-.1?'#3a321f':'#3a261f'},#24272C 70%)" aria-label="Snore score ${st.last!=null?Math.round(st.last):'none yet'}, ${word}. Open Progress">
+  <div class="between" style="align-items:flex-end">
+   <div>${tag('Snore score',ch==null?null:stc)}<div class="cond" style="font-size:64px;line-height:1;margin-top:4px">${st.last!=null?Math.round(st.last):'–'}</div>
+    <div style="font-weight:700;color:${ch==null?'var(--ink)':stc}">${word}</div><div class="small mut">${sub}</div></div>
+   <div style="text-align:right">${spark}${spark?'<div class="tiny mut">weekly trend</div>':''}</div>
+  </div>
+ </button>
+ <div class="grid3" style="margin:12px 0">${tile(nights,'nights logged')}${tile(wkAll?wkDone+'/'+wkAll:'–','sessions this week')}${tile(streak,streak===1?'day streak':'day streak')}</div>
+ ${di>=0?`<div class="card" style="padding:14px 16px">${tag('This week')}
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px">${wk.map((k,j)=>{const c=cnt(k),fut=k>t;return`<div style="text-align:center"><div class="tiny ${k===t?'':'mut'}" style="${k===t?'color:var(--acct);font-weight:700':''}">${DAYN[j][0]}</div><div style="margin:6px auto 0;width:30px;height:30px;border-radius:15px;${fut?'border:2px dashed var(--line)':c>=4?'background:var(--air)':c>0?'background:conic-gradient(var(--air) '+(c*25)+'%,var(--card2) 0)':'background:var(--card2)'}"></div></div>`}).join('')}</div></div>`:''}
+ ${di>=0?`<div class="card" style="padding:18px;background:linear-gradient(160deg,#33261F,#24272C 62%);border:1px solid #4a3328">
+  ${tag('Today · '+tdn+' of 4 done','var(--acct)')}
+  <div style="font-size:22px;font-weight:700;margin:6px 0 2px">${!logged?'Start by logging last night':nxt?'Next: '+esc(nxt):'All done for today'}</div>
+  <div class="small mut" style="margin-bottom:6px">${esc(info(d.m,d.p).day)}</div>
+  <button class="btn" data-act="tab" data-v="${!logged?'log':'day'}" style="margin-bottom:0">${!logged?'Log last night':'Go to today'}</button>${!logged?`<button class="btn2" data-act="tab" data-v="day" style="margin-bottom:0">See today’s sessions</button>`:''}</div>`
+ :`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
+ ${moreBox}
+ <div style="margin:18px 0 6px">${tag('Your program')}</div>
+ <div class="card" style="padding:14px 16px"><div class="seg">${[['F',2],['B',3],['S',3],['R',16]].map(([k,n])=>`<div style="flex:${n};${k===p?'background:var(--acc)':('FBSR'.indexOf(k)<'FBSR'.indexOf(p)||p==='M'?'background:var(--air)':'')}"></div>`).join('')}</div>
+  <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,24)} of 24</span><span class="mut">Retest around week 24</span></div></div>`}
+
+function day(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.path==='retest',flags=S.profile.flags||[];
+ const head=`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Back to home"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="small mut">${di<0?'Starts '+fmt(S.profile.start):fmt(t)+' · Day '+(di+1)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>`;
  const urgent=(P.risk==='urgent'||P.quick==='yes'||flags.length)&&!S.profile.gpOk&&!rt;
  const tips=[];
  if(!rt&&P.risk==='high'&&!S.profile.gpOk)tips.push('Several signs of possible sleep apnoea: ask your GP about a sleep study.');
@@ -386,7 +454,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
   {k:'imt',t:S.profile.imt!=='no'?'Breathing trainer':'Breathing session',s:(S.profile.imt!=='no'?'30 breaths in · level '+S.imtLevel:'30 straw breaths in')+(emstOn()?' + '+emstSets()*5+' hard breaths out':''),m:emstOn()?8:5},
   {k:'routine',t:done.sing?'Singing session':'Airway routine',s:done.sing?'Swapped in for today':myMoves(d.p).length+' moves'+(P.palate||P.base?' · focused on your '+[P.palate?'palate':null,P.base?'tongue':null].filter(Boolean).join(' and '):' · tongue, throat, neck'),m:12},
   {k:'main',t:i.t,s:i.s,m:i.min},
-  {k:'evening',t:'Evening wind-down',s:'Walk, calf raises, legs up · less fluid round your throat overnight',m:15}];
+  {k:'evening',t:'Evening wind-down',s:'Walk, calf raises, last drink early · less fluid round your throat overnight',m:15}];
  const left=SES.filter(x=>!done[x.k]),nx=left[0],nd=SES.length-left.length;
  const logged=!!S.nights[y];
  const sring=`<svg viewBox="0 0 200 200" width="104" height="104" aria-hidden="true"><circle cx="100" cy="100" r="82" fill="none" stroke="#2B2E33" stroke-width="20"/><circle cx="100" cy="100" r="82" fill="none" stroke="${stc}" stroke-width="20" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="${(frac*515.2).toFixed(1)} 515.2"/><text x="100" y="${st.last!=null?120:114}" text-anchor="middle" fill="#F2F0EC" font-size="${st.last!=null?64:44}" font-weight="800" font-family="Barlow Condensed,Arial Narrow,sans-serif">${st.last!=null?Math.round(st.last):'–'}</text></svg>`;
@@ -395,7 +463,8 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const tag=(x,c)=>`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${c||'var(--dim)'}">${x}</div>`;
  const hero=!logged?{act:'tab" data-v="log',tag:'First · 1 min',t:'Log last night',s:'Snore score and how you feel',btn:'Log it'}
   :nx?{act:nx.k,tag:'Next up · '+nx.m+' min',t:nx.t,s:nx.s,btn:'Start'}:null;
- return`${head.replace(fmt(t)+' · Day '+(di+1),fmt(t)+' · Week '+d.w+' · '+PH[d.p].n)}
+ return`${head}
+ <h1 style="margin-top:2px">Today</h1>
  ${must}
  <button data-act="tab" data-v="progress" class="row" style="width:100%;background:none;border:0;padding:0;margin:6px 0 16px;gap:16px;text-align:left" aria-label="Snore score ${st.last!=null?Math.round(st.last):'none yet'}, ${word}. Open Progress">
   ${sring}<span class="grow">${tag('Snore score')}<span style="display:block;font-size:24px;font-weight:700;line-height:1.2;color:${ch==null?'var(--ink)':stc}">${word}</span><span class="small mut">${sub}</span></span>
@@ -410,15 +479,58 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  <div class="card" style="padding:2px 16px">${SES.filter(x=>!hero||x.k!==hero.act).map((x,j,arr)=>`<button data-act="${x.k}" class="row" style="width:100%;background:none;border:0;${j<arr.length-1?'border-bottom:1px solid var(--line);':''}min-height:58px;padding:8px 0;text-align:left"><span class="dot${done[x.k]?' on':''}">${done[x.k]?checkSvg:''}</span><span class="grow" style="${done[x.k]?'color:var(--dim);text-decoration:line-through':''}">${esc(x.t)}</span><span class="tiny ${done[x.k]?'':'mut'}" style="${done[x.k]?'color:var(--air)':''}">${done[x.k]?'Done':x.m+' min'}</span></button>`).join('')}</div>
  ${moreBox}`}
 
-function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w),mon=addD(t,-((pd(t).getDay()+6)%7));
+/* milestones: day index from start (0 = day 1) */
+const MS=[
+ {d:0,t:'Day 1',s:'Your program starts. The snore scores you logged before today are your baseline.'},
+ {d:13,t:'Foundation done',s:'Two weeks in. The routine should feel familiar now, and most people can hold the tongue press longer than on day 1.'},
+ {d:14,t:'Build phase starts',s:'Lifts get heavier: 4 sets of 6–8. Keep stopping with 1–2 reps left.'},
+ {d:27,t:'4-week checkpoint',s:'Redo your checks so the app can show what’s changed: tongue hold, push-ups, plank, neck and energy.'},
+ {d:35,t:'Strength phase starts',s:'Heavier lifts again: 4–5 sets of 4–6. This is where the bracing work counts most.'},
+ {d:41,t:'Breathing muscles',s:'In trials, about 6 weeks of daily breathing training made breathing-in muscles measurably stronger. Your trainer level should have gone up by now.'},
+ {d:55,t:'8 weeks',s:'Snoring changes often start to show around now. Mouth exercise programs recommend at least 8 weeks before judging them.'},
+ {d:55,t:'8-week checkpoint',s:'Redo your checks. If snoring hasn’t moved and you haven’t been tested, it’s a good time to ask your GP about a sleep study.'},
+ {d:83,t:'3 months',s:'Most mouth and throat exercise trials measured their results at 3 months. Compare your snore score with your baseline.'},
+ {d:111,t:'16 weeks',s:'Keep going. Strength and breathing gains keep building as long as the loads keep creeping up.'},
+ {d:167,t:'6 months · retest',s:'Time to compare with where you started. CPAP and mouthguard users: book your repeat sleep study with your doctor. Don’t change your treatment without them.'}];
+const msOn=k=>{const i=dayIdx(k);return MS.filter(m=>m.d===i)};
+function daySum(k){const t=TODAY(),i=dayIdx(k),past=k<t,isT=k===t,dn0=S.done[k]||{},n=S.nights[k],ms=msOn(k);
+ const head=`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${isT?'var(--acct)':'var(--dim)'}">${isT?'Today':k===addD(t,1)?'Tomorrow':past?'Past':'Coming up'} · ${fmt(k)}</div>`;
+ const msH=ms.map(m=>`<div style="margin-top:12px;padding:12px 14px;border-radius:14px;background:#33291c;box-shadow:inset 3px 0 0 var(--amb)"><div class="t1" style="color:var(--amb)">★ ${esc(m.t)}</div><div class="small" style="margin-top:2px">${esc(m.s)}</div></div>`).join('');
+ if(i<0)return`<div class="card">${head}<div style="font-size:20px;font-weight:700;margin:6px 0">Before the program</div><div class="small mut">${n&&num(n.snore)!=null?'Snore score '+Math.round(n.snore)+' (baseline night)':'Baseline: log your snore score each morning.'}</div>${msH}</div>`;
+ const d=dayPlan(k),inf=info(d.m,d.p);
+ const L=[['imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session'],['routine',dn0.sing?'Singing session':'Airway routine'],['main',inf.t],['evening','Evening wind-down']];
+ const rows=L.map(([key,l])=>`<div class="row" style="min-height:40px"><span class="dot${dn0[key]?' on':''}" style="width:22px;height:22px">${dn0[key]?checkSvg:''}</span><span class="grow small" style="${past&&!dn0[key]?'color:var(--dim)':''}">${esc(l)}</span>${key==='main'?`<span class="tiny mut">${inf.min} min</span>`:''}</div>`).join('');
+ return`<div class="card">${head}
+  <div style="font-size:22px;font-weight:700;margin:6px 0 2px">${esc(inf.day)}</div>
+  <div class="small mut">Week ${d.w} · ${PH[d.p].n} phase${d.m.k==='w'?' · '+esc(PH[d.p].lift):''}</div>
+  ${n&&num(n.snore)!=null?`<div class="small" style="margin-top:8px">Snore score that night: <b>${Math.round(n.snore)}</b></div>`:''}
+  <div style="margin-top:8px">${rows}</div>
+  ${isT?`<button class="btn" data-act="tab" data-v="day" style="margin-bottom:0">Go to today</button>`:''}
+  ${msH}</div>`}
+function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w);
  const segs=[['F','Start','wk 1–2',3],['B','Build','wk 3–5',3],['S','Strength','wk 6–8',3],['R','Progress','wk 9–24',6]];
+ const sel=V.cd||t,mo=V.cm||t.slice(0,7),[yy,mm]=mo.split('-').map(Number),first=new Date(yy,mm-1,1),lead=(first.getDay()+6)%7,dim=new Date(yy,mm,0).getDate();
+ const prevM=iso(new Date(yy,mm-2,1)).slice(0,7),nextM=iso(new Date(yy,mm,1)).slice(0,7);
+ const keys=['imt','routine','main','evening'],cnt=k=>{const x=S.done[k]||{};return keys.filter(z=>x[z]).length};
+ const cells=[...Array(lead)].map(()=>'<div></div>').concat([...Array(dim)].map((_,j)=>{const k=mo+'-'+pad(j+1),i=dayIdx(k),ms=msOn(k).length,c=cnt(k),inP=i>=0&&i<168,isT=k===t,isS=k===sel;
+  const dot=k<=t&&inP?(c>=4?'var(--air)':c>0?'var(--amb)':'var(--edge)'):'transparent';
+  return`<button data-act="calday" data-v="${k}" aria-label="${fmt(k)}${ms?', milestone':''}" style="position:relative;height:46px;border-radius:12px;border:${isS?'2px solid var(--acc)':'0'};background:${isT?'#3a2a22':inP?'var(--card2)':'transparent'};color:${inP||isT?'var(--ink)':'var(--dim)'};font-weight:${isT?800:600};font-size:15px;padding:0">${j+1}
+   ${ms?'<span style="position:absolute;top:3px;right:5px;color:var(--amb);font-size:10px">★</span>':''}<span style="position:absolute;left:50%;bottom:5px;width:6px;height:6px;margin-left:-3px;border-radius:3px;background:${dot}"></span></button>`}));
+ const up=MS.filter(m=>m.d>di).slice(0,2);
  return`<div class="top"><span></span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
  <h1>Your plan</h1>
  <div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
  <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acct);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>
- <h2>${di<0?'First week':'This week · week '+w}</h2>
- <div class="card" style="padding:4px 14px">${DAYN.map((n,k)=>{const s=addD(di<0?S.profile.start:mon,k),d=dayPlan(s),i=info(d.m,d.p),ok=S.done[s]&&S.done[s].main;
-  return`<div class="check"><span class="small" style="width:36px;${s===t?'color:var(--acct);font-weight:600':'color:var(--mut)'}">${n}</span><span class="grow"><span class="t1" style="font-size:15px">${i.t}</span></span><span class="tiny" style="color:${ok?'var(--air)':'var(--mut)'}">${ok?'Done':s===t?'Today':i.min+' min'}</span></div>`}).join('')}</div>
+ <h2>Calendar</h2>
+ <div class="card" style="padding:12px">
+  <div class="between" style="margin-bottom:8px"><button class="icon" data-act="calm" data-v="${prevM}" aria-label="Previous month"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+   <b>${first.toLocaleDateString('en-AU',{month:'long',year:'numeric'})}</b>
+   <button class="icon" data-act="calm" data-v="${nextM}" aria-label="Next month"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 5 L16 12 L9 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button></div>
+  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center">${DAYN.map(n=>`<div class="tiny mut" style="padding-bottom:4px">${n[0]}</div>`).join('')}${cells.join('')}</div>
+  <div class="row tiny mut" style="flex-wrap:wrap;gap:12px;margin-top:10px"><span><span style="color:var(--air)">●</span> all done</span><span><span style="color:var(--amb)">●</span> some done</span><span><span style="color:var(--amb)">★</span> milestone</span></div>
+ </div>
+ ${daySum(sel)}
+ ${up.length?`<h2>Coming up</h2>${up.map(m=>{const k=addD(S.profile.start,m.d);return`<button class="item" data-act="calday" data-v="${k}"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">${esc(m.t)}</span><span class="t2">${fmt(k)} · in ${dayIdx(k)-di} day${dayIdx(k)-di===1?'':'s'}</span></span></button>`}).join('')}`:''}
  <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing in and out + the airway routine, about 20 min, then the evening wind-down.<br>This phase: lifts at ${PH[p].lift}, stopping with 1–2 reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
  ${S.profile.path==='retest'?CPAPNOTE:''}
  <button class="btn2" data-act="go" data-v="settings">Settings and checks</button>`}
@@ -511,7 +623,7 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.eq
   if(e.n==='Plank with chin tuck'&&p==='F'&&P.plank!=null&&P.plank<30)sc='3 × 20 s';
   return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(n)].map(()=>({kg:'',reps:''})):[]}})}}
  const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
  <h1>${esc(wk.t)}</h1>
  <div class="card small"><b style="color:var(--acct)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
  ${W.ex.map((e,i)=>{const L=e.log?lastOf(e.n):null,tip=e.tip;return`<div class="card">
@@ -525,7 +637,7 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.eq
  <div style="position:sticky;bottom:0;background:var(--deep);border-top:1px solid var(--card);margin:0 -16px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))" class="row"><span class="cond" style="font-size:30px;width:72px" data-tmr>${T?mmss(T.left):'1:30'}</span><button class="btn2" style="margin:0" data-act="rest" data-v="90">Rest 90 s</button><button class="btn2" style="margin:0" data-act="rest" data-v="180">Rest 3 min</button></div>`}
 
 function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
- if(d.m.k!=='int')return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div>
+ if(d.m.k!=='int')return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div>
   <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.min} minutes.</p>
   <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
   <button class="btn2" data-act="ctimer" data-v="${i.min*60}">${T?'Restart timer':'Start timer'}</button>
@@ -533,7 +645,7 @@ function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
   <div class="card small"><b>${d.m.k==='z2long'?'Pick one today':'Ways to do it'}:</b><br>• <b>Plain walk:</b> brisk walk, bike or rower at Zone 2 pace.<br>• <b>Loaded walk:</b> the same walk wearing a backpack with 5–10 kg (a few water bottles or books). Stand tall, chin tucked. It adds strength to the cardio.${d.m.k==='z2long'?'<br>New to it? Start without the pack and add weight from week 3.':''}</div>`}
   <button class="btn" data-act="cdone">Mark done</button>`;
  const R0=pick(d.p,[6,6,8]),H0=pick(d.p,[5,5,8]);if(!N)N={r:1,ph:'ready',R:R0,H:H0,steps:[]};
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
  ${N.ph==='holds'||N.ph==='done'?`<h1>Breath-hold walk</h1>
   <p class="mut small">Breathe out normally, pinch your nose and walk until a moderate urge to breathe. Count your steps, then breathe calmly through your nose for a minute.</p>
   <div class="warn">Never in water, while driving or near traffic. Skip this if you have heart problems.</div>
@@ -627,8 +739,8 @@ function stripView(m){if(!STRIP[m.k])return art(m.k);const p=panIdx();
  return`<div data-swipe="pan"><img src="${STRIP[m.k][p]}" alt="${esc(m.n)}: step ${p+1} of 3" style="width:100%;height:auto;max-height:290px;object-fit:contain;display:block;border-radius:20px;background:#0B0B0C"><div class="row" style="justify-content:center;gap:8px;margin-top:8px">${[0,1,2].map(j=>`<button class="chip" data-act="pan" data-v="${j}" aria-pressed="${j===p}" aria-label="Show step ${j+1}" style="min-width:48px">${j+1}</button>`).join('')}</div></div>`}
 function myMoves(p){const P=pers(),M=MOVES(p);M.forEach(m=>{if(P.palate&&m.k==='ahh'){m.reps=Math.round(m.reps*1.5);m.focus=1}if(P.base&&['press','slide','down','chin','spoon','reach'].includes(m.k)){m.reps=Math.round(m.reps*1.25);m.focus=1}if(P.hold!=null){if(m.k==='press')m.hold=Math.min(10,Math.max(3,Math.round(P.hold/3)));if(m.k==='down')m.hold=Math.min(8,Math.max(3,Math.round(P.hold/4)))}if(P.fwd!=null&&m.k==='spoon')m.hold=Math.min(10,Math.max(3,Math.round(P.fwd/3)))});return M}
 function routine(){const p=dayPlan(TODAY()).p,M=myMoves(p);if(!R)R={i:0,rep:1,ph:'ready'};const m=M[R.i];
- if(R.ph==='done')return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div><h1>Routine done</h1><p class="mut">${M.length} moves, about 12 minutes. Same again tomorrow.</p><button class="btn" data-act="rdone">Save and close</button>`;
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close routine">${back}</button><span class="small mut">Airway routine · ${R.i+1} of ${M.length}</span><span style="width:44px"></span></div>
+ if(R.ph==='done')return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div><h1>Routine done</h1><p class="mut">${M.length} moves, about 12 minutes. Same again tomorrow.</p><button class="btn" data-act="rdone">Save and close</button>`;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close routine">${back}</button><span class="small mut">Airway routine · ${R.i+1} of ${M.length}</span><span style="width:44px"></span></div>
  <div style="display:grid;grid-template-columns:repeat(${M.length},minmax(0,1fr));gap:4px;margin:4px 0 12px">${M.map((_,k)=>`<div style="height:5px;border-radius:3px;background:${k<R.i?'var(--air)':k===R.i?'var(--acc)':'var(--card)'}"></div>`).join('')}</div>
  ${stripView(m)}
  <h1 style="margin-top:14px">${m.n}</h1>${m.focus?'<div class="tiny" style="color:var(--air);margin-top:-6px">Your focus move: extra reps</div>':''}
@@ -640,7 +752,7 @@ function routine(){const p=dayPlan(TODAY()).p,M=myMoves(p);if(!R)R={i:0,rep:1,ph
  <p class="tiny mut" style="text-align:center">A beep marks each hold and rep. Turn your volume up.</p>`}
 
 function emstScr(){const dev=S.profile.emst==='yes',n=emstSets();
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Breathing out · set ${I.os} of ${n}</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Breathing out · set ${I.os} of ${n}</span><span style="width:44px"></span></div>
  <h1>${I.ph==='orest'?'Rest':'Blow out hard'}</h1>
  <p class="mut">${dev?'Nose clip on, lips sealed round the trainer. Big breath in, then blow out hard and fast until the valve opens, for 1–2 seconds.':'Big breath in. Purse your lips tight, as if blowing through a pinhole, and blow out as hard and fast as you can for 1–2 seconds. Puff your cheeks as little as you can.'} Tap once per breath.</p>
  <div style="position:relative;height:240px;display:flex;align-items:center;justify-content:center">
@@ -650,7 +762,7 @@ function emstScr(){const dev=S.profile.emst==='yes',n=emstSets();
  ${I.ph==='orest'?`<button class="btn2" data-act="oskip">Skip rest</button>`:`<button class="btn" data-act="oblow" style="min-height:72px;font-size:24px">Tap for each breath out</button>`}
  <div class="card tiny mut">Stop if you feel dizzy or get a headache.${dev?'':' A breath-out trainer gives a set, adjustable load. See Settings for where to get one.'}</div>`}
 function imt(){if(!I)I={set:1,b:0,ph:'go'};const has=S.profile.imt!=='no';if(I.ph==='out'||I.ph==='orest')return emstScr();
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">${has?'IMT trainer · level '+S.imtLevel:'Breathing session · no trainer yet'}</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">${has?'IMT trainer · level '+S.imtLevel:'Breathing session · no trainer yet'}</span><span style="width:44px"></span></div>
  ${I.ph==='ask'?(has?`<h1>All done</h1><p class="mut">Did the last few breaths <i>in</i> feel easy?</p><div class="grid2"><button class="btn2" data-act="imtans" data-v="1">Yes, easy</button><button class="btn2" data-act="imtans" data-v="0">No, hard</button></div>`
   :`<h1>All done</h1><p class="mut">Finish with 2 minutes of slow breathing through your nose: in for 4, out for 6.</p><button class="btn" data-act="imtans" data-v="0">Save session</button>`)
  :`<h1>${I.ph==='rest'?'Rest':'Breathe in hard'}</h1>
@@ -668,12 +780,12 @@ function imt(){if(!I)I={set:1,b:0,ph:'go'};const has=S.profile.imt!=='no';if(I.p
 
 const EVS=[['walk','Walk 10–20 minutes after dinner','Easy pace. Working your calves pumps fluid out of your legs before you lie down. Already did cardio this evening? Tick it.'],
  ['calf','Calf raises: 2 × 20','Slow and full range, holding a wall or bench.'],
- ['legs','Legs up for 10 minutes','Lie on your back with your legs up a wall or on the couch. Experimental: not tested in trials yet. Try it and let your logs decide.',600],
+ ['move','Moved every hour today','On long sitting days, stand up and walk for a couple of minutes every hour. Sitting still lets fluid pool in your legs.',],
  ['drink','Last drink 3+ hours before bed, or none','Alcohol relaxes the throat muscles. In one study it doubled breathing events in snorers.'],
  ['side','Set up for side-sleeping','A firm pillow behind your back stops you rolling over.']];
 function evening(){const t=TODAY(),ev=(S.done[t]||{}).ev||{},pi=posInsight();
  const list=EVS.filter(e=>e[0]!=='side'||pi);
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Evening wind-down</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Evening wind-down</span><span style="width:44px"></span></div>
  <h1>Evening wind-down</h1>
  <p class="small mut" style="margin-top:0">Fluid pools in your legs during the day, then moves up to your neck when you lie down and narrows your airway. In a trial, walking twice a day for a week cut sleep apnoea events by 30%, partly by reducing this.</p>
  <div class="card" style="padding:4px 14px">${list.map(([k,l,s,sec])=>`<div class="check" style="align-items:flex-start"><button class="dot${ev[k]?' on':''}" data-act="evtick" data-v="${k}" aria-pressed="${!!ev[k]}" aria-label="${esc(l)}" style="border:0;flex:none;margin-top:2px">${ev[k]?checkSvg:''}</button><span class="grow"><span class="t1" style="font-size:15px">${l}</span><span class="t2">${s}</span>${sec?`<span class="row" style="margin-top:8px"><span class="cond" style="font-size:28px;width:80px" data-tmr>${T?mmss(T.left):mmss(sec)}</span><button class="chip" data-act="evtimer" data-v="${sec}">${T?'Restart':'Start timer'}</button></span>`:''}</span></div>`).join('')}</div>
@@ -690,8 +802,8 @@ const SING=[['Humming slides','Lips closed, hum “mmm” sliding from low to hi
 const singWeek=()=>{const t=TODAY();let c=0;for(let k=1;k<=6;k++){const d=S.done[addD(t,-k)];if(d&&d.sing)c++}return c};
 let G=null;
 function sing(){if(!G)G={i:0,ph:'ready'};const st=SING[G.i];
- if(G.ph==='done')return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div><h1>Singing done</h1><p class="mut">That counts as today’s airway routine. Back to the tongue moves tomorrow.</p><button class="btn" data-act="sdone">Save and close</button>`;
- return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">Singing · ${G.i+1} of ${SING.length}</span><span style="width:44px"></span></div>
+ if(G.ph==='done')return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div><h1>Singing done</h1><p class="mut">That counts as today’s airway routine. Back to the tongue moves tomorrow.</p><button class="btn" data-act="sdone">Save and close</button>`;
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Singing · ${G.i+1} of ${SING.length}</span><span style="width:44px"></span></div>
  <div style="display:grid;grid-template-columns:repeat(${SING.length},minmax(0,1fr));gap:4px;margin:4px 0 12px">${SING.map((_,k)=>`<div style="height:5px;border-radius:3px;background:${k<G.i?'var(--air)':k===G.i?'var(--acc)':'var(--card)'}"></div>`).join('')}</div>
  ${G.i===0&&G.ph==='ready'?'<p class="small mut">Singing works the soft palate and throat. In a 3-month trial, daily singing exercises reduced how loud and how often people snored. The tongue moves reach the tongue base better, so keep singing to 2 days a week.</p>':''}
  <h1>${st[0]}</h1><p class="mut" style="margin-top:0">${st[1]}</p>
@@ -907,14 +1019,14 @@ ${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
 function retest(){return health()}
 
 /* ---------- render ---------- */
-const TABS=['today','plan','log','progress','retest'];
+const TABS=['today','day','plan','log','progress','retest'];
 function render(){const v=$('#view'),nav=$('#nav');
  if(FBC&&!USER&&!LOCAL){v.innerHTML=login();nav.style.display='none';v.className='wrap full';return}
  if(!S.profile){v.innerHTML=setup();nav.style.display='none';v.className='wrap full';return}
  if(S.profile.equip==null||S.profile.imt==null){v.innerHTML=setup2();nav.style.display='none';v.className='wrap full';return}
- const fn={today,plan,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing}[V.s]||today;
+ const fn={today,plan,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
  v.innerHTML=fn();const tab=TABS.includes(V.s);nav.style.display=tab?'':'none';v.className='wrap'+(tab?'':' full');
- nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
+ nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s==='day'?'today':V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
  const c=$('#chart');if(c){drawChart();new ResizeObserver(drawChart).observe(c)}}
 
 /* ---------- routine / imt / interval engines ---------- */
@@ -946,6 +1058,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='restoreok'){if(v==='yes'&&V.restore){S=Object.assign(blank(),V.restore.data);W=R=I=N=null;save();toast('Backup restored')}V.restore=null;render();return}
  if(a==='signout'){if(FB){try{localStorage.removeItem(LKEY)}catch(e){}FB.Au.signOut(FB.auth)}return}
  if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
+ if(a==='calday'){V.cd=v;V.cm=v.slice(0,7);render();return}
+ if(a==='calm'){V.cm=v;render();return}
  if(a==='zoom'){V.zoom=V.zoom===+v?null:+v;render();return}
  if(a==='go'){V.confirm=false;go(v,{from:V.s});return}
  if(a==='ck'){CKD=Object.assign({},(lastCk(v)||{}).a||{});go('check',{k:v,from:V.s});return}
@@ -965,29 +1079,29 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='sing'){G=null;T=null;keepAwake();go('sing');return}
  if(a==='sgo'){G.ph='go';beep(880);startT(SING[G.i][2],sNext);render();return}
  if(a==='snext'){sNext();return}
- if(a==='sdone'){dn(t).routine=true;dn(t).sing=true;G=null;save();toast('Singing saved');go('today');return}
+ if(a==='sdone'){dn(t).routine=true;dn(t).sing=true;G=null;save();toast('Singing saved');go('day');return}
  if(a==='evening'){T=null;go('evening');return}
  if(a==='evtick'){const d=dn(t);d.ev=d.ev||{};d.ev[v]=!d.ev[v];save();render();return}
- if(a==='evtimer'){keepAwake();startT(+v,()=>{beep(990,.5);const d=dn(t);d.ev=d.ev||{};d.ev.legs=true;save();render()});render();return}
- if(a==='evdone'){const n=num($('#neckpm').value);S.pm=S.pm||{};if(n!=null)S.pm[t]=n;else delete S.pm[t];const d=dn(t);d.evening=Object.values(d.ev||{}).some(Boolean)||n!=null;T=null;save();toast('Wind-down saved');go('today');return}
+ if(a==='evtimer'){keepAwake();startT(+v,()=>{beep(990,.5);render()});render();return}
+ if(a==='evdone'){const n=num($('#neckpm').value);S.pm=S.pm||{};if(n!=null)S.pm[t]=n;else delete S.pm[t];const d=dn(t);d.evening=Object.values(d.ev||{}).some(Boolean)||n!=null;T=null;save();toast('Wind-down saved');go('day');return}
  if(a==='main'){const d=dayPlan(t);if(d.m.k==='w'){go('workout',{x:d.m.x})}else{N=null;keepAwake();go('cardio')}return}
  if(a==='rest'){startT(+v,()=>{beep(990,.4);document.querySelectorAll('[data-tmr]').forEach(el=>el.textContent='Go')});render();return}
- if(a==='finish'){S.sessions.push({date:t,type:'W'+W.x,ex:W.ex});dn(t).main=true;W=null;save();toast('Workout saved');go('today');return}
+ if(a==='finish'){S.sessions.push({date:t,type:'W'+W.x,ex:W.ex});dn(t).main=true;W=null;save();toast('Workout saved');go('day');return}
  if(a==='ctimer'){startT(+v,()=>{beep(990,.5)});render();return}
- if(a==='cdone'){dn(t).main=true;S.sessions.push({date:t,type:dayPlan(t).m.k});save();toast('Saved');go('today');return}
+ if(a==='cdone'){dn(t).main=true;S.sessions.push({date:t,type:dayPlan(t).m.k});save();toast('Saved');go('day');return}
  if(a==='istart'){nRound();return}
  if(a==='iskip'){T=null;N.ph='holds';render();return}
- if(a==='idone'){S.sessions.push({date:t,type:'int',rounds:N.R,holdSteps:N.steps.map(num)});dn(t).main=true;N=null;save();toast('Session saved');go('today');return}
+ if(a==='idone'){S.sessions.push({date:t,type:'int',rounds:N.R,holdSteps:N.steps.map(num)});dn(t).main=true;N=null;save();toast('Session saved');go('day');return}
  if(a==='rgo'){rHold();return}
  if(a==='pan'){if(R){R.pan=+v;render()}return}
  if(a==='rpause'){if(!T)return;if(T.paused){T.end=Date.now()+T.rem;T.paused=false}else{T.rem=T.end-Date.now();T.paused=true}render();return}
  if(a==='rnext'){rNext(false);return}
- if(a==='rdone'){dn(t).routine=true;R=null;save();toast('Routine saved');go('today');return}
+ if(a==='rdone'){dn(t).routine=true;R=null;save();toast('Routine saved');go('day');return}
  if(a==='breath'){I.b++;beep(740,.06);if(I.b>=6){if(I.set>=5){if(emstOn()){T=null;I.ph='out';I.os=1;I.ob=0;beep(990,.3)}else I.ph='ask'}else{I.ph='rest';startT(60,()=>{I.set++;I.b=0;I.ph='go';beep(990,.3);render()})}}render();return}
  if(a==='oblow'){I.ob++;beep(620,.06);if(I.ob>=5){if(I.os>=emstSets()){I.ph='ask'}else{I.ph='orest';startT(30,()=>{I.os++;I.ob=0;I.ph='out';beep(990,.3);render()})}}render();return}
  if(a==='oskip'){T=null;I.os++;I.ob=0;I.ph='out';render();return}
  if(a==='imtskip'){T=null;I.set++;I.b=0;I.ph='go';render();return}
- if(a==='imtans'){S.imtEasy=v==='1'?S.imtEasy+1:0;dn(t).imt=true;I=null;save();toast(S.imtEasy>=2?'Time to raise your level':'IMT saved');go('today');return}
+ if(a==='imtans'){S.imtEasy=v==='1'?S.imtEasy+1:0;dn(t).imt=true;I=null;save();toast(S.imtEasy>=2?'Time to raise your level':'IMT saved');go('day');return}
  if(a==='lvl'){S.imtLevel=Math.min(12,Math.max(1,S.imtLevel+(+v)));if(+v>0)S.imtEasy=0;save();render();return}
  if(a==='tag'){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');return}
  if(a==='savenight'){const d=$('#ld').value||addD(t,-1),c=$('#cpap');const ns=document.querySelector('[name=nsrc]:checked');S.nights[d]={src:ns?ns.value:(S.profile.scoreSrc||'snorelab'),snore:num($('#snore').value),partner:$('#partner').dataset.touched||S.nights[d]&&S.nights[d].partner!=null?num($('#partner').value):null,tired:$('#tired').dataset.touched||S.nights[d]&&S.nights[d].tired!=null?num($('#tired').value):null,cpapH:$('#cph')?num($('#cph').value):null,ahi:$('#cpa')?num($('#cpa').value):null,seal:$('#cps')?($('#cps').value||null):null,offs:$('#cpo')?num($('#cpo').value):null,hr:num($('#hr').value),br:num($('#br').value),ox:$('#ox')?num($('#ox').value):null,bd:$('#bd')?($('#bd').value||null):null,drinks:num($('#dr').value),dgap:$('#dgap').value||null,neckAM:num($('#neckam').value),tags:[...document.querySelectorAll('[data-act=tag][aria-pressed=true]')].map(x=>x.dataset.v),cpap:c?c.checked:null};save();toast('Night saved');V.date=null;go('today');return}
