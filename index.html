@@ -12,19 +12,19 @@
    PICTURE: the working app itself; airway drawings in the routine player
    COLOUR and TYPE: iron #17181B, steel cards, chalk text, plate-orange actions, air-green progress; Barlow Condensed + Barlow
    LAYOUT: one phone column, max 520px, bottom tab bar */
-:root{color-scheme:dark;--bg:#17181B;--card:#2B2E33;--deep:#0F1012;--ink:#F2F0EC;--mut:#B9B6B0;--dim:#9A9791;--acc:#FF5A1F;--air:#7FB7A4;--line:#3A3D43;--edge:#4A4E55}
+:root{color-scheme:dark;--bg:#17181B;--card:#2B2E33;--deep:#0F1012;--ink:#F2F0EC;--mut:#B9B6B0;--dim:#9A9791;--acc:#FF5A1F;--acct:#FF7A45;--amb:#E8B04B;--air:#7FB7A4;--line:#3A3D43;--edge:#4A4E55}
 :root[data-theme=light]{color-scheme:dark}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
 .wrap{max-width:520px;margin:0 auto;padding:20px 16px 120px}
 .wrap.full{padding-bottom:40px}
 h1{font:800 clamp(34px,9vw,44px)/1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:6px 0 12px;text-wrap:balance}
 h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;margin:22px 0 8px}
 .cond{font-family:'Barlow Condensed',sans-serif;font-weight:800}
-.mut{color:var(--mut)}.small{font-size:14px}.tiny{font-size:13px}
+.mut{color:var(--mut)}.small{font-size:15px}.tiny{font-size:14px}
 .card{background:var(--card);border-radius:16px;padding:14px;margin:10px 0}
-.warn{border:1px solid var(--acc);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:15px}
+.warn{border:1px solid var(--amb);border-radius:14px;padding:12px 14px;margin:10px 0;font-size:15px}
 .row{display:flex;align-items:center;gap:12px}
 .between{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -32,20 +32,20 @@ h2{font:800 24px/1.1 'Barlow Condensed',sans-serif;text-transform:uppercase;marg
 button{font:inherit;color:inherit;cursor:pointer}
 .btn{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:27px;background:var(--acc);color:#17181B;border:0;font:800 20px 'Barlow Condensed',sans-serif;text-transform:uppercase;width:100%;margin:10px 0;padding:0 18px}
 .btn2{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:24px;background:transparent;color:var(--ink);border:1px solid var(--edge);font-weight:600;width:100%;margin:8px 0;padding:0 16px}
-.chip{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--edge);background:transparent;font-size:14px}
+.chip{min-height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--edge);background:transparent;font-size:15px}
 .chip[aria-pressed=true]{border-color:var(--air);background:#24332F}
 .item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);border:0;border-radius:14px;padding:14px;margin:8px 0;min-height:64px}
 .dot{width:28px;height:28px;border-radius:14px;border:2px solid var(--edge);flex:none;display:flex;align-items:center;justify-content:center}
 .dot.on{background:var(--air);border-color:var(--air)}
 .grow{flex:1;display:flex;flex-direction:column}
-.t1{font-weight:600}.t2{font-size:13px;color:var(--mut)}
+.t1{font-weight:600}.t2{font-size:14px;color:var(--mut)}
 label{display:block}
 input[type=number],input[type=date]{font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%}
-input[type=range]{width:100%;accent-color:var(--acc);height:32px}
-input[type=checkbox],input[type=radio]{accent-color:var(--acc);width:22px;height:22px;flex:none}
+input[type=range]{width:100%;accent-color:var(--acct);height:32px}
+input[type=checkbox],input[type=radio]{accent-color:var(--acct);width:22px;height:22px;flex:none}
 .check{display:flex;gap:12px;align-items:center;min-height:48px;border-bottom:1px solid var(--line)}
 .check:last-child{border-bottom:0}
-.lab{font-size:13px;color:var(--mut);margin-bottom:4px}
+.lab{font-size:14px;color:var(--mut);margin-bottom:4px}
 .big{font:800 64px/1 'Barlow Condensed',sans-serif}
 .huge{font:800 88px/1 'Barlow Condensed',sans-serif}
 .bars{display:flex;align-items:flex-end;gap:6px;height:64px}
@@ -56,11 +56,11 @@ input[type=checkbox],input[type=radio]{accent-color:var(--acc);width:22px;height
 .fig{position:relative;height:220px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
 .lthumb{width:92px;height:77px;background:#1F2125;border-radius:12px;display:block}
 .art{width:100%;height:240px;background:#1F2125;border-radius:20px;display:block}
-nav{position:fixed;left:0;right:0;bottom:0;background:var(--deep);border-top:1px solid var(--card);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));padding-bottom:env(safe-area-inset-bottom);z-index:5}
-nav button{background:none;border:0;color:var(--dim);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:62px}
-nav button[aria-current=page]{color:var(--acc)}
+nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:496px;margin:0 auto;background:rgba(15,16,18,.72);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%);border:1px solid rgba(255,255,255,.09);border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.45);display:grid;grid-template-columns:repeat(5,minmax(0,1fr));z-index:5;transition:transform .25s,opacity .25s}nav.mini{transform:scale(.9) translateY(6px);opacity:.92}
+nav button{background:none;border:0;color:var(--dim);font-size:13px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:60px}
+nav button[aria-current=page]{color:var(--acct)}
 .setrow{display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1fr);gap:8px;align-items:center;margin-top:8px}
-summary{list-style:none}summary::-webkit-details-marker{display:none}summary::after{content:' +';color:var(--acc)}details[open] summary::after{content:' −'}
+summary{list-style:none}summary::-webkit-details-marker{display:none}summary::after{content:' +';color:var(--acct)}details[open] summary::after{content:' −'}
 textarea{width:100%;min-height:200px;font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;padding:10px}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#17181B;padding:10px 16px;border-radius:20px;font-weight:600;z-index:9;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
@@ -239,7 +239,7 @@ else(async()=>{const C=window.claude;if(!C||!C.use)return;
    else if(S.profile){dirty=true;flush()}
    mode='account';render()}}catch(e){}})();
 function login(){return`<div style="min-height:70vh;display:flex;flex-direction:column;justify-content:center">
- <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong</div>
+ <div class="tiny" style="color:var(--acct);font-weight:600">Breathe Strong</div>
  <h1>Lift heavy. Breathe strong. Sleep quiet.</h1>
  <p class="mut">A 6-month strength, breathing and airway program for snoring and sleep health. Choose where your logs are kept. You can switch later in Settings.</p>
  ${FBERR?`<div class="warn">${esc(FBERR)}</div>`:''}
@@ -309,7 +309,7 @@ const emstInfo='<details class="card"><summary class="t1" style="cursor:pointer;
 const imtInfo='<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">What’s an IMT trainer?</summary><p class="small">A small handheld device with a one-way valve. You breathe in hard against its resistance for 30 breaths a day, like weights for your breathing muscles. Trials in people with sleep apnoea found 5 minutes a day improved sleep and blood pressure.</p><p class="small">No trainer yet? You’ll do straw breathing instead: pinch your nose and breathe in hard through an ordinary drinking straw. It’s weaker than a trainer, so it’s a stopgap. The where-to-buy list is in Settings.</p></details>';
 
 function setup2(){return`
- <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong · new options</div>
+ <div class="tiny" style="color:var(--acct);font-weight:600">Breathe Strong · new options</div>
  <h1>Two quick questions</h1>
  <p class="mut small">We’ve added home workouts and a no-trainer option. Pick what suits you; you can change it later in Settings.</p>
  <h2>Where you’ll train</h2>
@@ -321,7 +321,7 @@ function setup2(){return`
  <button class="btn" data-act="setup2">Save and continue</button>`}
 
 function setup(){const t=TODAY(),pth=V.path||'snorer';return`
- <div class="tiny" style="color:var(--acc);font-weight:600">Breathe Strong</div>
+ <div class="tiny" style="color:var(--acct);font-weight:600">Breathe Strong</div>
  <h1>Let’s set you up</h1>
  <p class="mut small">Five quick choices and you’re in. You can change any of them later in Settings.</p>
  <h2>1 · Your path</h2>
@@ -363,40 +363,50 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const extras=`${rt?CPAPNOTE:''}
  ${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}
  ${alerts().filter(a=>a.lv!=='low'&&a.t!=='See your GP soon about a sleep study').slice(0,2).map(alertCard).join('')}
- ${todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acc)">Go</span></button>`:''}
- ${due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acc)">Go</span></button>`:''}
- ${!S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acc)">Set up</span></button>`:''}
+ ${todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:''}
+ ${due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:''}
+ ${!S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`:''}
  ${tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''}`;
- if(di<0)return`${head}<h1>Baseline time</h1><p class="mut">Your program starts ${fmt(S.profile.start)}. Log your snore score each morning until then.</p>${extras}<button class="btn" data-act="tab" data-v="log">Log last night</button>`;
+ const more=[...alerts().filter(a=>a.lv!=='low'&&a.t!=='See your GP soon about a sleep study').slice(0,2).map(alertCard),
+  todo?`<button class="item" data-act="go" data-v="checks"><span class="grow"><span class="t1">Personalise your plan</span><span class="t2">${todo} quick check${todo>1?'s':''} left · skip any you like</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:'',
+  due.length?`<button class="item" data-act="checkpoint"><span class="grow"><span class="t1">4-week checkpoint</span><span class="t2">Redo: ${due.map(c=>c.t).join(', ')}</span></span><span class="small" style="color:var(--acct)">Go</span></button>`:'',
+  !S.profile.watch?`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Using a smartwatch or ring?</span><span class="t2">Tell us which, so the Log shows where to find your numbers</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`:'',
+  tips.length?`<div class="card"><div class="lab">Your tips</div>${tips.map(x=>`<div class="small" style="margin:6px 0">${esc(x)}</div>`).join('')}</div>`:''].filter(Boolean);
+ const must=`${rt?CPAPNOTE:''}${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}`;
+ const moreBox=more.length?`<details class="card" style="padding:4px 14px"><summary class="t1" style="cursor:pointer;min-height:48px;display:flex;align-items:center">More for you · ${more.length}</summary>${more.join('')}</details>`:'';
+ if(di<0)return`${head}<h1>Baseline time</h1><p class="mut">Your program starts ${fmt(S.profile.start)}. Log your snore score each morning until then.</p>${must}<button class="btn" data-act="tab" data-v="log">Log last night</button>${moreBox}`;
  const d=dayPlan(t),i=info(d.m,d.p),done=S.done[t]||{},y=addD(t,-1),days=[...Array(7)].map((_,k)=>addD(t,k-7));
  const vals=days.map(k=>S.nights[k]?num(S.nights[k].snore):null),mx=Math.max(st.base||0,...vals.filter(v=>v!=null),10);
  const row=(act,key,title,sub,right)=>`<button class="item" data-act="${act}"><span class="dot${done[key]?' on':''}">${done[key]?checkSvg:''}</span><span class="grow"><span class="t1">${title}</span><span class="t2">${sub}</span></span><span class="small ${done[key]?'':'mut'}" style="${done[key]?'color:var(--air)':''}">${done[key]?'Done':right}</span></button>`;
+ const ch=st.change,stc=ch==null?'var(--edge)':ch>=.1?'var(--air)':ch>-.1?'var(--amb)':'var(--acc)',stl=ch==null?(st.n?'Building your baseline · '+st.n+' of 10 nights':'Log your first night to start'):ch>=.1?'Improving · '+Math.round(ch*100)+'% below baseline':ch>-.1?'Holding steady':'Worse · '+Math.round(-ch*100)+'% above baseline';
+ const frac=ch==null?(st.n?Math.min(1,st.n/10):0):Math.max(.06,Math.min(1,.5+ch));
+ const ring=`<svg viewBox="0 0 200 200" width="188" height="188" aria-hidden="true"><circle cx="100" cy="100" r="84" fill="none" stroke="#2B2E33" stroke-width="16"/><circle cx="100" cy="100" r="84" fill="none" stroke="${stc}" stroke-width="16" stroke-linecap="round" transform="rotate(-90 100 100)" stroke-dasharray="${(frac*527.8).toFixed(1)} 527.8"/></svg>`;
  return`${head}
  <div class="small mut">Week ${d.w} of 24 · ${PH[d.p].n}</div>
  <h1>${i.day}</h1>
- ${extras}
- <button class="card" data-act="tab" data-v="progress" style="display:block;width:100%;text-align:left;border:0">
-  <div class="between small mut"><span>Snore score, last 7 nights</span><span>Progress</span></div>
-  <div class="between" style="align-items:flex-end;margin-top:6px">
-   <div><div class="big">${st.last!=null?Math.round(st.last):'–'}</div><div class="small" style="color:var(--air)">${st.change!=null?(st.change>=0?Math.round(st.change*100)+'% below baseline':Math.round(-st.change*100)+'% above baseline'):(st.n?'Baseline: '+st.n+' of 10 nights':'No nights logged yet')}</div></div>
-   <div class="bars" style="width:55%" role="img" aria-label="Snore score for the last 7 nights">${vals.map((v,k)=>`<div style="height:${v==null?4:Math.max(6,v/mx*100)}%;${k===6&&v!=null?'background:var(--air)':''}"></div>`).join('')}</div>
-  </div></button>
- ${S.nights[y]?'':`<button class="item" data-act="tab" data-v="log" style="border:1px solid var(--acc)"><span class="grow"><span class="t1">Log last night</span><span class="t2">Snore score from SnoreLab, plus how you feel</span></span><span class="small" style="color:var(--acc)">1 min</span></button>`}
+ ${must}
+ <button data-act="tab" data-v="progress" style="display:block;width:100%;background:none;border:0;padding:0;margin:4px 0 6px" aria-label="Snore score: ${st.last!=null?Math.round(st.last):'none yet'}. ${stl}. Open Progress">
+  <div style="position:relative;width:188px;height:188px;margin:0 auto">${ring}<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div class="small mut">Snore score</div><div class="cond" style="font-size:64px;line-height:1">${st.last!=null?Math.round(st.last):'–'}</div><div class="tiny mut">last 7 nights</div></div></div>
+  <div class="small" style="text-align:center;margin-top:8px;color:${ch==null?'var(--mut)':stc};font-weight:600">${stl}</div>
+  <div class="bars" style="width:60%;height:34px;margin:10px auto 0" role="img" aria-label="Snore score for the last 7 nights">${vals.map((v,k)=>`<div style="height:${v==null?4:Math.max(6,v/mx*100)}%;${k===6&&v!=null?'background:'+stc:''}"></div>`).join('')}</div>
+ </button>
+ ${S.nights[y]?'':`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
  <h2>Today’s sessions</h2>
  ${row('imt','imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session',(S.profile.imt!=='no'?'30 breaths in · level '+S.imtLevel:'30 straw breaths in')+(emstOn()?' + '+emstSets()*5+' hard breaths out':''),emstOn()?'8 min':'5 min')}
  ${row('routine','routine',done.sing?'Singing session':'Airway routine',done.sing?'Swapped in for today':myMoves(d.p).length+' moves'+(P.palate||P.base?' · focused on your '+[P.palate?'palate':null,P.base?'tongue':null].filter(Boolean).join(' and '):' · tongue, throat, neck'),'12 min')}
  ${row('evening','evening','Evening wind-down','Walk, calf raises, legs up · less fluid round your throat overnight','15 min')}
- ${row('main','main',i.t,i.s,i.min+' min')}`}
+ ${row('main','main',i.t,i.s,i.min+' min')}
+ ${moreBox}`}
 
 function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w),mon=addD(t,-((pd(t).getDay()+6)%7));
  const segs=[['F','Foundation','wk 1–2',2],['B','Build','wk 3–5',3],['S','Strength','wk 6–8',3],['R','Progression','wk 9–24',6]];
  return`<div class="top"><span></span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
  <h1>Your plan</h1>
  <div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
- <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acc);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>
+ <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acct);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>
  <h2>${di<0?'First week':'This week · week '+w}</h2>
  <div class="card" style="padding:4px 14px">${DAYN.map((n,k)=>{const s=addD(di<0?S.profile.start:mon,k),d=dayPlan(s),i=info(d.m,d.p),ok=S.done[s]&&S.done[s].main;
-  return`<div class="check"><span class="small" style="width:36px;${s===t?'color:var(--acc);font-weight:600':'color:var(--mut)'}">${n}</span><span class="grow"><span class="t1" style="font-size:15px">${i.t}</span></span><span class="tiny" style="color:${ok?'var(--air)':'var(--mut)'}">${ok?'Done':s===t?'Today':i.min+' min'}</span></div>`}).join('')}</div>
+  return`<div class="check"><span class="small" style="width:36px;${s===t?'color:var(--acct);font-weight:600':'color:var(--mut)'}">${n}</span><span class="grow"><span class="t1" style="font-size:15px">${i.t}</span></span><span class="tiny" style="color:${ok?'var(--air)':'var(--mut)'}">${ok?'Done':s===t?'Today':i.min+' min'}</span></div>`}).join('')}</div>
  <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing in and out + the airway routine, about 20 min, then the evening wind-down.<br>This phase: lifts at ${PH[p].lift}, stopping with 1–2 reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
  ${S.profile.path==='retest'?CPAPNOTE:''}
  <button class="btn2" data-act="go" data-v="settings">Settings and checks</button>`}
@@ -431,14 +441,14 @@ function settings(){const pr=S.profile;return`
  ${radios('emstq',emstOpts(),pr.emst||'no')}
  ${emstInfo}
  <h2>Watch and data</h2>
- <button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">${esc((WATCH[pr.watch]||{n:'Not set'}).n)}</span><span class="t2">Where to find each number, and automatic sync later</span></span><span class="small" style="color:var(--acc)">Change</span></button>
+ <button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">${esc((WATCH[pr.watch]||{n:'Not set'}).n)}</span><span class="t2">Where to find each number, and automatic sync later</span></span><span class="small" style="color:var(--acct)">Change</span></button>
  <h2>Snore score source</h2>
  ${radios('src',srcOpts(),pr.scoreSrc||'snorelab')}
  <label class="card"><div class="lab">Program start date</div><input type="date" id="start" value="${pr.start}"></label>
  <button class="btn" data-act="saveplan">Save settings</button>
  <h2>Your checks</h2>
  <p class="tiny mut" style="margin-top:0">Each one takes a minute and fine-tunes your plan. Skip any you like.</p>
- ${myChecks().map(c=>{const l=lastCk(c.k);return`<button class="item" data-act="ck" data-v="${c.k}"><span class="dot${l?' on':''}">${l?checkSvg:''}</span><span class="grow"><span class="t1">${c.t}</span><span class="t2">${l?esc(c.res(l.a).sum)+' · '+fmt(l.date):esc(c.why)}</span></span><span class="small" style="color:var(--acc)">${l?'Redo':'Take'}</span></button>`}).join('')}
+ ${myChecks().map(c=>{const l=lastCk(c.k);return`<button class="item" data-act="ck" data-v="${c.k}"><span class="dot${l?' on':''}">${l?checkSvg:''}</span><span class="grow"><span class="t1">${c.t}</span><span class="t2">${l?esc(c.res(l.a).sum)+' · '+fmt(l.date):esc(c.why)}</span></span><span class="small" style="color:var(--acct)">${l?'Redo':'Take'}</span></button>`}).join('')}
  <h2>Account</h2>
  ${FBC&&LOCAL?`<div class="card small">Kept on <b>this phone only</b>. Nobody else can see your logs, including the app’s owner. Deleting the app or clearing Safari data erases them, so back up regularly below.</div>
  <button class="btn2" data-act="tocloud">Switch to Google sign-in (sync)</button>`
@@ -491,9 +501,9 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.eq
  const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
  return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
  <h1>${esc(wk.t)}</h1>
- <div class="card small"><b style="color:var(--acc)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
+ <div class="card small"><b style="color:var(--acct)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
  ${W.ex.map((e,i)=>{const L=e.log?lastOf(e.n):null,tip=e.tip;return`<div class="card">
-  <div class="row" style="align-items:flex-start">${LIFT[e.n]?`<button class="icon" style="width:92px;height:77px;flex:none;padding:0" data-act="zoom" data-v="${i}" aria-label="${V.zoom===i?'Hide':'Show'} how to do ${esc(e.n)}">${liftArt(e.n)}</button>`:''}<div class="grow"><span class="t1">${esc(e.n)}</span><span class="small mut">${esc(e.sc)}</span>${LIFT[e.n]?`<span class="tiny" style="color:var(--acc)">${V.zoom===i?'Tap picture to close':'Tap picture to enlarge'}</span>`:''}</div></div>
+  <div class="row" style="align-items:flex-start">${LIFT[e.n]?`<button class="icon" style="width:92px;height:77px;flex:none;padding:0" data-act="zoom" data-v="${i}" aria-label="${V.zoom===i?'Hide':'Show'} how to do ${esc(e.n)}">${liftArt(e.n)}</button>`:''}<div class="grow"><span class="t1">${esc(e.n)}</span><span class="small mut">${esc(e.sc)}</span>${LIFT[e.n]?`<span class="tiny" style="color:var(--acct)">${V.zoom===i?'Tap picture to close':'Tap picture to enlarge'}</span>`:''}</div></div>
   ${V.zoom===i?`<div style="margin-top:10px">${liftArt(e.n,true)}</div>`:''}
   ${tip?`<div class="tiny mut">${esc(tip)}</div>`:''}
   ${e.log?`${L?`<div class="tiny" style="color:var(--air)">Last time: ${esc(L)}</div>`:''}<div class="setrow tiny mut" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span>Set</span>${kgc?'<span>kg</span>':''}<span>Reps</span></div>${e.sets.map((s,j)=>`<div class="setrow" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span class="small">${j+1}</span>${kgc?`<input type="number" inputmode="decimal" aria-label="${esc(e.n)} set ${j+1} kg" data-set="${i}:${j}:kg" value="${esc(s.kg)}">`:''}<input type="number" inputmode="numeric" aria-label="${esc(e.n)} set ${j+1} reps" data-set="${i}:${j}:reps" value="${esc(s.reps)}"></div>`).join('')}`
@@ -611,7 +621,7 @@ function routine(){const p=dayPlan(TODAY()).p,M=myMoves(p);if(!R)R={i:0,rep:1,ph
  <h1 style="margin-top:14px">${m.n}</h1>${m.focus?'<div class="tiny" style="color:var(--air);margin-top:-6px">Your focus move: extra reps</div>':''}
  ${m.steps?`<ol style="list-style:none;padding:0;margin:0 0 10px">${m.steps.map((x,j)=>`<li class="row" style="align-items:flex-start;gap:10px;margin:6px 0;${STRIP[m.k]&&j!==panIdx()?'opacity:.5':''}"><span style="flex:none;width:24px;height:24px;border-radius:12px;background:var(--acc);color:#17181B;font:800 14px/24px 'Barlow Condensed',sans-serif;text-align:center">${j+1}</span><span class="small" style="padding-top:2px">${x}</span></li>`).join('')}</ol>`:`<p class="mut" style="margin-top:0">${m.how}</p>`}
  ${m.feel?`<div class="card" style="padding:10px 14px;box-shadow:inset 3px 0 0 #E8B04B"><div class="lab" style="color:#E8B04B">Feel it here</div><div class="small">${m.feel}</div></div>`:''}
- ${R.i===0&&R.ph==='ready'?`<button class="item" data-act="sing"><span class="grow"><span class="t1">Swap for singing today</span><span class="t2">${singWeek()>=2?'You’ve swapped twice this week. Best to do the tongue moves today':'A 13-minute vocal workout. Up to 2 days a week'}</span></span><span class="small" style="color:var(--acc)">Sing</span></button>`:''}
+ ${R.i===0&&R.ph==='ready'?`<button class="item" data-act="sing"><span class="grow"><span class="t1">Swap for singing today</span><span class="t2">${singWeek()>=2?'You’ve swapped twice this week. Best to do the tongue moves today':'A 13-minute vocal workout. Up to 2 days a week'}</span></span><span class="small" style="color:var(--acct)">Sing</span></button>`:''}
  <div class="card between"><div><div class="small mut">${R.ph==='rest'?'Rest':m.rest?'Hold':'Pace'}</div><div class="big" data-tmr style="color:${R.ph==='rest'?'var(--ink)':'var(--acc)'}">${T?mmss(T.left):mmss(m.hold)}</div></div><div style="text-align:right"><div class="small mut">Rep</div><div class="cond" style="font-size:40px;line-height:1">${R.rep} <span style="font-size:22px;color:var(--dim)">/ ${m.reps}</span></div></div></div>
  <div class="grid2">${R.ph==='ready'?`<button class="btn" data-act="rgo">Start</button>`:`<button class="btn2" data-act="rpause">${T&&T.paused?'Resume':'Pause'}</button>`}<button class="btn2" data-act="rnext">${R.i===M.length-1?'Finish':'Next move'}</button></div>
  <p class="tiny mut" style="text-align:center">A beep marks each hold and rep. Turn your volume up.</p>`}
@@ -672,7 +682,7 @@ function sing(){if(!G)G={i:0,ph:'ready'};const st=SING[G.i];
  <div style="display:grid;grid-template-columns:repeat(${SING.length},minmax(0,1fr));gap:4px;margin:4px 0 12px">${SING.map((_,k)=>`<div style="height:5px;border-radius:3px;background:${k<G.i?'var(--air)':k===G.i?'var(--acc)':'var(--card)'}"></div>`).join('')}</div>
  ${G.i===0&&G.ph==='ready'?'<p class="small mut">Singing works the soft palate and throat. In a 3-month trial, daily singing exercises reduced how loud and how often people snored. The tongue moves reach the tongue base better, so keep singing to 2 days a week.</p>':''}
  <h1>${st[0]}</h1><p class="mut" style="margin-top:0">${st[1]}</p>
- <div class="card" style="text-align:center"><div class="huge" data-tmr style="color:var(--acc)">${T?mmss(T.left):mmss(st[2])}</div></div>
+ <div class="card" style="text-align:center"><div class="huge" data-tmr style="color:var(--acct)">${T?mmss(T.left):mmss(st[2])}</div></div>
  <div class="grid2">${G.ph==='ready'?`<button class="btn" data-act="sgo">Start</button>`:`<button class="btn2" data-act="rpause">${T&&T.paused?'Resume':'Pause'}</button>`}<button class="btn2" data-act="snext">${G.i===SING.length-1?'Finish':'Next'}</button></div>`}
 function sNext(){T=null;if(G.i>=SING.length-1){G.ph='done';beep(990,.4);render();return}G.i++;G.ph='ready';beep(990,.3);render()}
 function buy(){const regions=[...new Set(BUY.map(b=>b[0]))];
@@ -688,7 +698,7 @@ function buy(){const regions=[...new Set(BUY.map(b=>b[0]))];
  <div class="warn small">Not the same thing: “lung flutter” devices such as AirPhysio train breathing <i>out</i> with vibration (OPEP). They aren’t IMT trainers. Prices and stock change, so check before you buy.</div>`}
 
 function log(){const t=TODAY(),dsel=V.date||addD(t,-1),n=S.nights[dsel]||{},w=Math.max(0,weekOf(t)),wk=S.weekly['w'+w]||{},rt=S.profile.path==='retest',tags=n.tags||[];
- const sl=(id,lab,v)=>`<div style="margin:6px 0"><div class="between"><label for="${id}" class="t1" style="font-size:15px">${lab}</label><span class="small" style="color:var(--acc);font-weight:600" id="${id}v">${v==null?'–':v} / 10</span></div><input id="${id}" type="range" min="0" max="10" value="${v==null?5:v}" data-out="${id}v"></div>`;
+ const sl=(id,lab,v)=>`<div style="margin:6px 0"><div class="between"><label for="${id}" class="t1" style="font-size:15px">${lab}</label><span class="small" style="color:var(--acct);font-weight:600" id="${id}v">${v==null?'–':v} / 10</span></div><input id="${id}" type="range" min="0" max="10" value="${v==null?5:v}" data-out="${id}v"></div>`;
  return`<h1>Log last night</h1>
  <label class="card"><div class="lab">Night of</div><input type="date" id="ld" value="${dsel}" max="${t}"></label>
  <div class="card"><div class="lab">Score from</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${srcOpts().map(([k,l,s,dis])=>`<label class="chip row" style="gap:8px;${dis?'opacity:.55':''}"><input type="radio" name="nsrc" value="${k}" ${(n.src||S.profile.scoreSrc||'snorelab')===k&&!dis?'checked':''} ${dis?'disabled':''} style="width:18px;height:18px">${l}${dis?' · soon':''}</label>`).join('')}</div>
@@ -702,7 +712,7 @@ function log(){const t=TODAY(),dsel=V.date||addD(t,-1),n=S.nights[dsel]||{},w=Ma
  <div class="grid2"><label class="card" style="margin:0;padding:10px"><div class="lab">Last drink before bed</div><select id="dgap" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px">${DGAP.map(([k,l])=>`<option value="${k}" ${(n.dgap||'')===k?'selected':''}>${l}</option>`).join('')}</select></label>
  <label class="card" style="margin:0;padding:10px"><div class="lab">Neck on waking (cm)</div><input id="neckam" type="number" inputmode="decimal" value="${esc(n.neckAM??'')}"></label></div>
  ${(S.pm||{})[dsel]!=null?`<div class="tiny mut" style="margin:4px 2px 8px">Bedtime neck that night: ${S.pm[dsel]} cm${num(n.neckAM)!=null?' · change '+(n.neckAM-S.pm[dsel]>0?'+':'')+r1(n.neckAM-S.pm[dsel])+' cm':''}</div>`:''}
- ${(()=>{const w=WATCH[S.profile.watch];if(!w)return`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Where do I find these?</span><span class="t2">Tell us your watch, or measure by hand</span></span><span class="small" style="color:var(--acc)">Set up</span></button>`;
+ ${(()=>{const w=WATCH[S.profile.watch];if(!w)return`<button class="item" data-act="go" data-v="watch"><span class="grow"><span class="t1">Where do I find these?</span><span class="t2">Tell us your watch, or measure by hand</span></span><span class="small" style="color:var(--acct)">Set up</span></button>`;
   if(S.profile.watch==='none')return`<div class="card tiny mut">${NOWATCH}</div>`;
   return`<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Where to find these on your ${esc(w.n)}</summary><p class="small"><b>Resting HR:</b> ${esc(w.hr)}</p><p class="small"><b>Breathing rate:</b> ${esc(w.br)}</p><p class="small"><b>Blood oxygen:</b> ${esc(w.ox)}</p>${w.bd?`<p class="small"><b>Breathing disturbances:</b> ${esc(w.bd)}</p>`:''}<p class="tiny mut">Automatic sync through ${esc(w.sync)} is coming in the phone app.</p></details>`})()}
  ${S.profile.watch&&S.profile.watch!=='none'?`<div class="grid2"><label class="card" style="margin:0;padding:10px"><div class="lab">Blood oxygen avg (%)</div><input id="ox" type="number" inputmode="decimal" value="${esc(n.ox??'')}"></label>${S.profile.watch==='apple'?`<label class="card" style="margin:0;padding:10px"><div class="lab">Breathing disturbances</div><select id="bd" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px"><option value="">Not shown</option><option value="no" ${n.bd==='no'?'selected':''}>Not elevated</option><option value="yes" ${n.bd==='yes'?'selected':''}>Elevated</option></select></label>`:''}</div>`:''}
@@ -742,7 +752,7 @@ function progress(){const st=stats(),pts=weekly(),ks=scored(),wks=Object.keys(S.
   ${(()=>{const a=fshift(7),b=fshift();return b?tile('Overnight neck change',a?a.d:b.d,b.d,'cm',d=>d<=0):''})()}
   ${avg('ox')!=null?tile('Blood oxygen (last 7)',avg('ox',1),firstOf('ox'),'%',d=>d>=0):''}
  </div>
- ${(()=>{const b=Object.values(S.nights).filter(n=>n.bd);if(!b.length)return'';const y=b.filter(n=>n.bd==='yes').length;return`<div class="card small">Breathing disturbances elevated on <b>${y}</b> of ${b.length} logged nights.${y/b.length>=.3?' <span style="color:var(--acc)">That’s often: please talk to your GP.</span>':''}</div>`})()}
+ ${(()=>{const b=Object.values(S.nights).filter(n=>n.bd);if(!b.length)return'';const y=b.filter(n=>n.bd==='yes').length;return`<div class="card small">Breathing disturbances elevated on <b>${y}</b> of ${b.length} logged nights.${y/b.length>=.3?' <span style="color:var(--acct)">That’s often: please talk to your GP.</span>':''}</div>`})()}
  <div class="card small">Workouts and cardio logged: <b>${Object.values(S.done).filter(d=>d.main).length}</b> · Routines: <b>${Object.values(S.done).filter(d=>d.routine).length}</b> (singing ${Object.values(S.done).filter(d=>d.sing).length}) · Breathing sessions: <b>${Object.values(S.done).filter(d=>d.imt).length}</b> · Wind-downs: <b>${Object.values(S.done).filter(d=>d.evening).length}</b></div>
  ${(()=>{const L=[];const tr=(k,f,lab,unit,lower)=>{const a=(S.checks&&S.checks[k])||[];const v=a.map(x=>typeof f==='function'?f(x.a):num(x.a[f])).filter(x=>x!=null);if(!v.length)return;const d=v.length>1?r1(v[v.length-1]-v[0]):null;L.push(`<div class="check"><span class="grow"><span class="t1" style="font-size:15px">${lab}</span><span class="t2">${v.length} check${v.length>1?'s':''}</span></span><span class="small">${r1(v[v.length-1])} ${unit}${d!=null&&d!==0?` <span style="color:${(lower?d<0:d>0)?'var(--air)':'var(--acc)'}">(${d>0?'+':''}${d})</span>`:''}</span></div>`)};
  tr('alert',x=>Object.values(x).reduce((s,v)=>s+(+v||0),0),'Energy score','/ 15',true);tr('tongue','secs','Tongue hold','s',false);tr('forward','secs','Tongue forward','s',false);tr('fitness','push','Push-ups','reps',false);tr('fitness','plank','Plank','s',false);tr('body','w','Weight','kg',true);tr('body','neck','Neck','cm',true);
@@ -809,10 +819,10 @@ function health(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),w=Math.max
  <h1>${rt?'Train for your retest':'Sleep health'}</h1>
  ${rt?CPAPNOTE:''}
  ${A.filter(a=>a.lv==='high').map(alertCard).join('')}
- <button class="item" data-act="go" data-v="record"><span class="grow"><span class="t1">${!H.status&&!H.treatment&&rt?'Add your diagnosis and treatment':esc(STATUS[H.status]||STATUS[''])}</span><span class="t2">${last?'Last study '+fmt(last.date)+(last.ahi!=null&&last.ahi!==''?' · AHI '+esc(last.ahi):''):'No sleep study entered'} · ${esc(TREAT[H.treatment]||TREAT[''])}</span></span><span class="small" style="color:var(--acc)">Edit</span></button>
+ <button class="item" data-act="go" data-v="record"><span class="grow"><span class="t1">${!H.status&&!H.treatment&&rt?'Add your diagnosis and treatment':esc(STATUS[H.status]||STATUS[''])}</span><span class="t2">${last?'Last study '+fmt(last.date)+(last.ahi!=null&&last.ahi!==''?' · AHI '+esc(last.ahi):''):'No sleep study entered'} · ${esc(TREAT[H.treatment]||TREAT[''])}</span></span><span class="small" style="color:var(--acct)">Edit</span></button>
  <h2>${rt?'Your 6-month road':'Getting tested'}</h2>
  ${rt?`<p class="small mut" style="margin-top:0">Muscle and fitness changes take months at our age, so this runs for 24 weeks before a repeat sleep study. Some people end up needing less treatment. Your doctor makes that call.</p>`:''}
- <div class="card">${steps.map((s,k)=>{const cur=w>=s[0]&&(k===steps.length-1||w<steps[k+1][0]),past=k<steps.length-1&&w>=steps[k+1][0];return`<div class="row" style="align-items:flex-start;padding:8px 0"><span class="dot${past?' on':''}" style="${cur?'border-color:var(--acc);border-width:3px':''}">${past?checkSvg:''}</span><span class="grow"><span class="tiny" style="color:${cur?'var(--acc)':'var(--mut)'}">${s[1]}${cur?' · now':''}</span><span class="t1" style="font-size:15px">${s[2]}</span></span></div>`}).join('')}</div>
+ <div class="card">${steps.map((s,k)=>{const cur=w>=s[0]&&(k===steps.length-1||w<steps[k+1][0]),past=k<steps.length-1&&w>=steps[k+1][0];return`<div class="row" style="align-items:flex-start;padding:8px 0"><span class="dot${past?' on':''}" style="${cur?'border-color:var(--acct);border-width:3px':''}">${past?checkSvg:''}</span><span class="grow"><span class="tiny" style="color:${cur?'var(--acc)':'var(--mut)'}">${s[1]}${cur?' · now':''}</span><span class="t1" style="font-size:15px">${s[2]}</span></span></div>`}).join('')}</div>
  <button class="btn" data-act="go" data-v="report">${rt?'Doctor summary':'GP visit summary'}</button>
  <button class="btn2" data-act="go" data-v="record">Appointments and questions</button>
  <p class="tiny mut" style="text-align:center">Breathe Strong is a training and tracking program. It doesn’t diagnose or treat sleep apnoea.</p>`}
@@ -981,6 +991,7 @@ document.addEventListener('change',e=>{const el=e.target;
  if(el.name==='path'&&!S.profile){const r=el.value==='retest',a=$('#cpapnote'),q=$('#quickq');if(a)a.hidden=!r;if(q)q.hidden=r}
  if(el.dataset.exdone!=null&&W){W.ex[+el.dataset.exdone].done=el.checked}
  if(el.id==='ld'){V.date=el.value;render()}});
+let LY=0;window.addEventListener('scroll',()=>{const y=window.scrollY,n=$('#nav');if(n)n.classList.toggle('mini',y>LY&&y>80);LY=y},{passive:true});
 let SX=null;document.addEventListener('touchstart',e=>{SX=e.target.closest('[data-swipe]')?e.touches[0].clientX:null},{passive:true});
 document.addEventListener('touchend',e=>{if(SX==null||!R)return;const dx=e.changedTouches[0].clientX-SX;SX=null;if(Math.abs(dx)<40)return;R.pan=Math.min(2,Math.max(0,panIdx()+(dx<0?1:-1)));render()},{passive:true});
 render();
