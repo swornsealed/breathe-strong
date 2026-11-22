@@ -109,7 +109,7 @@ last (alcoholic) drink 3+ hours before bed or none; optional bedtime neck measur
 | Session completion | Per day: breathing trainer, airway routine, main session, evening | Tick or finish |
 | Strength log | Per session: every set's kg and reps | Manual |
 | Weekly check | Breath-hold time, neck, waist, events per hour, trainer level | Manual |
-| Checks (seven) | Sleep risk, daytime energy, nose, snore source, tongue hold, tongue forward, fitness, body measures. Five repeat every 28 days | Manual |
+| Checks (eight; seven on the CPAP path) | Sleep risk, daytime energy, nose, snore source, tongue hold, tongue forward, fitness, body measures. Five repeat every 28 days | Manual |
 | Health record | Diagnosis, treatment, pressure, sleep studies, appointments, questions | Manual |
 | Outputs | Weekly snore chart against baseline, insights and alerts, triggers, clinician summary, CSV copy, backup file | Automatic |
 
