@@ -2,8 +2,8 @@
 
 Needs Node and Playwright with Chromium. Run from the repository root.
 
-- `node tests/check-plan.js` compares the plan the app produces for every day of weeks 1 to 30,
-  in each equipment mode, with the recorded snapshot in `tests/golden/plan-v1.json`.
+- `node tests/check-plan.js` compares the plan against the snapshot recorded from the original app in
+  `tests/golden/plan-v1.json`: weeks 1 to 24 as released, and weeks 1 to 30 in original mode.
 - `node tests/check-plan.js --write` re-records the snapshot. Only do this when a change to the
   plan is intended and approved.
 
@@ -20,7 +20,7 @@ Needs Node and Playwright with Chromium. Run from the repository root.
   and the history added to the clinician summary, including a check that no review text suggests
   reducing or stopping treatment.
 
-Weeks 25 to 52 are off by default. To try them in a browser, run
-`localStorage.setItem('bs-year52','1')` in the console and reload; remove the key to switch back.
+The 52-week program is on by default. To see the original 24-week behaviour in a browser, run
+`localStorage.setItem('bs-year52','0')` in the console and reload; remove the key to switch back.
 
 The tests never modify `index.html`. See the comments in `harness.js`.

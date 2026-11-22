@@ -1,7 +1,8 @@
 // Regression test for the training plan.
 //   node tests/check-plan.js           compare the app against the golden snapshot
 //   node tests/check-plan.js --write   re-record the snapshot (only when a plan change is intended and approved)
-// The snapshot covers every day of weeks 1 to 30 for each equipment mode and for a lower starting fitness.
+// The snapshot was recorded from the original 24-week app and covers every day of weeks 1 to 30
+// for each equipment mode and for a lower starting fitness.
 const fs = require('fs'), path = require('path');
 const { open } = require('./harness');
 const GOLDEN = path.join(__dirname, 'golden', 'plan-v1.json');
@@ -18,10 +19,10 @@ const DAY = `(()=>{const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
  if(d.m.k==='w'){W=null;V={s:'workout',x:d.m.x};workout();o.exercises=W.ex.map(e=>[e.n,e.sc,e.tip||'',e.log?e.sets.length+' logged sets':'tick']);W=null;V={s:'today'}}
  return JSON.stringify({week:d.w,o})})()`;
 
-async function record() {
+async function record(legacy) {
   const payloads = [], index = new Map(), days = {};
   for (const [name, profile, checks] of VARIANTS) {
-    const app = await open(profile, checks); days[name] = [];
+    const app = await open(profile, checks, legacy ? { year52: false } : {}); days[name] = [];
     for (let n = 0; n < WEEKS * 7; n++) {
       await app.setDay(n);
       const { week, o } = JSON.parse(await app.ev(DAY));
@@ -36,14 +37,16 @@ async function record() {
 }
 
 (async () => {
-  const now = await record();
-  if (process.argv.includes('--write')) { fs.writeFileSync(GOLDEN, JSON.stringify(now, null, 1) + '\n'); console.log('Snapshot written:', now.payloads.length, 'distinct day plans,', Object.keys(now.days).length, 'variants'); return; }
-  const old = JSON.parse(fs.readFileSync(GOLDEN, 'utf8')); let bad = 0;
-  for (const v of Object.keys(old.days)) for (let n = 0; n < old.days[v].length; n++) {
-    const a = old.days[v][n], b = (now.days[v] || [])[n];
-    const A = JSON.stringify([a[0], old.payloads[a[1]]]), B = b ? JSON.stringify([b[0], now.payloads[b[1]]]) : 'missing';
-    if (A !== B) { if (bad++ < 5) console.log('DIFF', v, 'day', n + 1, '(week ' + a[0] + ')\n  was', A.slice(0, 400), '\n  now', B.slice(0, 400)); }
+  if (process.argv.includes('--write')) { const now = await record(true); fs.writeFileSync(GOLDEN, JSON.stringify(now, null, 1) + '\n'); console.log('Snapshot written:', now.payloads.length, 'distinct day plans,', Object.keys(now.days).length, 'variants'); return; }
+  const old = JSON.parse(fs.readFileSync(GOLDEN, 'utf8')); let bad = 0, n = 0;
+  // 1. the program as released: weeks 1-24 must be exactly the original plan
+  // 2. the original 24-week behaviour (fallback switch): all 30 recorded weeks must match
+  for (const [label, now, upto] of [['released program, weeks 1-24', await record(false), 24 * 7], ['original behaviour, weeks 1-30', await record(true), 30 * 7]]) {
+    for (const v of Object.keys(old.days)) for (let d = 0; d < upto; d++) { n++;
+      const a = old.days[v][d], b = (now.days[v] || [])[d];
+      const A = JSON.stringify([a[0], old.payloads[a[1]]]), B = b ? JSON.stringify([b[0], now.payloads[b[1]]]) : 'missing';
+      if (A !== B) { if (bad++ < 5) console.log('DIFF', label, v, 'day', d + 1, '(week ' + a[0] + ')\n  was', A.slice(0, 400), '\n  now', B.slice(0, 400)); } }
   }
-  console.log(bad ? 'FAIL: ' + bad + ' day plans changed' : 'PASS: all ' + Object.values(old.days).reduce((x, d) => x + d.length, 0) + ' day plans match the snapshot');
+  console.log(bad ? 'FAIL: ' + bad + ' day plans changed' : 'PASS: all ' + n + ' day plans match the snapshot (weeks 1-24 as released; weeks 1-30 in original mode)');
   process.exit(bad ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(2); });

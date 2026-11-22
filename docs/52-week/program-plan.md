@@ -1,11 +1,12 @@
 # Breathe Strong: 52-week program plan
 
-Status: **specification accepted by the owner; build in progress on a branch. The live app is unchanged.**
+Status: **built and switched on. The app now runs the full 52-week program by default.**
 
 ### Owner decisions recorded
 - **Phase labels stay as they are.** Foundation, Build, Strength and Progression keep their names and the
   current layout is kept. The rename suggested in this document is withdrawn.
-- **Clinical review is deferred to a later stage** by the owner's decision. Section 4 stays as the list
+- **Released without clinical review** by the owner's decision (users are told throughout to consult their
+  clinician). Originally deferred; Section 4 stays as the list
   to work through. The safeguards built into the app stay regardless: it never tells a user to
   reduce or stop treatment, and it points to a clinician for reassessment.
 - **The later stages are also about keeping what has been gained.** Strength and fitness fall away
@@ -33,10 +34,11 @@ Status: **specification accepted by the owner; build in progress on a branch. Th
   carries the limits wording and the keep-using-your-treatment notice.
 - Stage 7 done (switch on only): "Your year, stage by stage" with each stage's numbers and saved
   reviews, and a history-by-stage section in the clinician summary.
-- Remaining before release: clinical review (section 4, deferred by the owner), then switching the
-  new weeks on (stage 9), then the website update (stage 10). Billing is separate.
-- Known gaps: the CSV export does not yet include the sleep-quality column, and there are no drawings
-  for the non-walking cardio options.
+- Stage 9 done: the 52-week program is on by default. Welcome, set-up, the Health tab and the
+  clinician summary now describe a 12-month program with reviews every 13 weeks. The original
+  24-week behaviour remains available as a fallback (`localStorage` key `bs-year52` set to `0`).
+- Still to do: website update (stage 10). Billing is separate and not started.
+- Known gaps: there are no drawings for the non-walking cardio options; tested in Chromium only.
 
 Contents
 1. [Audit of the existing program](#1-audit-of-the-existing-program)

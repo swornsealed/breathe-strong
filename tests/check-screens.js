@@ -16,7 +16,7 @@ const session = (date, n, sc, reps) => ({ date, type: 'WA', ex: [{ n, sc, log: t
 
 (async () => {
   // ---------- switch off: screens as before ----------
-  let app = await open({ equip: 'gym' });
+  let app = await open({ equip: 'gym' }, null, { year52: false });
   await at(app, 9 * 7 + 1); let t = await text(app);
   has(t, 'Week 10 of 24'); has(t, 'Progression phase'); hasnt(t, 'stage'); has(t, 'Retest around week 24');
   await tab(app, 'plan'); t = await text(app); has(t, 'wk 9–24'); hasnt(t, 'Awaken'); hasnt(t, 'Recovery and when to ease off');
@@ -78,9 +78,22 @@ const session = (date, n, sc, reps) => ({ date, type: 'WA', ex: [{ n, sc, log: t
   t = await wo(app, 19 * 7); hasnt(t, 'two sessions running', 'no suggestions before week 27');
   t = await wo(app, 38 * 7); hasnt(t, 'two sessions running', 'no suggestions in a lighter week');
   assert.deepStrictEqual(app.errors, []); await app.close();
-  app = await open({ equip: 'gym' });
+  app = await open({ equip: 'gym' }, null, { year52: false });
   t = await wo(app, 27 * 7); hasnt(t, 'two sessions running', 'no suggestions with the switch off'); await app.close();
   ok('load suggestions appear only from week 27, with the switch on, outside lighter weeks, and leave the decision to the user');
+
+  // wording for a year-long program: welcome, set-up, Health tab, clinician summary, CSV
+  app = await open(null, null, { rawState: '' });
+  t = await text(app); has(t, 'I’ve started snoring'); has(t, 'A 12-month program to reduce snoring'); has(t, 'The same 12-month program, with a review every 13 weeks'); hasnt(t, '6-month');
+  await app.close();
+  app = await open({ equip: 'gym', path: 'retest' });
+  await at(app, 20 * 7); await tab(app, 'retest'); t = await text(app);
+  for (const s of ['Road to reassessment · 12 months', 'Your 12-month road', 'Weeks 1–52', 'Weeks 13, 26 and 39', 'Ask your doctor whether repeat sleep testing is appropriate', 'Your doctor makes that call, with testing']) has(t, s);
+  hasnt(t, 'Week 22'); hasnt(t, '6-month');
+  await tab(app, 'report'); const sum = await app.page.inputValue('#copytext'); assert.ok(sum.includes('12-month airway and fitness training program') && sum.includes('ask whether repeat sleep testing is appropriate') && !sum.includes('plan a repeat sleep study'));
+  assert.ok((await app.ev('csv()')).split('\n')[0].endsWith(',tags,sleep_quality'));
+  assert.deepStrictEqual(app.errors, []); await app.close();
+  ok('welcome, set-up, Health tab, clinician summary and CSV describe a 12-month program');
 
   // every tab and the new screen in each stage, no errors
   app = await open({ equip: 'bw', path: 'retest' }, null, { year52: true });

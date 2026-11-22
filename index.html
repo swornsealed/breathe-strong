@@ -94,8 +94,8 @@ const WEEKS=[...Array(24)].map((_,i)=>{const w=i+1;return{w,p:w<=2?'F':w<=5?'B':
 /* Weeks 25-52 (docs/52-week/program-plan.md, section 2.4). long = Saturday minutes; lite = lighter review week (3 sets at about 90%, no intervals);
    mt = the user may choose the Minimum week. Airway and breathing doses stay at the week-6 level throughout. */
 for(let w=25;w<=52;w++)WEEKS.push(w===25?{w,p:'R'}:w===26?{w,p:'R',lite:1}:w<=30?{w,p:'RB',long:50}:w<=34?{w,p:'P2',long:55}:w<=38?{w,p:'P2',long:60}:w===39?{w,p:'P2',lite:1}:w<=43?{w,p:'CO',long:60}:w<=51?{w,p:'MT',long:60,mt:1}:{w,p:'MT',lite:1});
-/* The second half of the year stays switched off until it is approved for release. With it off, week 25 onward behaves exactly as before. */
-let Y52=false;try{Y52=localStorage.getItem('bs-year52')==='1'}catch(e){}
+/* The full 52-week program is on. Setting localStorage 'bs-year52' to '0' brings back the original 24-week behaviour (kept for testing and as a fallback). */
+let Y52=true;try{Y52=localStorage.getItem('bs-year52')!=='0'}catch(e){}
 const AFTER={w:53,p:'MT',long:60,mt:1};
 const weekRow=w=>w<=24?WEEKS[w-1]||{}:!Y52?{}:w<=52?WEEKS[w-1]:AFTER;
 const phaseOf=w=>w<=24?(WEEKS[w-1]||WEEKS[0]).p:!Y52?'M':weekRow(w).p;
@@ -265,7 +265,7 @@ else(async()=>{const C=window.claude;if(!C||!C.use)return;
 function login(){return`<div style="min-height:70vh;display:flex;flex-direction:column;justify-content:center">
  <div class="tiny" style="color:var(--acct);font-weight:600">Breathe Strong</div>
  <h1>Lift heavy. Breathe strong. Sleep quiet.</h1>
- <p class="mut">A 6-month strength, breathing and airway program for snoring and sleep health. Choose where your logs are kept. You can switch later in Settings.</p>
+ <p class="mut">A ${Y52?'12':'6'}-month strength, breathing and airway program for snoring and sleep health. Choose where your logs are kept. You can switch later in Settings.</p>
  ${FBERR?`<div class="warn">${esc(FBERR)}</div>`:''}
  <label class="check" style="border:0;align-items:flex-start"><input type="checkbox" id="consent" style="margin-top:3px"><span class="small">I understand my logs are stored in Breathe Strong’s secure cloud database, linked to my Google account. Other users can’t see them, they’re used only to run this app, and I can delete them at any time in Settings.</span></label>
  <button class="btn" data-act="glogin" ${FB?'':'disabled style="opacity:.55"'}>${FB?'Continue with Google':FBERR?'Sign-in unavailable':'Loading…'}</button>
@@ -350,7 +350,7 @@ function setup(){const t=TODAY(),pth=V.path||'snorer';return`
  <h1>Let’s set you up</h1>
  <p class="mut small">Five quick choices and you’re in. You can change any of them later in Settings.</p>
  <h2>1 · Your path</h2>
- ${radios('path',[['snorer','I’ve started snoring','A 6-month program to reduce snoring, plus help getting tested if you need it'],['retest','I already use CPAP or a mouthguard','The same 6-month program, then a repeat sleep study. Your doctor decides any change to treatment']],pth)}
+ ${radios('path',[['snorer','I’ve started snoring','A '+(Y52?'12':'6')+'-month program to reduce snoring, plus help getting tested if you need it'],['retest','I already use CPAP or a mouthguard',Y52?'The same 12-month program, with a review every 13 weeks. Your doctor decides any change to treatment':'The same 6-month program, then a repeat sleep study. Your doctor decides any change to treatment']],pth)}
  <div id="cpapnote" ${pth==='retest'?'':'hidden'}>${CPAPNOTE}</div>
  <div id="quickq" ${pth==='retest'?'hidden':''}>
   <h2>Safety question</h2>
@@ -936,7 +936,7 @@ function progress(){const st=stats(),pts=weekly(),ks=scored(),wks=Object.keys(S.
  return L.length?`<h2>Checkpoints</h2><div class="card" style="padding:4px 14px">${L.join('')}</div>`:''})()}
  <button class="btn2" data-act="csv">Copy my nights as CSV</button>
  <textarea id="copytext" readonly aria-label="CSV of your nights">${esc(csv())}</textarea>`}
-function csv(){return'date,source,snore_score,partner,tiredness,drinks,resting_hr,breaths_per_min,blood_oxygen,breathing_disturbances,cpap_hours,cpap_events_per_hr,mask_seal,mask_off,last_drink_gap,neck_bed,neck_wake,evening_winddown,tags\n'+Object.keys(S.nights).sort().map(k=>{const n=S.nights[k];return[k,n.src||'snorelab',n.snore??'',n.partner??'',n.tired??'',n.drinks??'',n.hr??'',n.br??'',n.ox??'',n.bd??'',n.cpapH??'',n.ahi??'',n.seal??'',n.offs??'',n.dgap??'',(S.pm||{})[k]??'',n.neckAM??'',S.done[k]&&S.done[k].evening?1:'','"'+(n.tags||[]).join('; ')+'"'].join(',')}).join('\n')}
+function csv(){return'date,source,snore_score,partner,tiredness,drinks,resting_hr,breaths_per_min,blood_oxygen,breathing_disturbances,cpap_hours,cpap_events_per_hr,mask_seal,mask_off,last_drink_gap,neck_bed,neck_wake,evening_winddown,tags'+(Y52?',sleep_quality':'')+'\n'+Object.keys(S.nights).sort().map(k=>{const n=S.nights[k];return[k,n.src||'snorelab',n.snore??'',n.partner??'',n.tired??'',n.drinks??'',n.hr??'',n.br??'',n.ox??'',n.bd??'',n.cpapH??'',n.ahi??'',n.seal??'',n.offs??'',n.dgap??'',(S.pm||{})[k]??'',n.neckAM??'',S.done[k]&&S.done[k].evening?1:'','"'+(n.tags||[]).join('; ')+'"'].concat(Y52?[n.sleepQ??'']:[]).join(',')}).join('\n')}
 function drawChart(){const s=$('#chart');if(!s)return;const pts=weekly(),st=stats(),W=s.clientWidth,H=s.clientHeight;
  if(!pts.length){s.innerHTML=`<text x="${W/2}" y="${H/2}" fill="#B9B6B0" text-anchor="middle" font-size="14">Your weekly scores will appear here</text>`;return}
  const mx=Math.max(...pts.map(p=>p.v),st.base||0)*1.18||10,x=i=>pts.length===1?W/2:28+i*(W-56)/(pts.length-1),y=v=>H-30-(v/mx)*(H-56);let h='';
@@ -990,15 +990,16 @@ function insights(){const T=triggers().filter(x=>Math.abs(x.d)>=.15),U=unusual()
  ${E.length?`<div class="card"><div class="lab">Effort vs results</div>${E.map(e=>`<div class="between small" style="padding:3px 0"><span>Week ${e.w}</span><span>${e.s} session${e.s===1?'':'s'}</span><span>${e.v!=null?'score '+Math.round(e.v):'–'}</span></div>`).join('')}</div>`:''}`}
 
 function health(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),w=Math.max(0,weekOf(t)),last=H.studies.length?H.studies.slice().sort((a,b)=>a.date<b.date?1:-1)[0]:null,A=alerts();
- const steps=rt?[[0,'Week 0','Tell your doctor you’re starting, and enter your last sleep study'],[1,'Weeks 1–24','Train, and use CPAP every night'],[12,'Week 12','Midpoint: review your events per hour and symptoms'],[22,'Week 22','Ask your doctor for a repeat sleep study'],[25,'After','Your doctor reviews: keep, adjust, switch or stop treatment']]
+ const steps=rt&&Y52?[[0,'Week 0','Tell your doctor you’re starting, and enter your last sleep study'],[1,'Weeks 1–52','Train, and use CPAP every night'],[13,'Weeks 13, 26 and 39','Stage reviews: look at your events per hour, symptoms and goals'],[24,'From week 24','Ask your doctor whether repeat sleep testing is appropriate'],[53,'After','Your doctor reviews: keep, adjust, switch or stop treatment']]
+  :rt?[[0,'Week 0','Tell your doctor you’re starting, and enter your last sleep study'],[1,'Weeks 1–24','Train, and use CPAP every night'],[12,'Week 12','Midpoint: review your events per hour and symptoms'],[22,'Week 22','Ask your doctor for a repeat sleep study'],[25,'After','Your doctor reviews: keep, adjust, switch or stop treatment']]
   :[[0,'Now','Log your snoring and take the quick checks'],[2,'Week 2','Show your GP visit summary. Your GP does the official screening and can refer you'],[4,'Next','Home or lab sleep study'],[6,'Then','Enter your result here. Your plan adjusts to it']];
- return`<div class="small mut">${rt?'Road to retest · 6 months':'Your sleep health'}</div>
+ return`<div class="small mut">${rt?(Y52?'Road to reassessment · 12 months':'Road to retest · 6 months'):'Your sleep health'}</div>
  <h1>${rt?'Train for your retest':'Sleep health'}</h1>
  ${rt?CPAPNOTE:''}
  ${A.filter(a=>a.lv==='high').map(alertCard).join('')}
  <button class="item" data-act="go" data-v="record"><span class="grow"><span class="t1">${!H.status&&!H.treatment&&rt?'Add your diagnosis and treatment':esc(STATUS[H.status]||STATUS[''])}</span><span class="t2">${last?'Last study '+fmt(last.date)+(last.ahi!=null&&last.ahi!==''?' · AHI '+esc(last.ahi):''):'No sleep study entered'} · ${esc(TREAT[H.treatment]||TREAT[''])}</span></span><span class="small" style="color:var(--acct)">Edit</span></button>
- <h2>${rt?'Your 6-month road':'Getting tested'}</h2>
- ${rt?`<p class="small mut" style="margin-top:0">Muscle and fitness changes take months at our age, so this runs for 24 weeks before a repeat sleep study. Some people end up needing less treatment. Your doctor makes that call.</p>`:''}
+ <h2>${rt?(Y52?'Your 12-month road':'Your 6-month road'):'Getting tested'}</h2>
+ ${rt?`<p class="small mut" style="margin-top:0">${Y52?'Muscle and fitness changes take months at our age, so the program runs for a year, with a review every 13 weeks. Some people end up needing less treatment. Your doctor makes that call, with testing.':'Muscle and fitness changes take months at our age, so this runs for 24 weeks before a repeat sleep study. Some people end up needing less treatment. Your doctor makes that call.'}</p>`:''}
  <div class="card">${steps.map((s,k)=>{const cur=w>=s[0]&&(k===steps.length-1||w<steps[k+1][0]),past=k<steps.length-1&&w>=steps[k+1][0];return`<div class="row" style="align-items:flex-start;padding:8px 0"><span class="dot${past?' on':''}" style="${cur?'border-color:var(--acct);border-width:3px':''}">${past?checkSvg:''}</span><span class="grow"><span class="tiny" style="color:${cur?'var(--acc)':'var(--mut)'}">${s[1]}${cur?' · now':''}</span><span class="t1" style="font-size:15px">${s[2]}</span></span></div>`}).join('')}</div>
  <button class="btn" data-act="go" data-v="report">${rt?'Doctor summary':'GP visit summary'}</button>
  <button class="btn2" data-act="go" data-v="record">Appointments and questions</button>
@@ -1038,7 +1039,7 @@ function report(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),st=stats()
 Self-recorded by the patient. Not a diagnosis.
 
 WHY I'M HERE
-${rt?'I use '+(TREAT[H.treatment]||'CPAP')+' and am doing a 6-month airway and fitness training program. I’d like to review my progress and plan a repeat sleep study.':'I’ve started snoring and I’m doing an airway and fitness training program. I’d like to know whether I should have a sleep study.'}
+${rt?'I use '+(TREAT[H.treatment]||'CPAP')+' and am doing a '+(Y52?'12':'6')+'-month airway and fitness training program. '+(Y52?'I’d like to review my progress and ask whether repeat sleep testing is appropriate.':'I’d like to review my progress and plan a repeat sleep study.'):'I’ve started snoring and I’m doing an airway and fitness training program. I’d like to know whether I should have a sleep study.'}
 
 SLEEP HEALTH
 Diagnosis: ${STATUS[H.status]||STATUS['']}

@@ -16,7 +16,7 @@ function appHtml() {
   return html.replace(ANCHOR, 'window.__bsEval=s=>eval(s);\n' + ANCHOR);
 }
 
-// opts.rawState: exact string to place in saved data (for upgrade tests). opts.year52: switch on weeks 25-52.
+// opts.rawState: exact string to place in saved data (for upgrade tests). opts.year52:false gives the original 24-week behaviour.
 async function open(profile, checks, opts) {
   opts = opts || {};
   const html = appHtml();
@@ -35,10 +35,10 @@ async function open(profile, checks, opts) {
       if (!localStorage.getItem('bs-local')) { // first load only, so reloads keep whatever the app saved
         localStorage.setItem('bs-local', '1');
         if (raw !== '') localStorage.setItem('bs-state', raw == null ? JSON.stringify(st) : raw);
-        if (y52) localStorage.setItem('bs-year52', '1');
+        if (y52 === false) localStorage.setItem('bs-year52', '0'); // original 24-week behaviour
       }
     } catch (e) {}
-  }, [state, opts.rawState === undefined ? null : opts.rawState, !!opts.year52, new Date(2026, 0, 5, 12).getTime() + (opts.day || 0) * 864e5]);
+  }, [state, opts.rawState === undefined ? null : opts.rawState, opts.year52 === false ? false : true, new Date(2026, 0, 5, 12).getTime() + (opts.day || 0) * 864e5]);
   const page = await ctx.newPage();
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:' + server.address().port + '/');

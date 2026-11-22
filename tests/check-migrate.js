@@ -41,7 +41,7 @@ function intact(now, was, label) {
   // 2. user past week 24 (week 40)
   app = await open(null, null, { rawState: raw, day: 39 * 7 });
   intact(JSON.parse(await app.ev('JSON.stringify(S)')), V1, 'week 40');
-  assert.strictEqual(await app.ev('weekOf(TODAY())'), 40); assert.strictEqual(await app.ev('PH[dayPlan(TODAY()).p].n'), 'Maintenance'); ok('a user past week 24 keeps his data and, with the new weeks off, the same plan as before');
+  assert.strictEqual(await app.ev('weekOf(TODAY())'), 40); assert.strictEqual(await app.ev('stageOf(40).n+"/"+PH[dayPlan(TODAY()).p].n'), 'Thrive/Consolidate'); ok('a user past week 24 keeps his data and lands in the right stage for his week');
   await app.close();
 
   // 3. brand-new user: no saved data at all

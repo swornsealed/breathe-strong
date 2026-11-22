@@ -1,4 +1,4 @@
-// Weeks 25 to 52 (switched on for the test) against the specification in docs/52-week/program-plan.md, section 2.4.
+// Weeks 25 to 52 against the specification in docs/52-week/program-plan.md, section 2.4.
 // The expected values below are written out independently of the app's own week table.
 //   node tests/check-year.js
 const assert = require('assert'), fs = require('fs'), path = require('path');
@@ -66,7 +66,7 @@ const week = async (app, w) => { const out = []; for (let d = 0; d < 7; d++) { a
   console.log('  ok  bodyweight users get three sets in a lighter week');
 
   // switched off: week 25 onward is exactly the old behaviour
-  app = await open({ equip: 'gym' });
+  app = await open({ equip: 'gym' }, null, { year52: false });
   const off = await week(app, 30); assert.strictEqual(off[0].phaseName, 'Maintenance'); assert.strictEqual(off[5].min, 45); await app.close();
   console.log('  ok  with the switch off, week 25 onward is unchanged');
   console.log('PASS: weeks 25-52');

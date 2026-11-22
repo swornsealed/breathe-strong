@@ -69,7 +69,7 @@ const SEED = `(()=>{for(let i=0;i<=88;i++){const d=addD(S.profile.start,i);
   assert.deepStrictEqual(app.errors, []); await app.close();
 
   // ---------- switch off: none of this appears, and nothing recorded is lost ----------
-  app = await open({ equip: 'gym', path: 'retest' });
+  app = await open({ equip: 'gym', path: 'retest' }, null, { year52: false });
   await app.ev(SEED); await app.ev("S.goals=[{t:'Kept goal'}];S.reviews={w13:{date:'2026-04-04',qol:7,goals:[]}};save()");
   await at(app, 66); t = await text(app); hasnt(t, 'Set your goals'); hasnt(t, 'review is ready');
   await go(app, 'progress'); t = await text(app); hasnt(t, 'stage by stage');
