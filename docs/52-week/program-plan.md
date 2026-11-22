@@ -1,6 +1,20 @@
 # Breathe Strong: 52-week program plan
 
-Status: **proposal for owner and clinical review. Nothing in the app has been changed.**
+Status: **specification accepted by the owner; build in progress on a branch. The live app is unchanged.**
+
+### Owner decisions recorded
+- **Phase labels stay as they are.** Foundation, Build, Strength and Progression keep their names and the
+  current layout is kept. The rename suggested in this document is withdrawn.
+- **Clinical review is deferred to a later stage** by the owner's decision. Section 4 stays as the list
+  to work through. The safeguards built into the app stay regardless: it never tells a user to
+  reduce or stop treatment, and it points to a clinician for reassessment.
+- **The later stages are also about keeping what has been gained.** Strength and fitness fall away
+  quickly when training stops, more so with age, so Reclaim and Thrive are framed as continued
+  incremental progress and protection of earlier gains.
+
+### Build progress
+- Stage 0 done: test harness and a snapshot of today's plan for weeks 1 to 30 (1,470 day plans).
+- Stage 1 done: stage structure and week table for weeks 1 to 24; snapshot still matches exactly.
 Prepared from a line-by-line read of `index.html` on `main` (commit `6b0e6c6`).
 
 Contents
@@ -187,9 +201,9 @@ minutes; Thursday session; Saturday long session minutes.
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Awaken | Foundation | Existing | A · B · A | 3 × 10–12 | 3 × 30 m / 3 × 30 s | 30 | Steady 30 | 45 | Level 1 (20 reps; head lift 3 × 30 s; slow exhale 2 min) | 30 in (5 × 6) + out 3 × 5 |  |
 | 2 | Awaken | Foundation | Existing | B · A · B | 3 × 10–12 | 3 × 30 m / 3 × 30 s | 30 | Steady 30 | 45 | Level 1 (20 reps; head lift 3 × 30 s; slow exhale 2 min) | 30 in (5 × 6) + out 3 × 5 |  |
-| 3 | Awaken | Build (rename proposed: Step-up) | Existing | A · B · A | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 |  |
-| 4 | Awaken | Build (rename proposed: Step-up) | Existing | B · A · B | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 | 28-day checks |
-| 5 | Awaken | Build (rename proposed: Step-up) | Existing | A · B · A | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 |  |
+| 3 | Awaken | Build | Existing | A · B · A | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 |  |
+| 4 | Awaken | Build | Existing | B · A · B | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 | 28-day checks |
+| 5 | Awaken | Build | Existing | A · B · A | 4 × 6–8 | 3 × 40 m / 3 × 40 s | 40 | Intervals 6 × 30 s hard / 90 s easy, then 5 breath-hold walks | 45 | Level 1 (20 reps; head lift 3 × 60 s; slow exhale 2 min) | 30 in (5 × 6) + out 5 × 5 |  |
 | 6 | Awaken | Strength | Existing | B · A · B | 4–5 × 4–6 | 4 × 40 m / 3 × 45 s | 45 | Intervals 8 × 30 s / 90 s, then 8 breath-hold walks | 45 | Level 2 (40 reps; head lift 3 × 60 s; slow exhale 3 min) | 30 in (5 × 6) + out 5 × 5 |  |
 | 7 | Awaken | Strength | Existing | A · B · A | 4–5 × 4–6 | 4 × 40 m / 3 × 45 s | 45 | Intervals 8 × 30 s / 90 s, then 8 breath-hold walks | 45 | Level 2 (40 reps; head lift 3 × 60 s; slow exhale 3 min) | 30 in (5 × 6) + out 5 × 5 |  |
 | 8 | Awaken | Strength | Existing | B · A · B | 4–5 × 4–6 | 4 × 40 m / 3 × 45 s | 45 | Intervals 8 × 30 s / 90 s, then 8 breath-hold walks | 45 | Level 2 (40 reps; head lift 3 × 60 s; slow exhale 3 min) | 30 in (5 × 6) + out 5 × 5 | 28-day checks |
@@ -317,7 +331,7 @@ The existing alerts (see your GP, contact your sleep clinic) stay as they are.
   scheme, tier, cardio minutes, Thursday type, flags for review and lighter weeks).
 - Weeks 1–24 of the table reproduce today's output exactly; a regression test enforces this.
 - Add `STAGES` (name, first week, last week, purpose).
-- Rename the weeks 3–5 block so it no longer clashes with the Build stage (suggested: "Step-up").
+- Phase names are kept as they are (owner decision). Where a stage and a phase are both shown, the stage is labelled as a stage.
 - After week 52: "Year complete", with the choice to continue the Maintain block or start again
   while keeping all history.
 
@@ -407,7 +421,7 @@ Each stage is a separate, reviewable change. Nothing merges to `main` without ap
 | Stage | Work | Check before moving on |
 |---|---|---|
 | 0 | Test harness. Record a "golden" snapshot of today's plan for every day of weeks 1–30 in all four equipment modes and both paths | Snapshot reviewed; app unchanged |
-| 1 | Week table and stages for weeks 1–24 only, plus the block rename | Golden snapshot still matches exactly; only labels differ |
+| 1 | Week table and stages for weeks 1–24 only | Golden snapshot still matches exactly; only labels differ |
 | 2 | State version 2, migration and backup key | Migration tests on saved states: fresh user, mid-program, past week 24, cloud and phone-only; no field lost |
 | 3 | Weeks 25–52 content, lighter weeks, Standard and Minimum week, behind an off-by-default switch | Table matches section 2.4; weeks 1–24 still match the snapshot |
 | 4 | Stage and week navigation, calendar to 364 days, milestones | Manual and scripted walkthrough at phone widths |
