@@ -16,7 +16,9 @@ function appHtml() {
   return html.replace(ANCHOR, 'window.__bsEval=s=>eval(s);\n' + ANCHOR);
 }
 
-async function open(profile, checks) {
+// opts.rawState: exact string to place in saved data (for upgrade tests). opts.year52: switch on weeks 25-52.
+async function open(profile, checks, opts) {
+  opts = opts || {};
   const html = appHtml();
   const server = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); r.end(html); });
   await new Promise(ok => server.listen(0, '127.0.0.1', ok));
@@ -25,12 +27,18 @@ async function open(profile, checks) {
   await ctx.route(u => !u.href.startsWith('http://127.0.0.1'), route => route.abort()); // no network: fonts, sign-in
   const state = { v: 1, at: 1, health: null, nights: {}, done: {}, sessions: [], weekly: {}, imtLevel: 4, imtEasy: 0,
     checks: checks || {}, profile: Object.assign({ start: START, scoreSrc: 'snorelab', path: 'snorer', equip: 'gym', imt: 'yes', quickFlag: null, gpOk: false }, profile || {}) };
-  await ctx.addInitScript(st => {
-    const D = Date; window.__bsNow = D.now();
+  await ctx.addInitScript(([st, raw, y52, now]) => {
+    const D = Date; window.__bsNow = now;
     class F extends D { constructor(...a) { a.length ? super(...a) : super(window.__bsNow); } static now() { return window.__bsNow; } }
     window.Date = F;
-    try { if (!localStorage.getItem('bs-state')) { localStorage.setItem('bs-local', '1'); localStorage.setItem('bs-state', JSON.stringify(st)); } } catch (e) {}
-  }, state);
+    try {
+      if (!localStorage.getItem('bs-local')) { // first load only, so reloads keep whatever the app saved
+        localStorage.setItem('bs-local', '1');
+        if (raw !== '') localStorage.setItem('bs-state', raw == null ? JSON.stringify(st) : raw);
+        if (y52) localStorage.setItem('bs-year52', '1');
+      }
+    } catch (e) {}
+  }, [state, opts.rawState === undefined ? null : opts.rawState, !!opts.year52, new Date(2026, 0, 5, 12).getTime() + (opts.day || 0) * 864e5]);
   const page = await ctx.newPage();
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('http://127.0.0.1:' + server.address().port + '/');

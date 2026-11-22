@@ -15,6 +15,13 @@ Status: **specification accepted by the owner; build in progress on a branch. Th
 ### Build progress
 - Stage 0 done: test harness and a snapshot of today's plan for weeks 1 to 30 (1,470 day plans).
 - Stage 1 done: stage structure and week table for weeks 1 to 24; snapshot still matches exactly.
+- Stage 2 done: saved data moves to version 2 by adding fields only (goals, reviews). An untouched
+  copy of the version 1 data is kept on the device. 11 upgrade checks pass.
+- Stage 3 done: weeks 25 to 52 are in the app, **switched off by default**. With the switch off the
+  app behaves exactly as before. With it on, all 28 new weeks match section 2.4.
+- Not yet built: the screens (stage navigation, reviews, goals, cardio choice, Minimum-week choice,
+  load suggestions, year-end summary). The "Week 46 of 24" display for users past week 24 is fixed
+  in stage 4.
 Prepared from a line-by-line read of `index.html` on `main` (commit `6b0e6c6`).
 
 Contents

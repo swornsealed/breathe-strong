@@ -83,13 +83,22 @@ textarea{width:100%;min-height:200px;font:14px/1.5 ui-monospace,Menlo,monospace;
 <script>
 {
 /* ---------- data: program ---------- */
-const PH={F:{n:'Foundation',lift:'3 × 10–12',z2:30},B:{n:'Build',lift:'4 × 6–8',z2:40},S:{n:'Strength',lift:'4–5 × 4–6',z2:45},R:{n:'Progression',lift:'4–5 × 4–6, add small loads',z2:45},M:{n:'Maintenance',lift:'4–5 × 4–6',z2:45}};
+const PH={F:{n:'Foundation',lift:'3 × 10–12',z2:30},B:{n:'Build',lift:'4 × 6–8',z2:40},S:{n:'Strength',lift:'4–5 × 4–6',z2:45},R:{n:'Progression',lift:'4–5 × 4–6, add small loads',z2:45},M:{n:'Maintenance',lift:'4–5 × 4–6',z2:45},
+ /* weeks 27-52. lt = which entry of a lift's three-step scheme to use; ls = one scheme for every logged lift */
+ RB:{n:'Rebuild',lift:'4 × 6–8',z2:45,lt:1},P2:{n:'Progression',lift:'4–5 × 4–6, add small loads',z2:45},CO:{n:'Consolidate',lift:'4 × 6–8',z2:45,lt:1},MT:{n:'Maintain',lift:'3 × 5–8, hold your loads',z2:45,ls:'3 × 5–8, hold your loads'}};
 /* The year is four 13-week stages. Each week has one entry in WEEKS; the phase (PH key) sets that week's prescription.
    Weeks 1-24 reproduce the original phase rule exactly and are covered by tests/check-plan.js. Weeks 25-52 are added later. */
 const STAGES=[{k:'awaken',n:'Awaken',a:1,b:13},{k:'build',n:'Build',a:14,b:26},{k:'reclaim',n:'Reclaim',a:27,b:39},{k:'thrive',n:'Thrive',a:40,b:52}];
 const stageOf=w=>STAGES.find(s=>w>=s.a&&w<=s.b)||null;
 const WEEKS=[...Array(24)].map((_,i)=>{const w=i+1;return{w,p:w<=2?'F':w<=5?'B':w<=8?'S':'R'}});
-const phaseOf=w=>{const r=WEEKS[w-1];return r?r.p:'M'};
+/* Weeks 25-52 (docs/52-week/program-plan.md, section 2.4). long = Saturday minutes; lite = lighter review week (3 sets at about 90%, no intervals);
+   mt = the user may choose the Minimum week. Airway and breathing doses stay at the week-6 level throughout. */
+for(let w=25;w<=52;w++)WEEKS.push(w===25?{w,p:'R'}:w===26?{w,p:'R',lite:1}:w<=30?{w,p:'RB',long:50}:w<=34?{w,p:'P2',long:55}:w<=38?{w,p:'P2',long:60}:w===39?{w,p:'P2',lite:1}:w<=43?{w,p:'CO',long:60}:w<=51?{w,p:'MT',long:60,mt:1}:{w,p:'MT',lite:1});
+/* The second half of the year stays switched off until it is approved for release. With it off, week 25 onward behaves exactly as before. */
+let Y52=false;try{Y52=localStorage.getItem('bs-year52')==='1'}catch(e){}
+const AFTER={w:53,p:'MT',long:60,mt:1};
+const weekRow=w=>w<=24?WEEKS[w-1]||{}:!Y52?{}:w<=52?WEEKS[w-1]:AFTER;
+const phaseOf=w=>w<=24?(WEEKS[w-1]||WEEKS[0]).p:!Y52?'M':weekRow(w).p;
 const pick=(p,a)=>a[p==='F'?0:p==='B'?1:2];
 /* alt: home versions [name, tip] for db = dumbbells, home = water jugs / backpack, bw = bodyweight only */
 const NECK={db:['Neck holds + posture','4-way neck holds, foam roller or rolled towel, wall angels'],home:['Neck holds + posture','4-way neck holds, rolled towel, wall angels'],bw:['Neck holds + posture','4-way neck holds, rolled towel, wall angels']};
@@ -216,18 +225,22 @@ const checkSvg='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="tru
 const back='<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
 
 /* ---------- state + saving ---------- */
-const blank=()=>({v:1,at:0,health:null,profile:null,nights:{},done:{},sessions:[],weekly:{},imtLevel:4,imtEasy:0});
+const blank=()=>({v:2,at:0,health:null,profile:null,nights:{},done:{},sessions:[],weekly:{},imtLevel:4,imtEasy:0,goals:[],reviews:{}});
+/* Saved-data upgrade. Only ever adds fields: nothing is renamed, re-keyed or removed. The untouched version 1 data is kept under V1KEY. */
+const V1KEY='bs-state-v1-backup';
+function keepV1(raw,r){try{if(r&&(r.v||1)<2&&r.profile&&!localStorage.getItem(V1KEY))localStorage.setItem(V1KEY,raw)}catch(e){}}
+function migrate(st){if(!Array.isArray(st.goals))st.goals=[];if(!st.reviews||typeof st.reviews!=='object')st.reviews={};if((st.v||1)<2)st.v=2;return st}
 const FBC=window.FIREBASE_CONFIG||null;
 let S=blank(),mode='memory',dbRef=null,saveT=null,writing=false,dirty=false,FB=null,USER=null,FBERR=null,LKEY='bs-state',PEND=null,LOCAL=false;
 try{LOCAL=localStorage.getItem('bs-local')==='1'}catch(e){}
-function loadLocal(){try{const s=localStorage.getItem(LKEY);if(s){S=Object.assign(blank(),JSON.parse(s));mode='device'}}catch(e){}}
+function loadLocal(){try{const s=localStorage.getItem(LKEY);if(s){const r=JSON.parse(s);keepV1(s,r);S=migrate(Object.assign(blank(),r));mode='device'}}catch(e){}}
 if(!FBC||LOCAL)loadLocal();
 function save(){S.at=Date.now();const js=JSON.stringify(S);try{localStorage.setItem(LKEY,js);if(mode==='memory')mode='device'}catch(e){}dirty=true;clearTimeout(saveT);saveT=setTimeout(flush,800)}
 async function flush(){if(!dbRef||writing||!dirty)return;writing=true;dirty=false;
  try{const body={s:JSON.stringify(S),at:S.at};if(FB)await FB.F.setDoc(dbRef,body);else await dbRef.set(body);mode='account'}
  catch(e){const c=e&&e.code;if(FB||c==='unavailable'||c==='resource_exhausted'){dirty=true;setTimeout(flush,3000+Math.random()*3000)}else{dbRef=null}}
  writing=false;if(dirty&&dbRef)flush()}
-function adopt(d){if(d&&typeof d.s==='string'){const r=JSON.parse(d.s);if(!S.at||(r.at||0)>=S.at){S=Object.assign(blank(),r);try{localStorage.setItem(LKEY,d.s)}catch(e){}}else{dirty=true;flush()}}}
+function adopt(d){if(d&&typeof d.s==='string'){const r=JSON.parse(d.s);if(!S.at||(r.at||0)>=S.at){keepV1(d.s,r);S=migrate(Object.assign(blank(),r));try{localStorage.setItem(LKEY,d.s)}catch(e){}}else{dirty=true;flush()}}}
 if(FBC){(async()=>{try{const b='https://www.gstatic.com/firebasejs/10.12.2/';
   const[A,Au,F]=await Promise.all([import(b+'firebase-app.js'),import(b+'firebase-auth.js'),import(b+'firebase-firestore.js')]);
   const app=A.initializeApp(FBC),auth=Au.getAuth(app);FB={auth,Au,F,db:F.getFirestore(app)};
@@ -269,10 +282,11 @@ async function copy(text){try{await navigator.clipboard.writeText(text);toast('C
 
 /* ---------- plan logic ---------- */
 function dayPlan(s){const w=weekOf(s),p=phaseOf(Math.max(1,w)),wd=(pd(s).getDay()+6)%7,L=w%2?['A','B','A']:['B','A','B'];
- const m=[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},{k:p==='F'?'z2':'int'},{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}][wd];return{w,p,wd,m}}
-function info(m,p){if(m.k==='w')return{t:WK[m.x].t,s:WK[m.x].ex.length+' exercises · '+(S.profile&&S.profile.equip&&S.profile.equip!=='gym'?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:50,day:'Workout '+m.x+' day'};
+ const row=weekRow(Math.max(1,w)),mini=row.mt&&S.profile&&S.profile.weekPlan==='min';
+ const m=(mini?[{k:'w',x:'A'},{k:'z2'},{k:'rest'},{k:'rest'},{k:'w',x:'B'},{k:'z2long'},{k:'rest'}]:[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},{k:p==='F'||row.lite?'z2':'int'},{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}])[wd];return{w,p,wd,m,row}}
+function info(m,p,row){row=row||{};if(m.k==='w')return{t:WK[m.x].t,s:WK[m.x].ex.length+' exercises · '+(row.lite?'3 sets · lighter week':S.profile&&S.profile.equip&&S.profile.equip!=='gym'?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:50,day:'Workout '+m.x+' day'};
  if(m.k==='z2')return{t:'Zone 2 cardio',s:'Talking pace, nose breathing only',min:p==='F'&&S.profile&&pers().walk==='no'?20:PH[p].z2,day:'Zone 2 day'};
- if(m.k==='z2long')return{t:'Long easy walk',s:'Zone 2 pace, with or without a loaded backpack',min:45,day:'Long walk day'};
+ if(m.k==='z2long')return{t:'Long easy walk',s:'Zone 2 pace, with or without a loaded backpack',min:row.long||45,day:'Long walk day'};
  if(m.k==='int')return{t:'Intervals + breath-hold walk',s:pick(p,[6,6,8])+' × 30 s hard / 90 s easy, then '+pick(p,[5,5,8])+' holds',min:30,day:'Intervals day'};
  return{t:'Rest + mobility',s:'Foam roller, wall angels, daily routine',min:15,day:'Rest day'}}
 function scored(){const src=(S.profile&&S.profile.scoreSrc)||'snorelab';return Object.keys(S.nights).sort().filter(k=>num(S.nights[k].snore)!=null&&(S.nights[k].src||'snorelab')===src)}
@@ -393,7 +407,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const wkDone=wk.filter(k=>k<=t).reduce((a,k)=>a+cnt(k),0),wkAll=wk.filter(k=>k<=t).length*4;
  let streak=0;for(let k=t;;k=addD(k,-1)){if(cnt(k)>0)streak++;else if(k!==t)break;if(streak>365||k<S.profile.start)break}
  const nights=Object.keys(S.nights).filter(k=>num(S.nights[k].snore)!=null).length;
- const tdn=cnt(t),nxt=d?(()=>{const i=info(d.m,d.p);const L=[['imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session'],['routine',done.sing?'Singing session':'Airway routine'],['main',i.t],['evening','Evening wind-down']];const f=L.find(x=>!done[x[0]]);return f?f[1]:null})():null;
+ const tdn=cnt(t),nxt=d?(()=>{const i=info(d.m,d.p,d.row);const L=[['imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session'],['routine',done.sing?'Singing session':'Airway routine'],['main',i.t],['evening','Evening wind-down']];const f=L.find(x=>!done[x[0]]);return f?f[1]:null})():null;
  const logged=!!S.nights[addD(t,-1)];
  const tile=(v,l)=>`<div class="card" style="margin:0;padding:14px 12px;text-align:center"><div class="cond" style="font-size:32px;line-height:1">${v}</div><div class="tiny mut" style="margin-top:4px">${l}</div></div>`;
  return`<div class="top"><span class="small mut">${fmt(t)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
@@ -413,7 +427,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  ${di>=0?`<div class="card" style="padding:18px;background:linear-gradient(160deg,#33261F,#24272C 62%);border:1px solid #4a3328">
   ${tag('Today · '+tdn+' of 4 done','var(--acct)')}
   <div style="font-size:22px;font-weight:700;margin:6px 0 2px">${!logged?'Start by logging last night':nxt?'Next: '+esc(nxt):'All done for today'}</div>
-  <div class="small mut" style="margin-bottom:6px">${esc(info(d.m,d.p).day)}</div>
+  <div class="small mut" style="margin-bottom:6px">${esc(info(d.m,d.p,d.row).day)}</div>
   <button class="btn" data-act="tab" data-v="${!logged?'log':'day'}" style="margin-bottom:0">${!logged?'Log last night':'Go to today'}</button>${!logged?`<button class="btn2" data-act="tab" data-v="day" style="margin-bottom:0">See today’s sessions</button>`:''}</div>`
  :`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
  ${moreBox}
@@ -449,7 +463,7 @@ function day(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.pat
  const must=`${rt?CPAPNOTE:''}${urgent?`<div class="warn">You have a sign that needs a doctor. Please see your GP about a sleep study, and don’t drive if you feel drowsy. <button class="btn2" data-act="gpok">I’ve booked it / spoken to my GP</button></div>`:''}`;
  const moreBox=more.length?`<details class="card" style="padding:4px 14px"><summary class="t1" style="cursor:pointer;min-height:48px;display:flex;align-items:center">More for you (${more.length})</summary>${more.join('')}</details>`:'';
  if(di<0)return`${head}<h1>Baseline time</h1><p class="mut">Your program starts ${fmt(S.profile.start)}. Log your snore score each morning until then.</p>${must}<button class="btn" data-act="tab" data-v="log">Log last night</button>${moreBox}`;
- const d=dayPlan(t),i=info(d.m,d.p),done=S.done[t]||{},y=addD(t,-1),days=[...Array(7)].map((_,k)=>addD(t,k-7));
+ const d=dayPlan(t),i=info(d.m,d.p,d.row),done=S.done[t]||{},y=addD(t,-1),days=[...Array(7)].map((_,k)=>addD(t,k-7));
  const vals=days.map(k=>S.nights[k]?num(S.nights[k].snore):null),mx=Math.max(st.base||0,...vals.filter(v=>v!=null),10);
  const row=(act,key,title,sub,right)=>`<button class="item" data-act="${act}"><span class="dot${done[key]?' on':''}">${done[key]?checkSvg:''}</span><span class="grow"><span class="t1">${title}</span><span class="t2">${sub}</span></span><span class="small ${done[key]?'':'mut'}" style="${done[key]?'color:var(--air)':''}">${done[key]?'Done':right}</span></button>`;
  const ch=st.change,stc=ch==null?'var(--edge)':ch>=.1?'var(--air)':ch>-.1?'var(--amb)':'var(--acc)',stl=ch==null?(st.n?'Building your baseline · '+st.n+' of 10 nights':'Log your first night to start'):ch>=.1?'Improving · '+Math.round(ch*100)+'% below baseline':ch>-.1?'Holding steady':'Worse · '+Math.round(-ch*100)+'% above baseline';
@@ -502,7 +516,7 @@ function daySum(k){const t=TODAY(),i=dayIdx(k),past=k<t,isT=k===t,dn0=S.done[k]|
  const head=`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${isT?'var(--acct)':'var(--dim)'}">${isT?'Today':k===addD(t,1)?'Tomorrow':past?'Past':'Coming up'} · ${fmt(k)}</div>`;
  const msH=ms.map(m=>`<div style="margin-top:12px;padding:12px 14px;border-radius:14px;background:#33291c;box-shadow:inset 3px 0 0 var(--amb)"><div class="t1" style="color:var(--amb)">★ ${esc(m.t)}</div><div class="small" style="margin-top:2px">${esc(m.s)}</div></div>`).join('');
  if(i<0)return`<div class="card">${head}<div style="font-size:20px;font-weight:700;margin:6px 0">Before the program</div><div class="small mut">${n&&num(n.snore)!=null?'Snore score '+Math.round(n.snore)+' (baseline night)':'Baseline: log your snore score each morning.'}</div>${msH}</div>`;
- const d=dayPlan(k),inf=info(d.m,d.p);
+ const d=dayPlan(k),inf=info(d.m,d.p,d.row);
  const L=[['imt',S.profile.imt!=='no'?'Breathing trainer':'Breathing session'],['routine',dn0.sing?'Singing session':'Airway routine'],['main',inf.t],['evening','Evening wind-down']];
  const rows=L.map(([key,l])=>`<div class="row" style="min-height:40px"><span class="dot${dn0[key]?' on':''}" style="width:22px;height:22px">${dn0[key]?checkSvg:''}</span><span class="grow small" style="${past&&!dn0[key]?'color:var(--dim)':''}">${esc(l)}</span>${key==='main'?`<span class="tiny mut">${inf.min} min</span>`:''}</div>`).join('');
  return`<div class="card">${head}
@@ -621,9 +635,9 @@ function ckres(){const c=ckOf(V.k),l=lastCk(V.k),r=c.res(l.a),more=V.wiz&&V.wiz.
  <div class="card"><div class="lab">What this changes</div><div>${esc(r.ch)}</div></div>
  ${more?`<button class="btn" data-act="cknext">Next check</button><button class="btn2" data-act="tab" data-v="today">Finish later</button>`:`<button class="btn" data-act="tab" data-v="today">Done</button>`}`}
 
-function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.equip||'gym',kgc=eq!=='bw';
- if(!W||W.x!==x||W.date!==t||W.eq!==eq){W={x,eq,date:t,ex:wk.ex.map(e=>{const a=eq!=='gym'&&e.alt?e.alt[eq]:null;let sc=a&&a[2]?pick(p,a[2]):e.s==='P'?PH[p].lift:pick(p,e.s);const n=parseInt(sc)||3;
-  const P=pers();let nm=a?a[0]:e.n,tp=a?a[1]:e.tip;if(a&&e.log&&!a[2])sc=n+' × 8–15, slow lowering';
+function workout(){const t=TODAY(),p=dayPlan(t).p,row=dayPlan(t).row,x=V.x,wk=WK[x],eq=S.profile.equip||'gym',kgc=eq!=='bw';
+ if(!W||W.x!==x||W.date!==t||W.eq!==eq){W={x,eq,date:t,ex:wk.ex.map(e=>{const a=eq!=='gym'&&e.alt?e.alt[eq]:null;let sc=a&&a[2]?pick(p,a[2]):e.s==='P'?PH[p].lift:e.log&&PH[p].ls?PH[p].ls:e.log&&PH[p].lt!=null?e.s[PH[p].lt]:pick(p,e.s);if(row.lite&&e.log)sc='3 ×'+sc.split('×')[1].split(',')[0]+', lighter week: about 90% of your recent load';const n=parseInt(sc)||3;
+  const P=pers();let nm=a?a[0]:e.n,tp=a?a[1]:e.tip;if(a&&e.log&&!a[2])sc=n+' × 8–15, slow lowering'+(row.lite?' (lighter week)':'');
   if(nm==='Push-ups'&&P.push!=null&&P.push<8){nm='Incline push-ups';tp='Hands on a kitchen bench or sturdy table. Lower the incline as you get stronger'}
   if(e.n==='Plank with chin tuck'&&p==='F'&&P.plank!=null&&P.plank<30)sc='3 × 20 s';
   return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(n)].map(()=>({kg:'',reps:''})):[]}})}}
@@ -641,7 +655,7 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,x=V.x,wk=WK[x],eq=S.profile.eq
  <button class="btn" data-act="finish">Finish workout</button>
  <div style="position:sticky;bottom:0;background:var(--deep);border-top:1px solid var(--card);margin:0 -16px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))" class="row"><span class="cond" style="font-size:30px;width:72px" data-tmr>${T?mmss(T.left):'1:30'}</span><button class="btn2" style="margin:0" data-act="rest" data-v="90">Rest 90 s</button><button class="btn2" style="margin:0" data-act="rest" data-v="180">Rest 3 min</button></div>`}
 
-function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
+function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
  if(d.m.k!=='int')return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div>
   <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.min} minutes.</p>
   <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
@@ -1060,7 +1074,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='tolocal'){const keep=JSON.stringify(S);LOCAL=true;try{localStorage.setItem('bs-local','1');localStorage.setItem('bs-state',keep)}catch(e){}toast('Kept on this phone. Your cloud copy stays until you delete it.');if(FB)FB.Au.signOut(FB.auth);return}
  if(a==='backup'){S.backupAt=t;save();const name='breathe-strong-backup-'+t+'.json',js=JSON.stringify(S),blob=new Blob([js],{type:'application/json'});let file=null;try{file=new File([blob],name,{type:'application/json'})}catch(e){}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(()=>{})}else{const u=URL.createObjectURL(blob),el=document.createElement('a');el.href=u;el.download=name;document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}render();return}
- if(a==='restoreok'){if(v==='yes'&&V.restore){S=Object.assign(blank(),V.restore.data);W=R=I=N=null;save();toast('Backup restored')}V.restore=null;render();return}
+ if(a==='restoreok'){if(v==='yes'&&V.restore){S=migrate(Object.assign(blank(),V.restore.data));W=R=I=N=null;save();toast('Backup restored')}V.restore=null;render();return}
  if(a==='signout'){if(FB){try{localStorage.removeItem(LKEY)}catch(e){}FB.Au.signOut(FB.auth)}return}
  if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
  if(a==='calday'){V.cd=v;V.cm=v.slice(0,7);render();return}

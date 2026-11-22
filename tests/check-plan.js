@@ -12,7 +12,7 @@ const VARIANTS = [
   ['gym-cpap-path', { equip: 'gym', path: 'retest' }],
   ['gym-low-fitness', { equip: 'gym' }, LOWFIT], ['bodyweight-low-fitness', { equip: 'bw' }, LOWFIT],
 ];
-const DAY = `(()=>{const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p);
+const DAY = `(()=>{const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
  const o={phase:d.p,phaseName:PH[d.p].n,weekday:d.wd,session:d.m,title:i.t,sub:i.s,min:i.min,dayLabel:i.day,breathOutSets:emstSets(),
   airway:myMoves(d.p).map(m=>[m.k,m.reps,m.hold,m.rest].join('/'))};
  if(d.m.k==='w'){W=null;V={s:'workout',x:d.m.x};workout();o.exercises=W.ex.map(e=>[e.n,e.sc,e.tip||'',e.log?e.sets.length+' logged sets':'tick']);W=null;V={s:'today'}}
