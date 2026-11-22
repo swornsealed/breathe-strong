@@ -249,7 +249,7 @@ function login(){return`<div style="min-height:70vh;display:flex;flex-direction:
  <p class="tiny mut" style="margin:2px 0 0">Syncs across your devices and survives a lost phone.</p>
  <button class="btn2" data-act="localonly" style="margin-top:14px">Keep it on this phone only</button>
  <p class="tiny mut" style="margin:2px 0 0">No account. Your logs never leave this phone. Back them up to iCloud Drive or Google Drive from Settings. On iPhone, add the app to your Home Screen first, then open it from there.</p>
- <p class="tiny mut">Breathe Strong is a training and tracking program. It doesn’t diagnose or treat sleep apnoea.</p></div>`}
+ <p class="tiny mut">Breathe Strong is a training and tracking program. It doesn’t diagnose sleep apnoea or replace your doctor or your treatment.</p></div>`}
 
 /* ---------- sound + timers ---------- */
 let ac=null;
@@ -950,7 +950,7 @@ function health(){const t=TODAY(),rt=S.profile.path==='retest',H=HL(),w=Math.max
  <div class="card">${steps.map((s,k)=>{const cur=w>=s[0]&&(k===steps.length-1||w<steps[k+1][0]),past=k<steps.length-1&&w>=steps[k+1][0];return`<div class="row" style="align-items:flex-start;padding:8px 0"><span class="dot${past?' on':''}" style="${cur?'border-color:var(--acct);border-width:3px':''}">${past?checkSvg:''}</span><span class="grow"><span class="tiny" style="color:${cur?'var(--acc)':'var(--mut)'}">${s[1]}${cur?' · now':''}</span><span class="t1" style="font-size:15px">${s[2]}</span></span></div>`}).join('')}</div>
  <button class="btn" data-act="go" data-v="report">${rt?'Doctor summary':'GP visit summary'}</button>
  <button class="btn2" data-act="go" data-v="record">Appointments and questions</button>
- <p class="tiny mut" style="text-align:center">Breathe Strong is a training and tracking program. It doesn’t diagnose or treat sleep apnoea.</p>`}
+ <p class="tiny mut" style="text-align:center">Breathe Strong is a training and tracking program. It doesn’t diagnose sleep apnoea or replace your doctor or your treatment.</p>`}
 
 function record(){const H=HL(),sel=(id,obj,cur)=>`<select id="${id}" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;width:100%;padding:0 8px">${Object.entries(obj).map(([k,l])=>`<option value="${k}" ${cur===k?'selected':''}>${l}</option>`).join('')}</select>`;
  const inp=(id,ph,ty,v)=>`<input id="${id}" type="${ty||'text'}" ${ty==='number'?'inputmode="decimal"':''} placeholder="${ph}" value="${esc(v??'')}" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%">`;
