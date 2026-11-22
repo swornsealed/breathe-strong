@@ -99,6 +99,11 @@ let Y52=false;try{Y52=localStorage.getItem('bs-year52')==='1'}catch(e){}
 const AFTER={w:53,p:'MT',long:60,mt:1};
 const weekRow=w=>w<=24?WEEKS[w-1]||{}:!Y52?{}:w<=52?WEEKS[w-1]:AFTER;
 const phaseOf=w=>w<=24?(WEEKS[w-1]||WEEKS[0]).p:!Y52?'M':weekRow(w).p;
+const TOTAL=()=>Y52?52:24;
+const STAGEWHY={awaken:'Learn the technique, set your baseline and build the daily habit.',build:'Progress your conditioning and consolidate the airway training.',reclaim:'Rebuild the loads, lengthen the weekend session and keep watching your sleep over the longer term.',thrive:'Consolidate, then settle into a week you can keep up, and review the year.'};
+const CARDIO={walk:['Walking','Brisk walk at an easy, steady effort. A loaded backpack is optional.'],bike:['Bike','Stationary, recumbent or outdoor bike at the same easy, steady effort.'],pool:['Pool','Swimming or walking in the water, steady, with short rests at the wall if you need them.'],machine:['Cross-trainer or rower','Cross-trainer or rowing machine at the same easy, steady effort.'],seated:['Seated or arm option','Arm bike, seated boxing or chair marching. Same minutes, same easy effort.']};
+const cardioMode=()=>(S.profile&&CARDIO[S.profile.cardioMode]?S.profile.cardioMode:'walk');
+const RECOVERY='<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Recovery and when to ease off</summary><p class="small">• <b>Sore joints, not muscles:</b> swap the exercise or lower the load. Don’t push through joint pain.<br>• <b>Unwell, or slept under 5 hours:</b> do the daily routines and skip or shorten the main session.<br>• <b>Missed days:</b> pick up from today. Never double up to catch up.<br>• <b>Missed more than 2 weeks:</b> use your earlier, lighter loads for a week.<br>• <b>Stop and get medical advice</b> for chest pain, faintness or unusual breathlessness.</p><p class="tiny mut">How you train is your call. Old injuries are a reason to adapt the plan, not a reason to stop.</p></details>';
 const pick=(p,a)=>a[p==='F'?0:p==='B'?1:2];
 /* alt: home versions [name, tip] for db = dumbbells, home = water jugs / backpack, bw = bodyweight only */
 const NECK={db:['Neck holds + posture','4-way neck holds, foam roller or rolled towel, wall angels'],home:['Neck holds + posture','4-way neck holds, rolled towel, wall angels'],bw:['Neck holds + posture','4-way neck holds, rolled towel, wall angels']};
@@ -411,8 +416,8 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const logged=!!S.nights[addD(t,-1)];
  const tile=(v,l)=>`<div class="card" style="margin:0;padding:14px 12px;text-align:center"><div class="cond" style="font-size:32px;line-height:1">${v}</div><div class="tiny mut" style="margin-top:4px">${l}</div></div>`;
  return`<div class="top"><span class="small mut">${fmt(t)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
- <h1 style="margin-top:2px">${di<0?'Baseline time':'Week '+w+' of 24'}</h1>
- <div class="small mut" style="margin:-6px 0 12px">${di<0?'Program starts '+fmt(S.profile.start)+'. Log your snore score each morning until then.':PH[p].n+' phase'}</div>
+ <h1 style="margin-top:2px">${di<0?'Baseline time':'Week '+w+(w>TOTAL()?'':' of '+TOTAL())}</h1>
+ <div class="small mut" style="margin:-6px 0 12px">${di<0?'Program starts '+fmt(S.profile.start)+'. Log your snore score each morning until then.':(Y52&&stageOf(w)?stageOf(w).n+' stage · ':'')+PH[p].n+' phase'+(weekRow(w).lite?' · lighter review week':'')}</div>
  ${must}
  <button data-act="tab" data-v="progress" class="card" style="display:block;width:100%;text-align:left;border:0;padding:18px;background:linear-gradient(150deg,${ch==null?'#24272C':ch>=.1?'#213530':ch>-.1?'#3a321f':'#3a261f'},#24272C 70%)" aria-label="Snore score ${st.last!=null?Math.round(st.last):'none yet'}, ${word}. Open Progress">
   <div class="between" style="align-items:flex-end">
@@ -432,8 +437,9 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  :`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
  ${moreBox}
  <div style="margin:18px 0 6px">${tag('Your program')}</div>
- <div class="card" style="padding:14px 16px"><div class="seg">${[['F',2],['B',3],['S',3],['R',16]].map(([k,n])=>`<div style="flex:${n};${k===p?'background:var(--acc)':('FBSR'.indexOf(k)<'FBSR'.indexOf(p)||p==='M'?'background:var(--air)':'')}"></div>`).join('')}</div>
-  <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,24)} of 24</span><span class="mut">Retest around week 24</span></div></div>`}
+ ${Y52?`<div class="card" style="padding:14px 16px"><div class="seg">${STAGES.map(g=>`<div style="flex:1;${w>=g.a&&w<=g.b?'background:var(--acc)':w>g.b?'background:var(--air)':''}"></div>`).join('')}</div>
+   <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,52)} of 52${stageOf(w)?' · '+stageOf(w).n:''}</span><span class="mut">${w>52?'Year complete':'Review at week '+[13,26,39,52].find(x=>x>=w)}</span></div></div>`:`<div class="card" style="padding:14px 16px"><div class="seg">${[['F',2],['B',3],['S',3],['R',16]].map(([k,n])=>`<div style="flex:${n};${k===p?'background:var(--acc)':('FBSR'.indexOf(k)<'FBSR'.indexOf(p)||p==='M'?'background:var(--air)':'')}"></div>`).join('')}</div>
+  <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,24)} of 24</span><span class="mut">Retest around week 24</span></div></div>`}`}
 
 function day(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.path==='retest',flags=S.profile.flags||[];
  const head=`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Back to home"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="small mut">${di<0?'Starts '+fmt(S.profile.start):fmt(t)+' · Day '+(di+1)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>`;
@@ -511,7 +517,17 @@ const MS=[
  {d:83,t:'3 months',s:'Most mouth and throat exercise trials measured their results at 3 months. Compare your snore score with your baseline.'},
  {d:111,t:'16 weeks',s:'Keep going. Strength and breathing gains keep building as long as the loads keep creeping up.'},
  {d:167,t:'6 months · retest',s:'Time to compare with where you started. CPAP and mouthguard users: book your repeat sleep study with your doctor. Don’t change your treatment without them.'}];
-const msOn=k=>{const i=dayIdx(k);return MS.filter(m=>m.d===i)};
+const MS52=[
+ {d:90,t:'Awaken complete · review',s:'Thirteen weeks done. Redo your checks and look at what has changed since day 1.'},
+ {d:91,t:'Build stage starts',s:'Weeks 14–26. Keep the loads creeping up and the daily routines steady.'},
+ {d:167,t:'24 weeks',s:'Compare with where you started. If you use CPAP or a mouthguard, keep using it, and ask your doctor whether repeat sleep testing is appropriate.'},
+ {d:181,t:'Build complete · half-year review',s:'A lighter week. Redo your checks, and take your summary to your doctor if your numbers have changed.'},
+ {d:182,t:'Reclaim stage starts',s:'Weeks 27–39. Loads rebuild from 4 × 6–8 and the weekend session gets longer.'},
+ {d:272,t:'Reclaim complete · review',s:'A lighter week. Redo your checks.'},
+ {d:273,t:'Thrive stage starts',s:'Weeks 40–52. Consolidate, then settle into a week you can keep up for good.'},
+ {d:363,t:'One year · review',s:'Fifty-two weeks. Redo every check and compare the year with day 1. Keep going: what you’ve built fades quickly if you stop.'}];
+const msAll=()=>Y52?MS.filter(m=>m.d!==167).concat(MS52).sort((a,b)=>a.d-b.d):MS;
+const msOn=k=>{const i=dayIdx(k);return msAll().filter(m=>m.d===i)};
 function daySum(k){const t=TODAY(),i=dayIdx(k),past=k<t,isT=k===t,dn0=S.done[k]||{},n=S.nights[k],ms=msOn(k);
  const head=`<div class="tiny" style="font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${isT?'var(--acct)':'var(--dim)'}">${isT?'Today':k===addD(t,1)?'Tomorrow':past?'Past':'Coming up'} · ${fmt(k)}</div>`;
  const msH=ms.map(m=>`<div style="margin-top:12px;padding:12px 14px;border-radius:14px;background:#33291c;box-shadow:inset 3px 0 0 var(--amb)"><div class="t1" style="color:var(--amb)">★ ${esc(m.t)}</div><div class="small" style="margin-top:2px">${esc(m.s)}</div></div>`).join('');
@@ -531,15 +547,17 @@ function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w
  const sel=V.cd||t,mo=V.cm||t.slice(0,7),[yy,mm]=mo.split('-').map(Number),first=new Date(yy,mm-1,1),lead=(first.getDay()+6)%7,dim=new Date(yy,mm,0).getDate();
  const prevM=iso(new Date(yy,mm-2,1)).slice(0,7),nextM=iso(new Date(yy,mm,1)).slice(0,7);
  const keys=['imt','routine','main','evening'],cnt=k=>{const x=S.done[k]||{};return keys.filter(z=>x[z]).length};
- const cells=[...Array(lead)].map(()=>'<div></div>').concat([...Array(dim)].map((_,j)=>{const k=mo+'-'+pad(j+1),i=dayIdx(k),ms=msOn(k).length,c=cnt(k),inP=i>=0&&i<168,isT=k===t,isS=k===sel;
+ const cells=[...Array(lead)].map(()=>'<div></div>').concat([...Array(dim)].map((_,j)=>{const k=mo+'-'+pad(j+1),i=dayIdx(k),ms=msOn(k).length,c=cnt(k),inP=i>=0&&i<TOTAL()*7,isT=k===t,isS=k===sel;
   const dot=k<=t&&inP?(c>=4?'var(--air)':c>0?'var(--amb)':'var(--edge)'):'transparent';
   return`<button data-act="calday" data-v="${k}" aria-label="${fmt(k)}${ms?', milestone':''}" style="position:relative;height:46px;border-radius:12px;border:${isS?'2px solid var(--acc)':'0'};background:${isT?'#3a2a22':inP?'var(--card2)':'transparent'};color:${inP||isT?'var(--ink)':'var(--dim)'};font-weight:${isT?800:600};font-size:15px;padding:0">${j+1}
    ${ms?'<span style="position:absolute;top:3px;right:5px;color:var(--amb);font-size:10px">★</span>':''}<span style="position:absolute;left:50%;bottom:5px;width:6px;height:6px;margin-left:-3px;border-radius:3px;background:${dot}"></span></button>`}));
- const up=MS.filter(m=>m.d>di).slice(0,2);
+ const up=msAll().filter(m=>m.d>di).slice(0,2);
  return`<div class="top"><span></span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
  <h1>Your plan</h1>
- <div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
- <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acct);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>
+ ${Y52?`<div class="seg">${STAGES.map(g=>`<div style="flex:1;${w>=g.a&&w<=g.b?'background:var(--acc)':w>g.b?'background:var(--air)':''}"></div>`).join('')}</div>
+  <div class="seg" style="margin-top:2px">${STAGES.map(g=>`<button data-act="stage" data-v="${g.k}" style="flex:1;min-height:48px;background:none;border:0;padding:6px 0;text-align:left;font-size:14px;line-height:1.3;color:${w>=g.a&&w<=g.b?'var(--acct)':'var(--mut)'};font-weight:${w>=g.a&&w<=g.b?600:400}">${g.n}<br>wk ${g.a}–${g.b}</button>`).join('')}</div>
+  <p class="tiny mut" style="margin:0">${PH[p].n} phase${weekRow(w).lite?' · lighter review week':''}. Tap a stage to see its weeks.</p>`:`<div class="seg">${segs.map(s=>`<div style="flex:${s[3]};${s[0]===p?'background:var(--acc)':('FBSR'.indexOf(s[0])<('FBSR'.indexOf(p)<0?4:'FBSR'.indexOf(p))?'background:var(--air)':'')}"></div>`).join('')}</div>
+ <div class="seg tiny mut" style="margin-top:6px">${segs.map(s=>`<div style="flex:${s[3]};height:auto;background:none;${s[0]===p?'color:var(--acct);font-weight:600':''}">${s[1]}<br>${s[2]}</div>`).join('')}</div>`}
  <h2>Calendar</h2>
  <div class="card" style="padding:12px">
   <div class="between" style="margin-bottom:8px"><button class="icon" data-act="calm" data-v="${prevM}" aria-label="Previous month"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
@@ -551,8 +569,15 @@ function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w
  ${daySum(sel)}
  ${up.length?`<h2>Coming up</h2>${up.map(m=>{const k=addD(S.profile.start,m.d);return`<button class="item" data-act="calday" data-v="${k}"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">${esc(m.t)}</span><span class="t2">${fmt(k)} · in ${dayIdx(k)-di} day${dayIdx(k)-di===1?'':'s'}</span></span></button>`}).join('')}`:''}
  <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing in and out + the airway routine, about 20 min, then the evening wind-down.<br>This phase: lifts at ${PH[p].lift}, stopping with 1–2 reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
+ ${Y52&&weekRow(w).mt?`<div class="card small"><b>Your week:</b> ${S.profile.weekPlan==='min'?'Minimum (2 strength, 2 cardio)':'Standard (3 strength, 3 cardio)'}. From week 44 you choose the week you can keep up. Change it in Settings.</div>`:''}
+ ${Y52?RECOVERY:''}
  ${S.profile.path==='retest'?CPAPNOTE:''}
  <button class="btn2" data-act="go" data-v="settings">Settings and checks</button>`}
+function stage(){const g=STAGES.find(x=>x.k===V.k)||STAGES[0],now=Math.max(1,weekOf(TODAY()));
+ return`<div class="top"><button class="icon" data-act="tab" data-v="plan" aria-label="Back to plan">${back}</button><span class="small mut">Stage ${STAGES.indexOf(g)+1} of 4 · weeks ${g.a}–${g.b}</span><span style="width:44px"></span></div>
+ <h1>${g.n}</h1><p class="mut">${STAGEWHY[g.k]}</p>
+ ${[...Array(g.b-g.a+1)].map((_,i)=>{const w=g.a+i,r=weekRow(w),ph=PH[r.p];return`<button class="item" data-act="week" data-v="${w}" ${w===now?'style="box-shadow:inset 3px 0 0 var(--acc)"':''}><span class="grow"><span class="t1">Week ${w}${w===now?' · now':''}${[13,26,39,52].includes(w)?' <span style="color:var(--amb)">★ review</span>':''}</span><span class="t2">${ph.n} · ${r.lite?'lighter week, 3 sets':esc(ph.lift)} · Saturday ${r.long||45} min</span></span></button>`}).join('')}
+ <p class="tiny mut">Every week also has the daily airway routine, breathing trainer and evening wind-down.</p>`}
 
 function watch(){const cur=S.profile.watch||'';return`
  <div class="top"><button class="icon" data-act="tab" data-v="${V.from&&V.from!=='watch'?V.from:'today'}" aria-label="Close">${back}</button><span class="small mut">Watch and data</span><span style="width:44px"></span></div>
@@ -576,6 +601,10 @@ function settings(){const pr=S.profile;return`
  <h2>Where you train</h2>
  ${radios('equip',equipOpts(),pr.equip||'gym')}
  ${swaps()}
+ ${Y52?`<h2>Cardio</h2>
+ <p class="tiny mut" style="margin-top:0">Pick what suits your body. Same minutes, same easy effort, and any session can be split into shorter bouts.</p>
+ ${radios('cardioq',Object.entries(CARDIO).map(([k,c])=>[k,c[0],c[1]]),cardioMode())}
+ ${weekRow(Math.max(1,weekOf(TODAY()))).mt?`<h2>Your week</h2>${radios('weekq',[['std','Standard week','3 strength sessions and 3 cardio sessions'],['min','Minimum week','2 strength sessions and 2 cardio sessions. A level you can hold for life. Daily routines stay the same']],pr.weekPlan==='min'?'min':'std')}`:''}`:''}
  <h2>Breathing trainer</h2>
  ${radios('imtq',imtOpts(),pr.imt==='no'?'no':'yes')}
  ${imtInfo}
@@ -641,15 +670,19 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,row=dayPlan(t).row,x=V.x,wk=WK
   if(nm==='Push-ups'&&P.push!=null&&P.push<8){nm='Incline push-ups';tp='Hands on a kitchen bench or sturdy table. Lower the incline as you get stronger'}
   if(e.n==='Plank with chin tuck'&&p==='F'&&P.plank!=null&&P.plank<30)sc='3 × 20 s';
   return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(n)].map(()=>({kg:'',reps:''})):[]}})}}
- const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
+ const sug=n=>{if(!Y52||row.lite||dayPlan(t).w<27)return'';const has=z=>z.reps!=='';const past=[];for(let k=S.sessions.length-1;k>=0&&past.length<2;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.filter(has).length>=2);if(e)past.push(e)}
+   if(past.length<2)return'';const st=past.map(e=>{const m=/×\s*(\d+)(?:–(\d+))?/.exec(e.sc||'');if(!m)return 0;const lo=+m[1],hi=+(m[2]||m[1]),r=e.sets.filter(has).map(z=>+z.reps);return r.every(x=>x>=hi)?1:r.some(x=>x<lo)?-1:0});
+   return st[0]===1&&st[1]===1?`<div class="tiny" style="color:var(--air)">Top of the range two sessions running. If you had a rep or two in hand, ${kgc?'add the smallest load you can (about 2.5 kg)':'slow the lowering or add a pause'}. Your call.</div>`:st[0]===-1&&st[1]===-1?`<div class="tiny" style="color:var(--amb)">Under the range two sessions running. ${kgc?'Drop the load by 5–10%':'Use an easier version'} and build back up.</div>`:''};
+  const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
  return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
  <h1>${esc(wk.t)}</h1>
  <div class="card small"><b style="color:var(--acct)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
+  ${row.lite?`<div class="card small" style="box-shadow:inset 3px 0 0 var(--air)"><b>Lighter week.</b> Three sets at about 90% of your recent loads. This is planned recovery, not a step back.</div>`:''}${Y52?RECOVERY:''}
  ${W.ex.map((e,i)=>{const L=e.log?lastOf(e.n):null,tip=e.tip;return`<div class="card">
   <div class="row" style="align-items:flex-start">${LIFT[e.n]?`<button class="icon" style="width:92px;height:77px;flex:none;padding:0" data-act="zoom" data-v="${i}" aria-label="${V.zoom===i?'Hide':'Show'} how to do ${esc(e.n)}">${liftArt(e.n)}</button>`:''}<div class="grow"><span class="t1">${esc(e.n)}</span><span class="small mut">${esc(e.sc)}</span>${LIFT[e.n]?`<span class="tiny" style="color:var(--acct)">${V.zoom===i?'Tap picture to close':'Tap picture to enlarge'}</span>`:''}</div></div>
   ${V.zoom===i?`<div style="margin-top:10px">${liftArt(e.n,true)}</div>`:''}
   ${tip?`<div class="tiny mut">${esc(tip)}</div>`:''}
-  ${e.log?`${L?`<div class="tiny" style="color:var(--air)">Last time: ${esc(L)}</div>`:''}<div class="setrow tiny mut" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span>Set</span>${kgc?'<span>kg</span>':''}<span>Reps</span></div>${e.sets.map((s,j)=>`<div class="setrow" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span class="small">${j+1}</span>${kgc?`<input type="number" inputmode="decimal" aria-label="${esc(e.n)} set ${j+1} kg" data-set="${i}:${j}:kg" value="${esc(s.kg)}">`:''}<input type="number" inputmode="numeric" aria-label="${esc(e.n)} set ${j+1} reps" data-set="${i}:${j}:reps" value="${esc(s.reps)}"></div>`).join('')}`
+  ${e.log?`${L?`<div class="tiny" style="color:var(--air)">Last time: ${esc(L)}</div>`:''}${sug(e.n)}<div class="setrow tiny mut" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span>Set</span>${kgc?'<span>kg</span>':''}<span>Reps</span></div>${e.sets.map((s,j)=>`<div class="setrow" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span class="small">${j+1}</span>${kgc?`<input type="number" inputmode="decimal" aria-label="${esc(e.n)} set ${j+1} kg" data-set="${i}:${j}:kg" value="${esc(s.kg)}">`:''}<input type="number" inputmode="numeric" aria-label="${esc(e.n)} set ${j+1} reps" data-set="${i}:${j}:reps" value="${esc(s.reps)}"></div>`).join('')}`
   :`<label class="check" style="border:0"><input type="checkbox" data-exdone="${i}" ${e.done?'checked':''}>Done</label>`}
  </div>`}).join('')}
  <button class="btn" data-act="finish">Finish workout</button>
@@ -661,7 +694,7 @@ function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
   <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
   <button class="btn2" data-act="ctimer" data-v="${i.min*60}">${T?'Restart timer':'Start timer'}</button>
   ${d.m.k==='rest'?`<div class="card small">Foam roller thoracic extension × 10, wall angels 2 × 10, then your daily routine and IMT.</div>`:`<div class="card small"><b>What’s Zone 2?</b> An easy, steady pace you can hold for a long time: you could chat but not sing, and you can breathe through your nose the whole way. If you have to open your mouth to breathe, slow down. On a watch it’s roughly 60–70% of your maximum heart rate (about 180 minus your age).</div>
-  <div class="card small"><b>${d.m.k==='z2long'?'Pick one today':'Ways to do it'}:</b><br>• <b>Plain walk:</b> brisk walk, bike or rower at Zone 2 pace.<br>• <b>Loaded walk:</b> the same walk wearing a backpack with 5–10 kg (a few water bottles or books). Stand tall, chin tucked. It adds strength to the cardio.${d.m.k==='z2long'?'<br>New to it? Start without the pack and add weight from week 3.':''}</div>`}
+  ${Y52?`<div class="card small"><b>Your choice: ${CARDIO[cardioMode()][0]}.</b> ${CARDIO[cardioMode()][1]}${cardioMode()==='walk'&&d.m.k==='z2long'?' New to the pack? Start without it.':''}<br>Can’t do it in one go? Split it into shorter bouts across the day, for example 3 × 10 minutes. It counts the same.<br><span class="tiny mut">Change your activity any time in Settings.</span></div>`:`<div class="card small"><b>${d.m.k==='z2long'?'Pick one today':'Ways to do it'}:</b><br>• <b>Plain walk:</b> brisk walk, bike or rower at Zone 2 pace.<br>• <b>Loaded walk:</b> the same walk wearing a backpack with 5–10 kg (a few water bottles or books). Stand tall, chin tucked. It adds strength to the cardio.${d.m.k==='z2long'?'<br>New to it? Start without the pack and add weight from week 3.':''}</div>`}`}
   <button class="btn" data-act="cdone">Mark done</button>`;
  const R0=pick(d.p,[6,6,8]),H0=pick(d.p,[5,5,8]);if(!N)N={r:1,ph:'ready',R:R0,H:H0,steps:[]};
  return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
@@ -671,7 +704,7 @@ function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
   <div class="card">${[...Array(N.H)].map((_,k)=>`<label class="between" style="margin:6px 0"><span>Hold ${k+1} steps</span><input type="number" inputmode="numeric" style="width:110px" data-step="${k}" value="${esc(N.steps[k]||'')}"></label>`).join('')}</div>
   <button class="btn" data-act="idone">Save session</button>`
  :`<h1>${N.ph==='hard'?'Go hard':N.ph==='easy'?'Easy, nose breathing':'Intervals'}</h1>
-  <p class="mut small">${N.R} rounds of 30 s hard and 90 s easy on a rower, bike, sled or hill. No gym? Stair climbs, a skipping rope, burpees or a steep hill walk all work. In each easy block, slow your breathing back down.</p>
+  <p class="mut small">${N.R} rounds of 30 s hard and 90 s easy on a rower, bike, sled or hill. No gym? Stair climbs, a skipping rope, burpees or a steep hill walk all work.${Y52?' Easier on the joints: bike, pool or arm bike. Pick what suits you.':''} In each easy block, slow your breathing back down.</p>
   <div class="card" style="text-align:center"><div class="small mut">Round ${N.r} of ${N.R}</div><div class="huge" data-tmr style="color:${N.ph==='hard'?'var(--acc)':'var(--ink)'}">${T?mmss(T.left):'0:30'}</div></div>
   ${N.ph==='ready'?`<button class="btn" data-act="istart">Start round 1</button>`:`<button class="btn2" data-act="iskip">Skip to breath-hold walk</button>`}`}`}
 
@@ -1043,7 +1076,7 @@ function render(){const v=$('#view'),nav=$('#nav');
  if(FBC&&!USER&&!LOCAL){v.innerHTML=login();nav.style.display='none';v.className='wrap full';return}
  if(!S.profile){v.innerHTML=setup();nav.style.display='none';v.className='wrap full';return}
  if(S.profile.equip==null||S.profile.imt==null){v.innerHTML=setup2();nav.style.display='none';v.className='wrap full';return}
- const fn={today,plan,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
+ const fn={today,plan,stage,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
  v.innerHTML=fn();const tab=TABS.includes(V.s);nav.style.display=tab?'':'none';v.className='wrap'+(tab?'':' full');
  nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s==='day'?'today':V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
  const c=$('#chart');if(c){drawChart();new ResizeObserver(drawChart).observe(c)}}
@@ -1078,6 +1111,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='signout'){if(FB){try{localStorage.removeItem(LKEY)}catch(e){}FB.Au.signOut(FB.auth)}return}
  if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
  if(a==='calday'){V.cd=v;V.cm=v.slice(0,7);render();return}
+  if(a==='stage'){go('stage',{k:v});return}
+  if(a==='week'){const k=addD(S.profile.start,(+v-1)*7);go('plan',{cd:k,cm:k.slice(0,7)});return}
  if(a==='calm'){V.cm=v;render();return}
  if(a==='zoom'){V.zoom=V.zoom===+v?null:+v;render();return}
  if(a==='go'){V.confirm=false;go(v,{from:V.s});return}
@@ -1090,7 +1125,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='ckclose'){SW=null;go(V.from==='settings'?'settings':'today');return}
  if(a==='reset'){if(!V.confirm&&!v){V.confirm=true;render();return}if(v==='yes'){S=blank();try{localStorage.removeItem('bs-state')}catch(e){}W=R=I=N=null;save();V={s:'today'};render();window.scrollTo(0,0);toast('All data deleted');return}V.confirm=false;render();return}
  if(a==='gpok'){S.profile.gpOk=true;save();render();return}
- if(a==='saveplan'){S.profile.start=$('#start').value||S.profile.start;S.profile.path=document.querySelector('[name=path]:checked').value;S.profile.equip=document.querySelector('[name=equip]:checked').value;S.profile.imt=document.querySelector('[name=imtq]:checked').value;const sr=document.querySelector('[name=src]:checked');if(sr)S.profile.scoreSrc=sr.value;const em=document.querySelector('[name=emstq]:checked');if(em)S.profile.emst=em.value;W=null;save();toast('Settings saved');V.confirm=false;render();window.scrollTo(0,0);return}
+ if(a==='saveplan'){S.profile.start=$('#start').value||S.profile.start;S.profile.path=document.querySelector('[name=path]:checked').value;S.profile.equip=document.querySelector('[name=equip]:checked').value;S.profile.imt=document.querySelector('[name=imtq]:checked').value;const sr=document.querySelector('[name=src]:checked');if(sr)S.profile.scoreSrc=sr.value;const em=document.querySelector('[name=emstq]:checked');if(em)S.profile.emst=em.value;const cq=document.querySelector('[name=cardioq]:checked');if(cq)S.profile.cardioMode=cq.value;const wq=document.querySelector('[name=weekq]:checked');if(wq)S.profile.weekPlan=wq.value;W=null;save();toast('Settings saved');V.confirm=false;render();window.scrollTo(0,0);return}
  if(a==='buy'){go('buy',{from:V.s});return}
  if(a==='gotimt'){S.profile.imt='yes';save();toast('Trainer sessions on');I=null;render();return}
  if(a==='imt'){I=null;keepAwake();go('imt');return}

@@ -19,10 +19,17 @@ Status: **specification accepted by the owner; build in progress on a branch. Th
   copy of the version 1 data is kept on the device. 11 upgrade checks pass.
 - Stage 3 done: weeks 25 to 52 are in the app, **switched off by default**. With the switch off the
   app behaves exactly as before. With it on, all 28 new weeks match section 2.4.
-- Not yet built: the screens (stage navigation, reviews, goals, cardio choice, Minimum-week choice,
-  load suggestions, year-end summary). The "Week 46 of 24" display for users past week 24 is fixed
-  in stage 4.
-Prepared from a line-by-line read of `index.html` on `main` (commit `6b0e6c6`).
+- Stage 4 done (shown only with the switch on): "Week N of 52" with the stage name, a four-stage bar
+  on Plan, a screen per stage listing its 13 weeks, the calendar and milestones extended to the full
+  year, and softer wording at week 24.
+- Stage 5 done (shown only with the switch on): cardio activity choice in Settings (walking, bike,
+  pool, cross-trainer or rower, seated or arm option) with split sessions, the Standard or Minimum
+  week choice from week 44, recovery guidance on Plan and in workouts, lighter-week notices, and
+  load suggestions from week 27 that leave the decision to the user.
+- One fix that applies with the switch off as well: a user past week 24 now sees "Week 46", not
+  "Week 46 of 24".
+- Not yet built: stage reviews, goals and the sleep-quality rating (stage 6), long-term history and
+  the year-end summary (stage 7).
 
 Contents
 1. [Audit of the existing program](#1-audit-of-the-existing-program)

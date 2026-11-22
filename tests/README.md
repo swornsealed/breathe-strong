@@ -12,6 +12,10 @@ Needs Node and Playwright with Chromium. Run from the repository root.
 - `node tests/check-year.js` switches on weeks 25 to 52 and checks them against section 2.4 of
   `docs/52-week/program-plan.md`, and confirms weeks 1 to 24 are unaffected.
 
+- `node tests/check-screens.js` drives the screens: stage navigation, the full-year calendar and
+  milestones, cardio choice, the Minimum week, recovery guidance and load suggestions, and confirms
+  the default screens are unchanged. Add `--shots` to save screenshots to `tests/shots/`.
+
 Weeks 25 to 52 are off by default. To try them in a browser, run
 `localStorage.setItem('bs-year52','1')` in the console and reload; remove the key to switch back.
 
