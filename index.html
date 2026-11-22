@@ -84,7 +84,12 @@ textarea{width:100%;min-height:200px;font:14px/1.5 ui-monospace,Menlo,monospace;
 {
 /* ---------- data: program ---------- */
 const PH={F:{n:'Foundation',lift:'3 × 10–12',z2:30},B:{n:'Build',lift:'4 × 6–8',z2:40},S:{n:'Strength',lift:'4–5 × 4–6',z2:45},R:{n:'Progression',lift:'4–5 × 4–6, add small loads',z2:45},M:{n:'Maintenance',lift:'4–5 × 4–6',z2:45}};
-const phaseOf=w=>w<=2?'F':w<=5?'B':w<=8?'S':w<=24?'R':'M';
+/* The year is four 13-week stages. Each week has one entry in WEEKS; the phase (PH key) sets that week's prescription.
+   Weeks 1-24 reproduce the original phase rule exactly and are covered by tests/check-plan.js. Weeks 25-52 are added later. */
+const STAGES=[{k:'awaken',n:'Awaken',a:1,b:13},{k:'build',n:'Build',a:14,b:26},{k:'reclaim',n:'Reclaim',a:27,b:39},{k:'thrive',n:'Thrive',a:40,b:52}];
+const stageOf=w=>STAGES.find(s=>w>=s.a&&w<=s.b)||null;
+const WEEKS=[...Array(24)].map((_,i)=>{const w=i+1;return{w,p:w<=2?'F':w<=5?'B':w<=8?'S':'R'}});
+const phaseOf=w=>{const r=WEEKS[w-1];return r?r.p:'M'};
 const pick=(p,a)=>a[p==='F'?0:p==='B'?1:2];
 /* alt: home versions [name, tip] for db = dumbbells, home = water jugs / backpack, bw = bodyweight only */
 const NECK={db:['Neck holds + posture','4-way neck holds, foam roller or rolled towel, wall angels'],home:['Neck holds + posture','4-way neck holds, rolled towel, wall angels'],bw:['Neck holds + posture','4-way neck holds, rolled towel, wall angels']};
