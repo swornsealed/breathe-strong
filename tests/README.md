@@ -16,6 +16,10 @@ Needs Node and Playwright with Chromium. Run from the repository root.
   milestones, cardio choice, the Minimum week, recovery guidance and load suggestions, and confirms
   the default screens are unchanged. Add `--shots` to save screenshots to `tests/shots/`.
 
+- `node tests/check-reviews.js` covers stage reviews, goals, the sleep-quality rating, the year view
+  and the history added to the clinician summary, including a check that no review text suggests
+  reducing or stopping treatment.
+
 Weeks 25 to 52 are off by default. To try them in a browser, run
 `localStorage.setItem('bs-year52','1')` in the console and reload; remove the key to switch back.
 

@@ -436,7 +436,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
   <button class="btn" data-act="tab" data-v="${!logged?'log':'day'}" style="margin-bottom:0">${!logged?'Log last night':'Go to today'}</button>${!logged?`<button class="btn2" data-act="tab" data-v="day" style="margin-bottom:0">See today’s sessions</button>`:''}</div>`
  :`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
  ${moreBox}
- <div style="margin:18px 0 6px">${tag('Your program')}</div>
+ ${Y52?reviewCard():''}<div style="margin:18px 0 6px">${tag('Your program')}</div>
  ${Y52?`<div class="card" style="padding:14px 16px"><div class="seg">${STAGES.map(g=>`<div style="flex:1;${w>=g.a&&w<=g.b?'background:var(--acc)':w>g.b?'background:var(--air)':''}"></div>`).join('')}</div>
    <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,52)} of 52${stageOf(w)?' · '+stageOf(w).n:''}</span><span class="mut">${w>52?'Year complete':'Review at week '+[13,26,39,52].find(x=>x>=w)}</span></div></div>`:`<div class="card" style="padding:14px 16px"><div class="seg">${[['F',2],['B',3],['S',3],['R',16]].map(([k,n])=>`<div style="flex:${n};${k===p?'background:var(--acc)':('FBSR'.indexOf(k)<'FBSR'.indexOf(p)||p==='M'?'background:var(--air)':'')}"></div>`).join('')}</div>
   <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,24)} of 24</span><span class="mut">Retest around week 24</span></div></div>`}`}
@@ -880,7 +880,7 @@ function log(){const t=TODAY(),dsel=V.date||addD(t,-1),n=S.nights[dsel]||{},w=Ma
  <label class="card"><div class="lab">Night of</div><input type="date" id="ld" value="${dsel}" max="${t}"></label>
  <div class="card"><div class="lab">Score from</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${srcOpts().map(([k,l,s,dis])=>`<label class="chip row" style="gap:8px;${dis?'opacity:.55':''}"><input type="radio" name="nsrc" value="${k}" ${(n.src||S.profile.scoreSrc||'snorelab')===k&&!dis?'checked':''} ${dis?'disabled':''} style="width:18px;height:18px">${l}${dis?' · soon':''}</label>`).join('')}</div>
  <label for="snore" class="t1" style="font-size:15px">Snore score</label><div class="row" style="margin-top:6px"><input id="snore" type="number" inputmode="decimal" style="width:140px;flex:none;font:800 30px 'Barlow Condensed',sans-serif;height:56px;padding:0 12px" value="${esc(n.snore??'')}"><span class="tiny mut">Copy it from SnoreLab’s morning report. The built-in recorder will fill this in automatically once it’s ready.</span></div></div>
- <div class="card">${sl('partner','Partner rating (how bad was it?)',n.partner)}${sl('tired','Daytime tiredness',n.tired)}</div>
+ <div class="card">${sl('partner','Partner rating (how bad was it?)',n.partner)}${sl('tired','Daytime tiredness',n.tired)}${Y52?sl('sleepq','Sleep quality (10 = slept well)',n.sleepQ):''}</div>
  <div class="grid3">
   <label class="card" style="margin:0;padding:10px"><div class="lab">Resting HR</div><input id="hr" type="number" inputmode="numeric" value="${esc(n.hr??'')}"></label>
   <label class="card" style="margin:0;padding:10px"><div class="lab">Breaths/min</div><input id="br" type="number" inputmode="decimal" value="${esc(n.br??'')}"></label>
@@ -912,7 +912,7 @@ function progress(){const st=stats(),pts=weekly(),ks=scored(),wks=Object.keys(S.
  const firstOf=f=>{const k=Object.keys(S.nights).sort().find(k=>num(S.nights[k][f])!=null);return k?num(S.nights[k][f]):null};
  const tile=(lab,now,first,unit,better)=>{const d=now!=null&&first!=null?r1(now-first):null;return`<div class="card" style="margin:0"><div class="tiny mut">${lab}</div><div class="cond" style="font-size:32px;line-height:1.1">${now==null?'–':r1(now)} <span style="font-size:16px;color:var(--mut)">${unit}</span></div><div class="tiny" style="color:${d==null?'var(--mut)':(better(d)?'var(--air)':'var(--acc)')}">${d==null?'not enough data':(d>0?'+':'')+d+' since start'}</div></div>`};
  const bf=wks.length?num(S.weekly[wks[0]].bolt):null,bl=wks.length?num(S.weekly[wks[wks.length-1]].bolt):null;
- return`<div class="small mut">${ks.length} night${ks.length===1?'':'s'} logged</div>
+ return`<div class="small mut">${ks.length} night${ks.length===1?'':'s'} logged</div>${Y52?yearLinks():''}
  <h1>${st.change!=null?(st.change>=0?'Snoring down '+Math.round(st.change*100)+'% since baseline':'Snoring up '+Math.round(-st.change*100)+'% on baseline'):'Log nights to see your trend'}</h1>
  <p class="tiny mut">Scores from ${esc(SRC[(S.profile.scoreSrc)||'snorelab'])}. Scores from different apps aren’t mixed, because they measure differently.</p>
  ${st.base&&st.prov?`<p class="tiny mut">Baseline is provisional until you’ve logged 10 nights (${st.n} so far).</p>`:''}
@@ -1059,9 +1059,9 @@ Resting HR ${avg7('hr')??'n/a'} bpm · breathing ${avg7('br')??'n/a'}/min · SpO
 ${(()=>{const b=lastCk('body');return b?'Neck '+(b.a.neck||'?')+' cm · weight '+(b.a.w||'?')+' kg'+(P.bmi?' · BMI '+r1(P.bmi):''):''})()}
 
 TRAINING
-Program week ${w} of 24 · ${Object.values(S.done).filter(d=>d.main).length} workouts/cardio · ${Object.values(S.done).filter(d=>d.routine).length} airway routines · ${Object.values(S.done).filter(d=>d.imt).length} breathing sessions (in${emstOn()?' and out':''}) · ${Object.values(S.done).filter(d=>d.evening).length} evening wind-downs
+Program week ${w}${w>TOTAL()?'':' of '+TOTAL()} · ${Object.values(S.done).filter(d=>d.main).length} workouts/cardio · ${Object.values(S.done).filter(d=>d.routine).length} airway routines · ${Object.values(S.done).filter(d=>d.imt).length} breathing sessions (in${emstOn()?' and out':''}) · ${Object.values(S.done).filter(d=>d.evening).length} evening wind-downs
 ${(()=>{const f=fshift(30);return f?'Overnight neck change (bedtime to waking): average '+(f.d>0?'+':'')+r1(f.d)+' cm over '+f.n+' nights':''})()}
-${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
+${Y52?historyText():''}${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
  return`<div class="top"><button class="icon" data-act="tab" data-v="retest" aria-label="Close">${back}</button><span class="small mut">${rt?'Doctor summary':'GP visit summary'}</span><span style="width:44px"></span></div>
  <h1>${rt?'Doctor summary':'GP visit summary'}</h1>
  <p class="small mut" style="margin-top:0">${rt?'Take this to your sleep clinic or GP.':'Show this to your GP. They do the official screening questionnaires and decide whether to refer you for a sleep study.'} Copy it into an email or note, or show this screen.</p>
@@ -1070,13 +1070,74 @@ ${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
 
 function retest(){return health()}
 
+/* ---------- stage reviews, goals and the year view (shown only with weeks 25-52 switched on) ---------- */
+const REVIEWS=[{k:'base',n:'Baseline',w:0},{k:'w13',n:'Awaken review',w:13,a:1,b:13},{k:'w26',n:'Build review',w:26,a:14,b:26},{k:'w39',n:'Reclaim review',w:39,a:27,b:39},{k:'w52',n:'Year-end review',w:52,a:40,b:52}];
+const REVNOTE='<div class="warn small"><b>Read these numbers for what they are.</b> They are your own records and consumer-device readings. They show trends, not a diagnosis. A lower snore score, lower machine readings or feeling better do not show that sleep apnoea has improved or gone. If you use CPAP or a mouthguard, keep using it: this review never recommends changing your treatment. If your numbers have changed meaningfully, take your summary to your doctor and ask whether reassessment or repeat sleep testing is appropriate.</div>';
+const SL=(id,lab,v)=>`<div style="margin:10px 0"><div class="between"><label for="${id}" class="t1" style="font-size:15px">${lab}</label><span class="small" style="color:var(--acct);font-weight:600" id="${id}v">${v==null?'–':v} / 10</span></div><input id="${id}" type="range" min="0" max="10" value="${v==null?5:v}" data-out="${id}v"></div>`;
+const avgOf=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+function span(a,b){const s0=addD(S.profile.start,(a-1)*7),s1=addD(S.profile.start,b*7-1),t=TODAY(),end=s1<t?s1:t;
+ const ks=Object.keys(S.nights).filter(k=>k>=s0&&k<=s1).sort(),val=f=>ks.map(k=>num(S.nights[k][f])).filter(v=>v!=null);
+ const src=S.profile.scoreSrc||'snorelab',sn=ks.filter(k=>(S.nights[k].src||'snorelab')===src).map(k=>num(S.nights[k].snore)).filter(v=>v!=null);
+ const days=end>=s0?Math.round((pd(end)-pd(s0))/864e5)+1:0,c={imt:0,routine:0,main:0,evening:0};
+ for(let i=0;i<days;i++){const d=S.done[addD(s0,i)];if(d)Object.keys(c).forEach(k=>{if(d[k])c[k]++})}
+ const hrs=val('cpapH'),best={};
+ S.sessions.filter(x=>x.date>=s0&&x.date<=s1).forEach(x=>(x.ex||[]).forEach(e=>(e.sets||[]).forEach(z=>{const kg=num(z.kg),r=num(z.reps);if(kg!=null&&r!=null&&(!best[e.n]||kg>best[e.n][0]||(kg===best[e.n][0]&&r>best[e.n][1])))best[e.n]=[kg,r]})));
+ return{a,b,days,nights:ks.length,snore:med(sn),snoreN:sn.length,sleepQ:avgOf(val('sleepQ')),tired:avgOf(val('tired')),cpapN:hrs.length,cpap4:hrs.filter(h=>h>=4).length,cpapH:avgOf(hrs),ahi:med(val('ahi')),done:c,pct:days?Math.round((c.imt+c.routine+c.main+c.evening)/(days*4)*100):null,best}}
+const f1=v=>v==null?'–':r1(v);
+function spanCard(x,prevBest){const st=stats(),lifts=Object.keys(x.best).slice(0,5);
+ const row=(l,v)=>`<div class="between small" style="padding:5px 0;align-items:flex-start"><span class="mut">${l}</span><span style="text-align:right;max-width:62%">${v}</span></div>`;
+ return`<div class="card">${row('Snore score (median)',x.snore==null?'no scores logged':Math.round(x.snore)+(st.base!=null?' · baseline '+Math.round(st.base):'')+' · '+x.snoreN+' night'+(x.snoreN===1?'':'s'))}
+ ${row('Sleep quality',f1(x.sleepQ)+' / 10')}${row('Daytime tiredness',f1(x.tired)+' / 10')}
+ ${x.cpapN?row('CPAP as you entered it',x.cpap4+' of '+x.cpapN+' nights 4 h+ · average '+f1(x.cpapH)+' h'+(x.ahi!=null?' · events/hr '+f1(x.ahi):'')):''}
+ ${row('Sessions done',x.pct==null?'–':x.pct+'% · airway '+x.done.routine+', breathing '+x.done.imt+', main '+x.done.main+', evening '+x.done.evening+' of '+x.days+' days')}
+ ${lifts.length?row('Best logged sets',lifts.map(n=>esc(n)+' '+x.best[n][0]+' kg × '+x.best[n][1]+(prevBest&&prevBest[n]?' <span class="mut">(earlier '+prevBest[n][0]+' × '+prevBest[n][1]+')</span>':'')).join('<br>')):''}</div>`}
+function reviewDue(){const w=weekOf(TODAY());return REVIEWS.filter(r=>r.w&&r.w<=w&&!S.reviews[r.k]).pop()||null}
+function reviewCard(){const due=reviewDue(),out=[];
+ if(!S.goals.length&&!S.reviews.base)out.push(`<button class="item" data-act="review" data-v="base"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">Set your goals</span><span class="t2">What do you want back? Takes a minute</span></span></button>`);
+ if(due)out.push(`<button class="item" data-act="review" data-v="${due.k}"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">${due.n} is ready</span><span class="t2">Look back over weeks ${due.a}–${due.b}</span></span></button>`);
+ return out.join('')}
+function goals(){const g=S.goals;return`<div class="top"><button class="icon" data-act="review" data-v="${V.back||'base'}" aria-label="Back">${back}</button><span class="small mut">Your goals</span><span style="width:44px"></span></div>
+ <h1>What do you want back?</h1>
+ <p class="mut">Up to three things, in your own words. For example: climb the stairs at work without stopping, walk the dog for an hour, stay awake through a film.</p>
+ ${[0,1,2].map(i=>`<label class="card"><div class="lab">Goal ${i+1}${i?' (optional)':''}</div><input id="g${i}" type="text" maxlength="80" value="${esc(g[i]?g[i].t:'')}" style="font:inherit;font-size:16px;background:var(--bg);color:var(--ink);border:1px solid var(--edge);border-radius:10px;height:46px;padding:0 10px;width:100%"></label>`).join('')}
+ <button class="btn" data-act="goalsave">Save goals</button>
+ <p class="tiny mut">These are yours. You rate them yourself at each review. There is no pass or fail.</p>`}
+function review(){const r=REVIEWS.find(x=>x.k===V.k)||REVIEWS[0],was=S.reviews[r.k],i=REVIEWS.indexOf(r),prev=REVIEWS.slice(0,i).reverse().map(x=>S.reviews[x.k]).find(Boolean)||null;
+ const gv=n=>{const src=was||prev;const hit=src&&(src.goals||[]).find(z=>z.t===S.goals[n].t);return hit?hit.v:null};
+ return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close review">${back}</button><span class="small mut">${r.w?'Weeks '+r.a+'–'+r.b:'Before you start'}</span><span style="width:44px"></span></div>
+ <h1>${r.n}</h1>
+ ${onCPAP()?CPAPNOTE:''}
+ ${r.w?`<p class="mut">What your own records show for this stage. Redo your checks first if you haven’t this week.</p>${spanCard(span(r.a,r.b),r.a>1?span(1,r.a-1).best:null)}<button class="btn2" data-act="go" data-v="checks">Redo your checks</button>`:`<p class="mut">Two things before you begin: what you want back, and how life feels now. You’ll rate the same things at weeks 13, 26, 39 and 52.</p>`}
+ <h2>Your goals</h2>
+ ${S.goals.length?`<div class="card">${S.goals.map((g,n)=>SL('rg'+n,esc(g.t)+' <span class="mut" style="font-weight:400">(10 = fully there)</span>',gv(n))).join('')}</div><button class="btn2" data-act="goals" data-v="${r.k}">Change goals</button>`:`<button class="btn2" data-act="goals" data-v="${r.k}">Set your goals</button>`}
+ <h2>Overall</h2>
+ <div class="card">${SL('rqol','Quality of life right now <span class="mut" style="font-weight:400">(10 = very good)</span>',was?was.qol:null)}</div>
+ ${REVNOTE}
+ <button class="btn" data-act="reviewsave" data-v="${r.k}">${was?'Save again':'Save review'}</button>
+ ${was?`<p class="tiny mut" style="text-align:center">Saved ${fmt(was.date)}</p>`:''}
+ ${r.w?`<button class="btn2" data-act="go" data-v="report">${S.profile.path==='retest'?'Doctor summary':'GP visit summary'}</button><button class="btn2" data-act="year">Your year, stage by stage</button>`:''}`}
+function yearLinks(){const w=weekOf(TODAY());return`<button class="item" data-act="year"><span class="grow"><span class="t1">Your year, stage by stage</span><span class="t2">Snoring, sleep, sessions and goals for each stage</span></span></button>`+REVIEWS.filter(r=>r.w<=Math.max(0,w)).map(r=>`<button class="item" data-act="review" data-v="${r.k}"><span class="dot${S.reviews[r.k]?' on':''}">${S.reviews[r.k]?checkSvg:''}</span><span class="grow"><span class="t1">${r.n}</span><span class="t2">${S.reviews[r.k]?'Saved '+fmt(S.reviews[r.k].date):'Not done yet'}</span></span></button>`).join('')}
+function year(){const w=Math.max(1,weekOf(TODAY())),rv=REVIEWS.filter(r=>S.reviews[r.k]);
+ return`<div class="top"><button class="icon" data-act="tab" data-v="progress" aria-label="Back to progress">${back}</button><span class="small mut">Week ${w}${w>52?'':' of 52'}</span><span style="width:44px"></span></div>
+ <h1>${w>=52?'Your year':'Your year so far'}</h1>
+ ${onCPAP()?CPAPNOTE:''}
+ ${STAGES.filter(g=>g.a<=w).map(g=>`<h2>${g.n} · weeks ${g.a}–${g.b}${w>=g.a&&w<=g.b?' · now':''}</h2>${spanCard(span(g.a,g.b),g.a>1?span(1,g.a-1).best:null)}`).join('')}
+ <h2>Your reviews</h2>
+ ${rv.length?`<div class="card">${rv.map(r=>{const x=S.reviews[r.k];return`<div style="padding:6px 0"><div class="between small"><b>${r.n}</b><span class="mut">${fmt(x.date)}</span></div><div class="small mut">Quality of life ${x.qol==null?'–':x.qol} / 10${(x.goals||[]).map(z=>'<br>'+esc(z.t)+': '+(z.v==null?'–':z.v)+' / 10').join('')}</div></div>`}).join('')}</div>`:`<p class="small mut">None saved yet.</p>`}
+ ${REVNOTE}
+ <button class="btn" data-act="go" data-v="report">${S.profile.path==='retest'?'Doctor summary':'GP visit summary'}</button>
+ <p class="tiny mut" style="text-align:center">What you’ve built fades quickly if you stop. Keeping it is part of the program.</p>`}
+function historyText(){const w=Math.max(1,weekOf(TODAY())),L=STAGES.filter(g=>g.a<=w).map(g=>{const x=span(g.a,g.b);return'- '+g.n+' (weeks '+g.a+'-'+g.b+'): snore median '+(x.snore==null?'n/a':Math.round(x.snore))+' over '+x.snoreN+' nights · sleep quality '+f1(x.sleepQ)+'/10 · tiredness '+f1(x.tired)+'/10 · sessions done '+(x.pct==null?'n/a':x.pct+'%')+(x.cpapN?' · CPAP '+x.cpap4+'/'+x.cpapN+' nights 4 h+, events/hr '+f1(x.ahi):'')});
+ const R=REVIEWS.filter(r=>S.reviews[r.k]).map(r=>{const x=S.reviews[r.k];return'- '+r.n+' ('+x.date+'): quality of life '+(x.qol==null?'n/a':x.qol)+'/10'+(x.goals||[]).map(z=>'; '+z.t+' '+(z.v==null?'n/a':z.v)+'/10').join('')});
+ return'\nPROGRAM HISTORY BY STAGE (self-recorded; trends only, not a measure of sleep apnoea)\n'+L.join('\n')+(R.length?'\nSelf-rated goals and quality of life\n'+R.join('\n'):'')+'\n'}
+
 /* ---------- render ---------- */
 const TABS=['today','day','plan','log','progress','retest'];
 function render(){const v=$('#view'),nav=$('#nav');
  if(FBC&&!USER&&!LOCAL){v.innerHTML=login();nav.style.display='none';v.className='wrap full';return}
  if(!S.profile){v.innerHTML=setup();nav.style.display='none';v.className='wrap full';return}
  if(S.profile.equip==null||S.profile.imt==null){v.innerHTML=setup2();nav.style.display='none';v.className='wrap full';return}
- const fn={today,plan,stage,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
+ const fn={today,plan,stage,review,goals,year,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
  v.innerHTML=fn();const tab=TABS.includes(V.s);nav.style.display=tab?'':'none';v.className='wrap'+(tab?'':' full');
  nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s==='day'?'today':V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
  const c=$('#chart');if(c){drawChart();new ResizeObserver(drawChart).observe(c)}}
@@ -1112,6 +1173,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
  if(a==='calday'){V.cd=v;V.cm=v.slice(0,7);render();return}
   if(a==='stage'){go('stage',{k:v});return}
+  if(a==='review'){go('review',{k:v});return}
+  if(a==='goals'){go('goals',{back:v});return}
+  if(a==='year'){go('year');return}
+  if(a==='goalsave'){const old=S.goals;S.goals=[0,1,2].map(i=>($('#g'+i).value||'').trim()).filter(Boolean).map(x=>old.find(g=>g.t===x)||{t:x,since:t});save();toast('Goals saved');go('review',{k:V.back||'base'});return}
+  if(a==='reviewsave'){const q=$('#rqol');S.reviews[v]={date:t,week:Math.max(0,weekOf(t)),qol:q&&(q.dataset.touched||S.reviews[v]&&S.reviews[v].qol!=null)?num(q.value):null,goals:S.goals.map((g,n)=>{const el=$('#rg'+n);return{t:g.t,v:el&&(el.dataset.touched||el.value!=='5'||S.reviews[v])?num(el.value):null}})};const rr=REVIEWS.find(x=>x.k===v);if(rr&&rr.w){const x=span(rr.a,rr.b);S.reviews[v].snap={snore:x.snore,snoreN:x.snoreN,sleepQ:x.sleepQ,tired:x.tired,pct:x.pct,cpapN:x.cpapN,cpap4:x.cpap4,ahi:x.ahi}}save();toast('Review saved');go('today');return}
   if(a==='week'){const k=addD(S.profile.start,(+v-1)*7);go('plan',{cd:k,cm:k.slice(0,7)});return}
  if(a==='calm'){V.cm=v;render();return}
  if(a==='zoom'){V.zoom=V.zoom===+v?null:+v;render();return}
@@ -1158,7 +1224,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='imtans'){S.imtEasy=v==='1'?S.imtEasy+1:0;dn(t).imt=true;I=null;save();toast(S.imtEasy>=2?'Time to raise your level':'IMT saved');go('day');return}
  if(a==='lvl'){S.imtLevel=Math.min(12,Math.max(1,S.imtLevel+(+v)));if(+v>0)S.imtEasy=0;save();render();return}
  if(a==='tag'){b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');return}
- if(a==='savenight'){const d=$('#ld').value||addD(t,-1),c=$('#cpap');const ns=document.querySelector('[name=nsrc]:checked');S.nights[d]={src:ns?ns.value:(S.profile.scoreSrc||'snorelab'),snore:num($('#snore').value),partner:$('#partner').dataset.touched||S.nights[d]&&S.nights[d].partner!=null?num($('#partner').value):null,tired:$('#tired').dataset.touched||S.nights[d]&&S.nights[d].tired!=null?num($('#tired').value):null,cpapH:$('#cph')?num($('#cph').value):null,ahi:$('#cpa')?num($('#cpa').value):null,seal:$('#cps')?($('#cps').value||null):null,offs:$('#cpo')?num($('#cpo').value):null,hr:num($('#hr').value),br:num($('#br').value),ox:$('#ox')?num($('#ox').value):null,bd:$('#bd')?($('#bd').value||null):null,drinks:num($('#dr').value),dgap:$('#dgap').value||null,neckAM:num($('#neckam').value),tags:[...document.querySelectorAll('[data-act=tag][aria-pressed=true]')].map(x=>x.dataset.v),cpap:c?c.checked:null};save();toast('Night saved');V.date=null;go('today');return}
+ if(a==='savenight'){const d=$('#ld').value||addD(t,-1),c=$('#cpap');const ns=document.querySelector('[name=nsrc]:checked');S.nights[d]={src:ns?ns.value:(S.profile.scoreSrc||'snorelab'),snore:num($('#snore').value),partner:$('#partner').dataset.touched||S.nights[d]&&S.nights[d].partner!=null?num($('#partner').value):null,tired:$('#tired').dataset.touched||S.nights[d]&&S.nights[d].tired!=null?num($('#tired').value):null,cpapH:$('#cph')?num($('#cph').value):null,ahi:$('#cpa')?num($('#cpa').value):null,seal:$('#cps')?($('#cps').value||null):null,offs:$('#cpo')?num($('#cpo').value):null,hr:num($('#hr').value),br:num($('#br').value),ox:$('#ox')?num($('#ox').value):null,bd:$('#bd')?($('#bd').value||null):null,drinks:num($('#dr').value),dgap:$('#dgap').value||null,neckAM:num($('#neckam').value),tags:[...document.querySelectorAll('[data-act=tag][aria-pressed=true]')].map(x=>x.dataset.v),cpap:c?c.checked:null,sleepQ:$('#sleepq')?($('#sleepq').dataset.touched||S.nights[d]&&S.nights[d].sleepQ!=null?num($('#sleepq').value):null):(S.nights[d]||{}).sleepQ};save();toast('Night saved');V.date=null;go('today');return}
  if(a==='saveweek'){const w='w'+Math.max(0,weekOf(t)),ah=$('#ahi');S.weekly[w]={bolt:num($('#bolt').value),neck:num($('#neck').value),waist:num($('#waist').value),ahi:ah?num(ah.value):null,imt:S.imtLevel};save();toast('Weekly check saved');return}
  if(a==='csv'){copy(csv());return}
  if(a==='copysum'){copy($('#copytext').value);return}

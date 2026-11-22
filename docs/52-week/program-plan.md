@@ -28,8 +28,15 @@ Status: **specification accepted by the owner; build in progress on a branch. Th
   load suggestions from week 27 that leave the decision to the user.
 - One fix that applies with the switch off as well: a user past week 24 now sees "Week 46", not
   "Week 46 of 24".
-- Not yet built: stage reviews, goals and the sleep-quality rating (stage 6), long-term history and
-  the year-end summary (stage 7).
+- Stage 6 done (switch on only): goals in the user's own words, a baseline rating, stage reviews at
+  weeks 13, 26, 39 and 52 built from his own records, and a nightly sleep-quality rating. Every review
+  carries the limits wording and the keep-using-your-treatment notice.
+- Stage 7 done (switch on only): "Your year, stage by stage" with each stage's numbers and saved
+  reviews, and a history-by-stage section in the clinician summary.
+- Remaining before release: clinical review (section 4, deferred by the owner), then switching the
+  new weeks on (stage 9), then the website update (stage 10). Billing is separate.
+- Known gaps: the CSV export does not yet include the sleep-quality column, and there are no drawings
+  for the non-walking cardio options.
 
 Contents
 1. [Audit of the existing program](#1-audit-of-the-existing-program)
