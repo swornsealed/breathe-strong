@@ -29,3 +29,6 @@ The 52-week program is on by default. To see the original 24-week behaviour in a
 `localStorage.setItem('bs-year52','0')` in the console and reload; remove the key to switch back.
 
 The tests never modify `index.html`. See the comments in `harness.js`.
+- `node tests/check-safety.js` covers training-level safety: the four health-screening states and what each one holds,
+  participant-reported clinician advice, the restart at Foundation, upgrade of earlier saved health checks, staged
+  level changes for strength and cardio (extend, go back, logged weights untouched), and the breath-hold switch-off.

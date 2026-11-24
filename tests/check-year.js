@@ -28,7 +28,7 @@ const week = async (app, w) => { const out = []; for (let d = 0; d < 7; d++) { a
   // weeks 1-24 must be untouched by switching the new weeks on
   const GDAY = fs.readFileSync(path.join(__dirname, 'check-plan.js'), 'utf8').match(/const DAY = `([\s\S]*?)`;/)[1];
   for (let n = 0; n < 24 * 7; n++) { await app.setDay(n); const r = JSON.parse(await app.ev(GDAY)); const g = golden.days.gym[n];
-    const nm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; return c; };
+    const nm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; if (c.title === 'Intervals + breath-hold walk') { c.title = 'Intervals'; c.sub = c.sub.replace(/, then \d+ holds$/, ''); } return c; }; // breath-hold walks are switched off
     assert.deepStrictEqual([r.week, nm(r.o)], [g[0], nm(golden.payloads[g[1]])], 'week ' + g[0] + ' day ' + (n % 7 + 1) + ' changed when weeks 25-52 are on'); }
   console.log('  ok  weeks 1-24 are identical with the new weeks switched on');
 
@@ -43,7 +43,7 @@ const week = async (app, w) => { const out = []; for (let d = 0; d < 7; d++) { a
     assert.strictEqual(B[1][1], s.chin, tag + 'chin-ups'); assert.strictEqual(B[2][1], s.goblet, tag + 'goblet squat');
     assert.strictEqual(A[3][1], '4 × 40 m', tag + 'carry'); assert.strictEqual(B[5][1], '3 × 45 s', tag + 'plank');
     assert.strictEqual(d[1].min, 45, tag + 'Tuesday minutes'); assert.strictEqual(d[5].min, s.sat, tag + 'Saturday minutes');
-    if (s.lite) assert.strictEqual(d[3].min, 45, tag + 'Thursday steady'); else assert.strictEqual(d[3].sub, '8 × 30 s hard / 90 s easy, then 8 holds', tag + 'intervals');
+    if (s.lite) assert.strictEqual(d[3].min, 45, tag + 'Thursday steady'); else assert.strictEqual(d[3].sub, '8 × 30 s hard / 90 s easy', tag + 'intervals');
     d.forEach(x => { assert.deepStrictEqual(x.airway, week8, tag + 'airway dose must stay at the week-6 level'); assert.strictEqual(x.out, 5, tag + 'breathing-out sets'); });
   }
   console.log('  ok  weeks 25-52 match the specification: phases, lift schemes, lighter weeks, cardio minutes');

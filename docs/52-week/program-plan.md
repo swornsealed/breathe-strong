@@ -2,6 +2,8 @@
 
 Status: **built and switched on. The app now runs the full 52-week program by default.**
 
+> **Update, safety refinement:** breath-hold walks and the BOLT breath-hold test are switched off in the app pending clinical review. Tables below that mention them describe the original prescription. See `docs/three-levels/safety-refinement.md`.
+
 ### Owner decisions recorded
 - **Phase labels stay as they are.** Foundation, Build, Strength and Progression keep their names and the
   current layout is kept. The rename suggested in this document is withdrawn.

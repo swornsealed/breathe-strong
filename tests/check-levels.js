@@ -3,7 +3,7 @@
 // 1. Every combination of strength level, cardio level, equipment, week plan and week resolves to a usable session.
 // 2. Foundation and Standard match docs/three-levels/training-levels-plan.md (expected values written out here independently).
 // 3. Airway and breathing work do not depend on level.
-// 4. New-user assessment, level changes, the two-week step-up and the health screen behave as designed.
+// 4. New-user assessment and level changes behave as designed. Health screening and the staged step-up are in check-safety.js.
 const assert = require('assert'), fs = require('fs'), path = require('path');
 const { open } = require('./harness');
 const SHOTS = process.argv.includes('--shots') ? path.join(__dirname, 'shots') : null;
@@ -24,22 +24,23 @@ const CARDIO = { // [Tuesday, Thursday, Saturday]; a range is 'lo–hi'; interva
   F: w => w <= 2 ? ['10–15', '10–15', 20] : w <= 5 ? ['15–20', '15–20', 25] : w <= 8 ? ['20–25', '20–25', 30] : w <= 13 ? ['25–30', '25–30', 35] : LITE(w) ? [30, 30, 30] : w <= 25 ? [30, 30, 40] : w <= 38 ? [30, 30, 45] : ['30–35', '30–35', 45],
   S: w => w <= 2 ? [25, 25, 35] : w <= 5 ? [30, 30, 40] : LITE(w) ? [40, 30, 40] : w <= 8 ? [35, 'int 4', 45] : w <= 30 ? [40, 'int 6', 45] : [40, 'int 6', 50],
 };
-const HOURS = { F: [6.2, 8.2], S: [7.8, 9.0], A: [8.6, 9.8] };
+// weekly hours including the daily airway, breathing and evening work. Full week, then Minimum week.
+const HOURS = { F: [6.3, 8.5], S: [8.0, 9.5], A: [9.0, 10.75] }, HOURS_MIN = { F: [6.3, 7.7], S: [7.4, 8.5], A: [8.2, 9.4] };
 const SWEEP = `(()=>{const out={bad:[],weeks:{}},t0=pd(S.profile.start).getTime()+12*36e5;
  const chk=(v,ctx,lab)=>{if(v==null||(typeof v==='number'&&!isFinite(v))||/undefined|NaN|null/.test(String(v)))out.bad.push(ctx.concat([lab,String(v)]))};
  for(const plan of ['full','min'])for(let w=1;w<=53;w++){let mins=0,ws=0,cs=0;const days=[];
   for(let d=0;d<7;d++){window.__bsNow=t0+((w-1)*7+d)*864e5;S.profile.weekPlan=plan;const t=TODAY(),dp=dayPlan(t),i=info(dp.m,dp.p,dp.row),ctx=[plan,w,d];
-   chk(i.t,ctx,'title');chk(i.s,ctx,'sub');chk(i.min,ctx,'min');chk(i.day,ctx,'day');if(!(i.min>=10&&i.min<=60))out.bad.push(ctx.concat(['minutes out of range',i.min]));mins+=i.min;let ex=null;
+   chk(i.t,ctx,'title');chk(i.s,ctx,'sub');chk(i.min,ctx,'min');chk(i.day,ctx,'day');if(!(i.min>=10&&i.min<=80))out.bad.push(ctx.concat(['minutes out of range',i.min]));mins+=i.min;let ex=null;
    if(dp.m.k==='w'){ws++;W=null;V={s:'workout',x:dp.m.x};chk(workout(),ctx,'workout screen');ex=W.ex.map(e=>[e.n,e.sc,e.sets.length]);
     W.ex.forEach(e=>{chk(e.n,ctx,'name');chk(e.sc,ctx,'scheme');if(!/^\\d+(–\\d+)? × \\d|^\\d+ min$/.test(e.sc))out.bad.push(ctx.concat(['bad scheme',e.sc]));if(e.log&&(e.sets.length<1||e.sets.length>5))out.bad.push(ctx.concat(['set rows',e.sets.length]))});W=null}
    else if(dp.m.k!=='rest'){cs++;N=null;V={s:'cardio'};chk(cardio(),ctx,'cardio screen');N=null}
    V={s:'today'};days.push({k:dp.m.k,x:dp.m.x||'',min:i.min,rng:i.rng||null,sub:i.s,ex})}
-  if(plan==='full')out.weeks[w]={mins,ws,cs,days};else out.weeks['m'+w]={ws,cs,pattern:days.map(x=>x.k+x.x).join(',')}}
+  if(plan==='full')out.weeks[w]={mins,ws,cs,days};else out.weeks['m'+w]={ws,cs,mins,pattern:days.map(x=>x.k+x.x).join(',')}}
  S.profile.weekPlan='full';return JSON.stringify(out)})()`;
 
 (async () => {
   // ---------- 1 and 2: the full matrix ----------
-  let app = await open({ equip: 'gym' }); let combos = 0; const hours = { F: [], S: [], A: [] };
+  let app = await open({ equip: 'gym' }); let combos = 0; const hours = { F: [], S: [], A: [] }, hoursMin = { F: [], S: [], A: [] };
   for (const s of 'FSA') for (const c of 'FSA') for (const eq of ['gym', 'db', 'home', 'bw']) {
     await app.ev(`S.profile.level={s:'${s}',c:'${c}'};S.profile.equip='${eq}';S.profile.trans={};S.profile.intOK=false;W=null`);
     const r = JSON.parse(await app.ev(SWEEP)); combos++;
@@ -64,10 +65,11 @@ const SWEEP = `(()=>{const out={bad:[],weeks:{}},t0=pd(S.profile.start).getTime(
         if (c === 'F') assert.ok(!d.some(x => x.k === 'int'), tag + 'no intervals at Foundation unless switched on');
         assert.ok(!d.some(x => /hold/.test(x.sub) && x.k === 'int'), tag + 'no breath-hold walks below Advanced');
       }
-      if (s === c && eq === 'gym' && w <= 52) hours[s].push((wk.mins + 36 * 7) / 60);
+      if (s === c && eq === 'gym' && w <= 52) { hours[s].push((wk.mins + 36 * 7) / 60); hoursMin[s].push((r.weeks['m' + w].mins + 36 * 7) / 60); }
     }
   }
   for (const k of 'FSA') { const lo = Math.min(...hours[k]), hi = Math.max(...hours[k]); assert.ok(lo >= HOURS[k][0] && hi <= HOURS[k][1], `weekly hours for ${k}: ${lo.toFixed(1)} to ${hi.toFixed(1)}`); }
+  for (const k of 'FSA') { const lo = Math.min(...hoursMin[k]), hi = Math.max(...hoursMin[k]); console.log('      ' + k + ' weekly hours: Full ' + Math.min(...hours[k]).toFixed(1) + ' to ' + Math.max(...hours[k]).toFixed(1) + ', Minimum ' + lo.toFixed(1) + ' to ' + hi.toFixed(1)); assert.ok(lo >= HOURS_MIN[k][0] && hi <= HOURS_MIN[k][1], `Minimum-week hours for ${k}: ${lo.toFixed(1)} to ${hi.toFixed(1)}`); }
   const avg = (k, a, b) => (hours[k].slice(a - 1, b).reduce((x, y) => x + y, 0) / (b - a + 1)).toFixed(1);
   ok(combos + ' combinations of strength level, cardio level and equipment × 53 weeks × full and minimum weeks: every session resolves, no blanks, valid sets and reps');
   ok('Foundation and Standard match the plan document for sessions, sets, reps, exercise list and cardio minutes');
@@ -90,8 +92,8 @@ const SWEEP = `(()=>{const out={bad:[],weeks:{}},t0=pd(S.profile.start).getTime(
   assert.deepStrictEqual(await app.ev('[S.profile.level,S.profile.levelNew,S.v]'), [{ s: 'F', c: 'F' }, true, 3]);
   let t = await text(app); has(t, 'Set your training level'); has(t, 'Training level: FOUNDATION'); await shot(app, 'level-new-user-today');
   await app.page.click('[data-act=ck][data-v=screen]'); t = await text(app); has(t, 'heart condition'); has(t, 'not a medical clearance');
-  await app.ev("Object.assign(CKD,{heart:'no',chest:'no',dizzy:'no',bp:'no',breath:'no',joint:'no',recent:'no',limit:'no'})");
-  await app.page.click('[data-act=cksave]'); t = await text(app); has(t, 'Nothing flagged'); has(t, 'Next: fitness check');
+  await app.ev("Object.assign(CKD,{heart:'no',chest:'no',dizzy:'no',bp:'no',breath:'no',joint:'no',recent:'no',lung:'no',sugar:'no',limit:'no'})");
+  await app.page.click('[data-act=cksave]'); t = await text(app); has(t, 'No concerns identified'); has(t, 'Next: fitness check');
   await app.page.click('[data-act=ck][data-v=fitness]'); t = await text(app); has(t, 'Strength training in the last 6 months'); has(t, 'How many hours a week');
   await app.ev("Object.assign(CKD,{days:'1',lift:'some',away:'mid',push:'10',plank:'35',walk:'no',steady:'no',sore:'day',limits:'no',hours:'mid'})");
   await app.page.click('[data-act=cksave]'); t = await text(app); has(t, 'Recommended training level: Standard strength, Foundation cardio');
@@ -121,27 +123,20 @@ const SWEEP = `(()=>{const out={bad:[],weeks:{}},t0=pd(S.profile.start).getTime(
   assert.deepStrictEqual(await app.ev('[S.profile.level.s,S.profile.trans.s||null,S.levelLog.length,S.levelLog[0].why]'), ['S', null, 1, 'chosen']); ok('moving down is immediate, with no questions');
   await app.ev("go('workout',{x:'A'})"); t = await text(app); has(t, '3 × 8–10'); has(t, 'stop each set with 2–3 reps left'); has(t, 'Week 10 · Progression · Standard'); await shot(app, 'level-standard-workout');
   await app.page.click('[data-act=easier]'); assert.deepStrictEqual(await app.ev('W.ex.filter(e=>e.log&&e.n!=="Dumbbell shrugs").map(e=>e.sets.length)'), [2, 2, 2]); t = await text(app); has(t, 'Eased for today'); ok('“Make today easier” drops a set from each lift for that session');
-  await app.ev("W=null;go('level')"); await app.page.click('[data-act=lvset][data-v="s:A"]'); t = await text(app); has(t, 'Moving up to Advanced strength'); has(t, 'step up over two weeks');
+  await app.ev("W=null;go('level')"); await app.page.click('[data-act=lvset][data-v="s:A"]'); t = await text(app); has(t, 'Moving up to Advanced strength'); has(t, 'about four weeks, in two steps');
   await app.page.click('[data-act=lvup]'); assert.strictEqual(await app.ev('S.profile.level.s'), 'S', 'moving up without the readiness ticks must not change the level');
   for (let i = 0; i < 4; i++) await app.page.check('#rd' + i);
-  await app.page.click('[data-act=lvup]'); assert.deepStrictEqual(await app.ev('[S.profile.level.s,S.profile.trans.s.from,S.profile.trans.s.until,S.levelLog[1].why]'), ['A', 'S', '2026-03-22', 'readiness check']);
-  await app.ev("W=null;go('workout',{x:'A'})"); t = await text(app); has(t, '3 × 4–6, add small loads'); hasnt(t, '4–5 × 4–6');
-  await at(app, 9 * 7 + 14); await app.ev("W=null;go('workout',{x:dayPlan(TODAY()).m.x})"); t = await text(app); has(t, '4–5 × 4–6');
-  ok('moving up needs the readiness check, then runs two weeks on the lower set count before the full prescription');
+  await app.page.click('[data-act=lvup]'); assert.deepStrictEqual(await app.ev('[S.profile.level.s,S.profile.trans.s.from,S.profile.trans.s.e2,S.levelLog[1].why]'), ['A', 'S', '2026-04-05', 'readiness check']);
+  await app.ev("W=null;go('workout',{x:'A'})"); t = await text(app); has(t, '3 × 8–10'); has(t, 'step 1 of 2'); hasnt(t, '4–6');
+  await at(app, 9 * 7 + 14); await app.ev("W=null;go('workout',{x:dayPlan(TODAY()).m.x})"); t = await text(app); has(t, '3 × 4–6, add small loads'); has(t, 'step 2 of 2'); hasnt(t, '4–5 × 4–6');
+  await at(app, 9 * 7 + 28); await app.ev("W=null;go('workout',{x:dayPlan(TODAY()).m.x})"); t = await text(app); has(t, '4–5 × 4–6');
+  ok('moving up needs the readiness check, then two fortnight steps (new exercise list, then new reps) before the full prescription');
   // completed sessions keep the scheme they were done at
   await app.ev("W=null;go('workout',{x:'A'})"); await app.page.click('[data-act=finish]');
   assert.ok(/4–5 × 4–6/.test(await app.ev('S.sessions[S.sessions.length-1].ex[0].sc'))); await app.ev("S.profile.level.s='F';W=null");
   assert.ok(/4–5 × 4–6/.test(await app.ev('S.sessions[S.sessions.length-1].ex[0].sc'))); ok('a completed session keeps the prescription it was done at when the level changes later');
 
-  // health screen with a "yes"
-  await app.ev("S.profile.level={s:'A',c:'A'};S.profile.trans={};W=null;CKD={chest:'yes'};V={s:'check',k:'screen'};render()");
-  await app.page.click('[data-act=cksave]'); t = await text(app); has(t, 'See your GP before the strength and cardio sessions');
-  assert.deepStrictEqual(await app.ev('[flagged(),lvOf("s"),lvOf("c"),lvRaw("s"),emstOn()]'), [true, 'F', 'F', 'A', false]);
-  await at(app, 12 * 7 + 3); assert.strictEqual(await app.ev('dayPlan(TODAY()).m.k'), 'z2', 'intervals are held back while flagged');
-  t = await text(app); has(t, 'held until you’ve seen your GP'); await app.ev("go('retest')"); t = await text(app); has(t, 'See your GP before the strength and cardio sessions');
-  await app.ev("go('level')"); await app.page.click('[data-act=lvset][data-v="c:A"]'); assert.strictEqual(await app.ev('V.up||null'), null, 'cannot move up while flagged'); await shot(app, 'level-screen-flagged');
-  await app.page.click('[data-act=gpseen]'); assert.deepStrictEqual(await app.ev('[flagged(),lvOf("s"),emstOn(),dayPlan(TODAY()).m.k]'), [false, 'A', true, 'int']);
-  ok('a “yes” on the health check holds the level at Foundation and pauses intervals and breathing-out work until the user confirms he has seen his GP');
+  await app.ev("S.profile.level={s:'A',c:'A'};S.profile.trans={};W=null"); // health screening has its own suite: tests/check-safety.js
 
   // Foundation: two sessions in Awaken, optional gentle intervals from week 14
   await app.ev("S.profile.level={s:'F',c:'F'};W=null"); await app.setDay(5 * 7);

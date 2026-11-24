@@ -38,7 +38,9 @@ async function record(legacy) {
 
 // Strength-session minutes were a flat 50 in the original app and are now estimated from the set count,
 // so they are left out of the comparison. Everything that is prescribed (exercises, sets, reps, cardio) is compared.
-const norm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; return c; };
+// Breath-hold walks are switched off pending clinical review, so an Advanced interval day is now plain intervals. That is the one intended difference from the snapshot.
+const noBH = c => { if (c.title === 'Intervals + breath-hold walk') { c.title = 'Intervals'; c.sub = c.sub.replace(/, then \d+ holds$/, ''); } return c; };
+const norm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; return noBH(c); };
 
 (async () => {
   if (process.argv.includes('--write')) { const now = await record(true); fs.writeFileSync(GOLDEN, JSON.stringify(now, null, 1) + '\n'); console.log('Snapshot written:', now.payloads.length, 'distinct day plans,', Object.keys(now.days).length, 'variants'); return; }

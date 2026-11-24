@@ -47,7 +47,7 @@ Contents
 | Strength | Workouts A and B, seven exercises each, Mon/Wed/Fri. Main lifts go from 3 × 10–12 to 4–5 × 4–6 by week 6, stopping 1–2 reps short. Every session shows "50 min" regardless of sets |
 | Exercise library | 14 exercise slots, each with gym, dumbbell, household and bodyweight versions; 20 drawings |
 | Progression rules | Load suggestions from week 27 (two sessions at the top or bottom of the range); breathing-trainer level prompt after two easy sessions |
-| Cardio | Tue steady, Thu steady then intervals with breath-hold walks, Sat long session. Activity setting: walking, bike, pool, machine, seated. Split sessions allowed |
+| Cardio | Tue steady, Thu steady then intervals (breath-hold walks switched off, see safety-refinement.md), Sat long session. Activity setting: walking, bike, pool, machine, seated. Split sessions allowed |
 | Respiratory trainer | 30 breaths in at a self-set level 1–12, then 3 or 5 sets of 5 breaths out. Not tied to anything else |
 | Neck work | Band or hand-resisted neck work 2 × 15 "keep it light", plus 5 minutes of four-way neck holds and posture drills in every session; Shaker head lift and chin tuck press in the airway routine |
 | Standard and Minimum week | A setting offered only in weeks 44–51. Minimum is two strength and two cardio sessions. Daily routines are unaffected |
@@ -193,7 +193,7 @@ Intensity for steady sessions at every level: a pace where he can still hold a c
 | Starts | Optional from week 14, only if ready | Week 6 | Week 3 |
 | Structure | 4 × 30 s brisk, 2 min easy | 4 then 6 × 30 s hard, 90 s easy | 6 then 8 × 30 s hard, 90 s easy |
 | Readiness criteria | 30 minutes continuous without stopping; at least 80% of cardio sessions done over the last four weeks; no symptoms; health screen clear | Health screen clear | Health screen clear |
-| Breath-hold walks afterwards | Not included | Not included | Optional, as today, pending review |
+| Breath-hold walks afterwards | Not included | Not included | Switched off pending clinical review |
 
 ---
 
@@ -266,9 +266,12 @@ Average hours a week by stage, all sessions included.
 
 | Level | Awaken | Build | Reclaim | Thrive | Range across the year |
 |---|---|---|---|---|---|
-| Foundation | 6.9 | 7.8 | 7.8 | 7.8 | 6.3 to 8.0 |
-| Standard | 8.4 | 8.8 | 8.8 | 8.7 | 7.9 to 8.9 |
-| Advanced | 9.3 | 9.4 | 9.5 | 9.3 | 8.7 to 9.7 |
+| Foundation | 7.0 | 7.9 | 8.0 | 8.0 | 6.4 to 8.4 |
+| Standard | 8.9 | 9.3 | 9.3 | 9.2 | 8.1 to 9.4 |
+| Advanced | 10.1 | 10.4 | 10.4 | 9.9 | 9.2 to 10.7 |
+
+Minimum week, range across the year: Foundation 6.4 to 7.6, Standard 7.5 to 8.4, Advanced 8.2 to 9.4.
+These figures were recalculated in the safety refinement with longer, more realistic strength-session estimates (see safety-refinement.md).
 
 - About 4.2 of those hours at every level are the daily routines (36 minutes a day), which do not vary.
 - The website's single "roughly 9 hours a week" would be replaced by these three figures.
@@ -291,7 +294,7 @@ Original wording, not a licensed questionnaire. Yes or no:
 8. Has a doctor told you to limit your physical activity for any other reason?
 
 Outcome:
-- **Any yes:** "See your GP before starting the strength and cardio sessions. Show them this list." The app caps the recommendation at Foundation, holds back intervals and breath-out training, and keeps reminding until he confirms he has been seen. The tongue and throat routine and the morning log stay available.
+- **Any yes:** medical assessment required. The affected sessions are held outright, not offered at a lower level. Superseded detail: see safety-refinement.md.
 - **All no:** continue to the assessment.
 - The screen is never described as clearance or a diagnosis, and a fitness result never overrides it.
 - Repeated every 12 weeks and whenever he reports a new symptom.
@@ -333,7 +336,7 @@ Outcome:
   - sets finished with reps in reserve;
   - no pain, and no symptoms on the health screen;
   - recovering within a day or two.
-- **Transition:** two weeks at the new level's exercises and reps with the previous level's set count, then the full prescription.
+- **Transition:** one level at a time, staged over about four weeks in two steps, extendable and reversible. Full rules in safety-refinement.md.
 - **Never used to promote:** age, weeks elapsed, snore score, CPAP readings.
 - **Stays put:** the program week and stage, all records. Every completed session already stores the scheme it was done at, and each change is added to a level history.
 
@@ -419,7 +422,7 @@ No wording in the app or on the website will say that heavier lifting or a stron
 | B | Standard and Foundation tables | Matrix test: 3 strength levels × 3 cardio levels × 52 weeks × 4 equipment modes × 2 week plans × 5 cardio activities. No missing or undefined values, valid ranges, weekly hours match section 7 |
 | C | Data version 3 and migration | Version 1 and 2 records survive; existing users' prescription is byte-for-byte unchanged |
 | D | Health screen and assessment in set-up; recommendation | Every answer combination gives a level; any "yes" on the screen caps and restricts |
-| E | Training level settings, level change, transition, history | Down is immediate; up needs the check; transition lasts two weeks; history kept |
+| E | Training level settings, level change, transition, history | Down is immediate; up needs the check; transition runs in two fortnight steps; history kept |
 | F | Today and workout screens, session lengths, Full and Minimum week from week 1 | Screens at phone and desktop widths, every stage and level |
 | G | Review and sign-off of section 11 | Recorded |
 | H | Switch on and release | Owner approval |
