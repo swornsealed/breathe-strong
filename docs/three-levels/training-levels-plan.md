@@ -1,6 +1,22 @@
 # Breathe Strong: three training levels
 
-Status: **proposal for owner approval. Nothing in the app or on the website has been changed.**
+Status: **approved by the owner as proposed and built.** All seven decisions in section 13 were accepted.
+Professional review (section 11) has not been done and remains open.
+
+### What was built
+- Prescription engine with level tables; Advanced reproduces the original program exactly (2,646 day plans match the snapshot).
+- Foundation and Standard strength and cardio tables, as specified in sections 4 and 5.
+- Health check before exercise, a fuller fitness check, and a recommendation with reasons.
+- Training level screen: separate strength and cardio levels, immediate move down, readiness check and a two-week step-up to move up, level history.
+- Data version 3: existing users stay on the original plan (Advanced) and are offered the check; new users start on Foundation until assessed.
+- Full week and Minimum week, available in any week.
+- Session lengths estimated from the set count.
+- Tests: `tests/check-levels.js` plus the five earlier suites.
+
+Differences from this document as built:
+- Foundation's row substitution for chin-ups applies in the gym; home equipment keeps its existing row versions.
+- "Make today easier" drops one set from each lift for that session.
+- The repeat health check appears with the other checks every 12 weeks; a new symptom is reported by redoing it.
 Covers phases 1 to 3 of the brief: audit, training design, and application architecture.
 The ranges below are design ranges. They need exercise and clinical review before public release.
 

@@ -35,7 +35,7 @@ const session = (date, n, sc, reps) => ({ date, type: 'WA', ex: [{ n, sc, log: t
 
   await app.page.click('[data-act=stage][data-v=reclaim]'); await app.page.waitForTimeout(120); t = await text(app);
   has(t, 'Stage 3 of 4'); for (let w = 27; w <= 39; w++) has(t, 'Week ' + w); hasnt(t, 'Week 26'); hasnt(t, 'Week 40');
-  has(t, 'Week 30 · now'); has(t, 'Week 39 ★ review'); has(t, 'lighter week, 3 sets'); has(t, 'Saturday 60 min'); await shot(app, 'stage-reclaim');
+  has(t, 'Week 30 · now'); has(t, 'Week 39 ★ review'); has(t, '3 sets, lighter week'); has(t, 'Saturday 60 min'); await shot(app, 'stage-reclaim');
   await app.page.click('[data-act=week][data-v="35"]'); await app.page.waitForTimeout(120);
   assert.strictEqual(await app.ev('V.s+"|"+V.cd'), 'plan|2026-08-31'); t = await text(app); has(t, 'August 2026');
   ok('stage screen lists its 13 weeks and a week opens on the calendar');
@@ -48,7 +48,7 @@ const session = (date, n, sc, reps) => ({ date, type: 'WA', ex: [{ n, sc, log: t
 
   // cardio choice
   await at(app, 29 * 7 + 1); await app.ev("go('cardio')"); t = await text(app); has(t, 'Your choice: Walking'); has(t, '3 × 10 minutes');
-  await app.ev("go('settings')"); t = await text(app); has(t, 'Cardio'); hasnt(t, 'Minimum week', 'week choice only from week 44');
+  await app.ev("go('settings')"); t = await text(app); has(t, 'Cardio'); has(t, 'Full week'); has(t, 'Minimum week');
   await app.page.check('input[name=cardioq][value=pool]'); await app.page.click('[data-act=saveplan]'); await app.page.waitForTimeout(150);
   assert.strictEqual(await app.ev('S.profile.cardioMode'), 'pool');
   await app.ev("go('cardio')"); t = await text(app); has(t, 'Your choice: Pool'); has(t, 'It counts the same'); await shot(app, 'cardio-pool');
@@ -63,8 +63,8 @@ const session = (date, n, sc, reps) => ({ date, type: 'WA', ex: [{ n, sc, log: t
   await at(app, 44 * 7 + 2); await app.ev("go('settings')"); t = await text(app); has(t, 'Minimum week');       // week 45, Wednesday
   await app.page.check('input[name=weekq][value=min]'); await app.page.click('[data-act=saveplan]'); await app.page.waitForTimeout(150);
   assert.strictEqual(await app.ev('dayPlan(TODAY()).m.k'), 'rest');
-  await tab(app, 'plan'); t = await text(app); has(t, 'Your week: Minimum'); await shot(app, 'plan-minimum-week45');
-  ok('the Minimum week can be chosen from week 44 and changes the schedule');
+  await tab(app, 'plan'); t = await text(app); has(t, 'Your week: Minimum week'); await shot(app, 'plan-minimum-week45');
+  ok('the Minimum week can be chosen in Settings and changes the schedule');
   assert.deepStrictEqual(app.errors, []); await app.close();
 
   // load suggestions: only from week 27, only with the switch on, never in a lighter week

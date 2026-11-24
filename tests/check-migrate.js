@@ -16,8 +16,12 @@ const V1 = { v: 1, at: 1700000000000, imtLevel: 6, imtEasy: 1, backupAt: '2026-0
   pm: { '2026-01-06': 43.5 } };
 
 function intact(now, was, label) {
-  for (const k of Object.keys(was)) if (k !== 'v' && k !== 'at') same(now[k], was[k], label + ': field "' + k + '" changed');
-  assert.strictEqual(now.v, 2, label + ': version should be 2');
+  for (const k of Object.keys(was)) if (k !== 'v' && k !== 'at' && k !== 'profile') same(now[k], was[k], label + ': field "' + k + '" changed');
+  for (const k of Object.keys(was.profile)) same(now.profile[k], was.profile[k], label + ': profile field "' + k + '" changed');
+  assert.strictEqual(now.v, 3, label + ': version should be 3');
+  same(now.profile.level, { s: 'A', c: 'A' }, label + ': an existing user must stay on the original plan (Advanced)');
+  assert.strictEqual(now.profile.levelPrompt, true, label + ': an existing user should be offered the level check');
+  assert.ok(Array.isArray(now.levelLog) && now.screen === null, label + ': level fields missing');
   assert.ok(Array.isArray(now.goals) && now.reviews && typeof now.reviews === 'object', label + ': new fields missing');
 }
 
@@ -47,19 +51,30 @@ function intact(now, was, label) {
   // 3. brand-new user: no saved data at all
   app = await open(null, null, { rawState: '' });
   const fresh = JSON.parse(await app.ev('JSON.stringify(S)'));
-  assert.strictEqual(fresh.v, 2); assert.strictEqual(fresh.profile, null);
-  assert.strictEqual(await app.page.evaluate(() => localStorage.getItem('bs-state-v1-backup')), null); ok('a new user starts on version 2 with no leftover copy');
+  assert.strictEqual(fresh.v, 3); assert.strictEqual(fresh.profile, null);
+  assert.strictEqual(await app.page.evaluate(() => localStorage.getItem('bs-state-v1-backup')), null); ok('a new user starts on version 3 with no leftover copy');
   // 4. cloud record arriving in version 1 form
   await app.ev('adopt({s:' + JSON.stringify(raw) + ',at:' + V1.at + '})');
   intact(JSON.parse(await app.ev('JSON.stringify(S)')), V1, 'cloud'); ok('a version 1 record arriving from the cloud is upgraded with every field intact');
   await app.close();
 
+  // version 2 record (the 52-week release) with the old 'std' week setting
+  const V2 = Object.assign({}, V1, { v: 2, goals: [{ t: 'Stairs' }], reviews: { w13: { date: '2026-04-03', qol: 6, goals: [] } }, profile: Object.assign({}, V1.profile, { weekPlan: 'std', cardioMode: 'bike' }) });
+  const raw2 = JSON.stringify(V2);
+  app = await open(null, null, { rawState: raw2, day: 20 * 7 });
+  const up = JSON.parse(await app.ev('JSON.stringify(S)'));
+  assert.strictEqual(up.v, 3); same(up.goals, V2.goals); same(up.reviews, V2.reviews); same(up.nights, V2.nights); same(up.sessions, V2.sessions);
+  same(up.profile.level, { s: 'A', c: 'A' }); assert.strictEqual(up.profile.weekPlan, 'full'); assert.strictEqual(up.profile.cardioMode, 'bike');
+  assert.strictEqual(await app.page.evaluate(() => localStorage.getItem('bs-state-v2-backup')), raw2);
+  assert.strictEqual(await app.ev('lvOf("s")+lvOf("c")'), 'AA'); ok('a version 2 record upgrades to version 3 on the original plan, with a kept copy and the week setting carried over');
+  await app.close();
+
   // 5. forward compatibility: fields this version does not know about survive a load and save
-  const future = Object.assign({}, V1, { v: 3, goals: [{ t: 'Walk the hill track', r: 4 }], reviews: { w13: { date: '2026-04-05' } }, somethingNew: { keep: [1, 2, 3] } });
+  const future = Object.assign({}, V1, { v: 4, goals: [{ t: 'Walk the hill track', r: 4 }], reviews: { w13: { date: '2026-04-05' } }, somethingNew: { keep: [1, 2, 3] } });
   app = await open(null, null, { rawState: JSON.stringify(future) });
   await app.ev('save()');
   const back = JSON.parse(await app.page.evaluate(() => localStorage.getItem('bs-state')));
-  same(back.somethingNew, future.somethingNew); same(back.goals, future.goals); same(back.reviews, future.reviews); assert.strictEqual(back.v, 3); ok('unknown newer fields and a newer version number are preserved');
+  same(back.somethingNew, future.somethingNew); same(back.goals, future.goals); same(back.reviews, future.reviews); assert.strictEqual(back.v, 4); ok('unknown newer fields and a newer version number are preserved');
   // 6. restore from a version 1 backup file
   await app.ev('V.restore={data:' + raw + ',date:"x"}');
   intact(JSON.parse(await app.ev('JSON.stringify(migrate(Object.assign(blank(),V.restore.data)))')), V1, 'restore'); ok('a version 1 backup file restores with every field intact');

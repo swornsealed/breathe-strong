@@ -28,7 +28,8 @@ const week = async (app, w) => { const out = []; for (let d = 0; d < 7; d++) { a
   // weeks 1-24 must be untouched by switching the new weeks on
   const GDAY = fs.readFileSync(path.join(__dirname, 'check-plan.js'), 'utf8').match(/const DAY = `([\s\S]*?)`;/)[1];
   for (let n = 0; n < 24 * 7; n++) { await app.setDay(n); const r = JSON.parse(await app.ev(GDAY)); const g = golden.days.gym[n];
-    assert.deepStrictEqual([r.week, r.o], [g[0], golden.payloads[g[1]]], 'week ' + g[0] + ' day ' + (n % 7 + 1) + ' changed when weeks 25-52 are on'); }
+    const nm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; return c; };
+    assert.deepStrictEqual([r.week, nm(r.o)], [g[0], nm(golden.payloads[g[1]])], 'week ' + g[0] + ' day ' + (n % 7 + 1) + ' changed when weeks 25-52 are on'); }
   console.log('  ok  weeks 1-24 are identical with the new weeks switched on');
 
   const week8 = (await week(app, 8))[0].airway;
@@ -52,11 +53,10 @@ const week = async (app, w) => { const out = []; for (let d = 0; d < 7; d++) { a
   assert.strictEqual(after[0].phaseName, 'Maintain'); assert.strictEqual(after[5].min, 60);
   console.log('  ok  after week 52 the plan continues on the Maintain block');
 
-  // Minimum week: only offered in weeks 44-51
+  // Minimum week: now available in any week
   await app.ev("S.profile.weekPlan='min'");
-  for (const w of [44, 51]) { const d = await week(app, w); assert.deepStrictEqual(d.map(x => x.kind + x.x), ['wA', 'z2', 'rest', 'rest', 'wB', 'z2long', 'rest'], 'week ' + w + ' Minimum pattern'); }
-  for (const w of [10, 30, 43, 52]) { const d = await week(app, w); assert.strictEqual(d.filter(x => x.kind === 'w').length, 3, 'week ' + w + ' must ignore the Minimum setting'); }
-  console.log('  ok  the Minimum week applies in weeks 44-51 only');
+  for (const w of [3, 30, 44, 51]) { const d = await week(app, w); assert.deepStrictEqual(d.map(x => x.kind + x.x), ['wA', 'z2', 'rest', 'rest', 'wB', 'z2long', 'rest'], 'week ' + w + ' Minimum pattern'); }
+  console.log('  ok  the Minimum week gives two strength and two cardio sessions in any week');
   assert.deepStrictEqual(app.errors, []); await app.close();
 
   // home equipment in a lighter week

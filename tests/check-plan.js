@@ -36,6 +36,10 @@ async function record(legacy) {
   return { note: 'Plan for every day of weeks 1-' + WEEKS + '. days[variant][dayIndex] = [week, payload index].', weeks: WEEKS, payloads, days };
 }
 
+// Strength-session minutes were a flat 50 in the original app and are now estimated from the set count,
+// so they are left out of the comparison. Everything that is prescribed (exercises, sets, reps, cardio) is compared.
+const norm = o => { const c = Object.assign({}, o); if (c.session && c.session.k === 'w') delete c.min; return c; };
+
 (async () => {
   if (process.argv.includes('--write')) { const now = await record(true); fs.writeFileSync(GOLDEN, JSON.stringify(now, null, 1) + '\n'); console.log('Snapshot written:', now.payloads.length, 'distinct day plans,', Object.keys(now.days).length, 'variants'); return; }
   const old = JSON.parse(fs.readFileSync(GOLDEN, 'utf8')); let bad = 0, n = 0;
@@ -44,7 +48,7 @@ async function record(legacy) {
   for (const [label, now, upto] of [['released program, weeks 1-24', await record(false), 24 * 7], ['original behaviour, weeks 1-30', await record(true), 30 * 7]]) {
     for (const v of Object.keys(old.days)) for (let d = 0; d < upto; d++) { n++;
       const a = old.days[v][d], b = (now.days[v] || [])[d];
-      const A = JSON.stringify([a[0], old.payloads[a[1]]]), B = b ? JSON.stringify([b[0], now.payloads[b[1]]]) : 'missing';
+      const A = JSON.stringify([a[0], norm(old.payloads[a[1]])]), B = b ? JSON.stringify([b[0], norm(now.payloads[b[1]])]) : 'missing';
       if (A !== B) { if (bad++ < 5) console.log('DIFF', label, v, 'day', d + 1, '(week ' + a[0] + ')\n  was', A.slice(0, 400), '\n  now', B.slice(0, 400)); } }
   }
   console.log(bad ? 'FAIL: ' + bad + ' day plans changed' : 'PASS: all ' + n + ' day plans match the snapshot (weeks 1-24 as released; weeks 1-30 in original mode)');

@@ -139,6 +139,16 @@ const BUY=[
 const YN=[['yes','Yes'],['no','No']];
 const FREQ=[['0','Never'],['1','Sometimes'],['2','Often'],['3','Most days']];
 const CK=[
+ {k:'screen',t:'Health check before exercise',why:'Eight quick questions. A “yes” means see your GP before the strength and cardio sessions. It is not a medical clearance.',time:'1 min',every:84,q:[
+  ['c','heart','Has a doctor ever said you have a heart condition?',YN],
+  ['c','chest','Do you get chest pain or tightness when you exert yourself?',YN],
+  ['c','dizzy','Have you felt dizzy or fainted in the past year?',YN],
+  ['c','bp','Is your blood pressure high and not controlled by treatment?',YN],
+  ['c','breath','Do you get unusually breathless with light effort?',YN],
+  ['c','joint','Do you have a joint, bone or back problem that exercise could make worse?',YN],
+  ['c','recent','Have you had surgery, a heart event or a stroke in the past 6 months?',YN],
+  ['c','limit','Has a doctor told you to limit your physical activity for any other reason?',YN]],
+  res:a=>{const y=Object.values(a).filter(v=>v==='yes').length;return y?{sum:'See your GP before the strength and cardio sessions',ch:'You answered yes to '+y+' question'+(y===1?'':'s')+'. Show your GP this list before you start lifting or cardio. Until you confirm you’ve been seen, your level is held at Foundation, and intervals and breathing-out work are paused. The tongue and throat routine and your morning log carry on as normal.'}:{sum:'Nothing flagged',ch:'This is not a medical clearance. Redo this check if anything changes. We’ll ask again in 12 weeks.'}}},
  {k:'risk',t:'Sleep risk check',why:'Spots signs that your snoring could be sleep apnoea, so you know if you should see a doctor.',time:'1 min',q:[
   ['c','loud','Is your snoring loud enough to hear through a closed door?',YN],
   ['c','pause','Has anyone seen you stop breathing, choke or gasp in your sleep?',YN],
@@ -177,18 +187,25 @@ const CK=[
   ['n','secs','Stick your tongue straight out and push it hard against a spoon. How many seconds until it fades?','s',1]],
   res:a=>{const s=num(a.secs);return s==null?{sum:'Not measured',ch:'Default hold times kept.'}:{sum:'Held '+s+' s',ch:'Spoon push holds set to '+Math.min(10,Math.max(3,Math.round(s/3)))+' s. Retest in 4 weeks.'}}},
  {k:'fitness',t:'Starting fitness',why:'Picks your starting level so the first weeks aren’t too easy or too hard.',time:'3 min',every:28,q:[
-  ['n','push','Push-ups in a row with good form (knees down is fine)','reps',0],
+  ['c','days','Over the last 3 months, how many days a week have you been active?',[['0','None'],['1','1–2 days'],['3','3 or more']]],
+   ['c','lift','Strength training in the last 6 months?',[['none','None'],['some','Some'],['reg','Twice a week or more']]],
+   ['c','away','When did you last train regularly?',[['long','Over a year ago'],['mid','3–12 months ago'],['now','Within 3 months']]],
+   ['n','push','Push-ups in a row with good form (knees down is fine)','reps',0],
   ['n','plank','Plank hold on your forearms','s',1],
-  ['c','walk','Can you walk briskly for 30 minutes without stopping?',[['yes','Yes'],['no','Not yet']]]],
+  ['c','walk','Can you walk briskly for 30 minutes without stopping?',[['yes','Yes'],['no','Not yet']]],
+   ['c','steady','Can you keep up steady effort for 45 minutes?',[['yes','Yes'],['no','Not yet']]],
+   ['c','sore','After a hard session, how long are you sore?',[['day','A day or so'],['days','Several days']]],
+   ['c','limits','Any joint, back or mobility limits?',YN],
+   ['c','hours','How many hours a week can you give this?',[['lo','Under 6'],['mid','6 to 8'],['hi','9 or more']]]],
   res:a=>{const ch=[];if(num(a.push)!=null&&num(a.push)<8)ch.push('incline push-ups to start');if(num(a.plank)!=null&&num(a.plank)<30)ch.push('20 s planks to start');if(a.walk==='no')ch.push('20 min walks in weeks 1–2');
-   return{sum:[num(a.push)!=null?a.push+' push-ups':null,num(a.plank)!=null?a.plank+' s plank':null].filter(Boolean).join(' · ')||'Saved',ch:ch.length?'Adjusted: '+ch.join(', ')+'.':'Standard starting levels. Retest in 4 weeks.'}}},
+   return{sum:[num(a.push)!=null?a.push+' push-ups':null,num(a.plank)!=null?a.plank+' s plank':null].filter(Boolean).join(' · ')||'Saved',ch:(ch.length?'Adjusted: '+ch.join(', ')+'.':'Retest in 4 weeks.')+recTxt(a)}}},
  {k:'body',t:'Body measures',why:'Neck size and weight are linked to snoring, so tracking them shows change.',time:'2 min',every:28,q:[
   ['n','h','Height','cm',0],['n','w','Weight','kg',0],['n','neck','Neck, just below the Adam’s apple','cm',0],['n','waist','Waist, at the belly button','cm',0]],
   res:a=>{const h=num(a.h),w=num(a.w),b=h&&w?w/((h/100)**2):null;return{sum:b?'BMI '+r1(b):'Saved',ch:b&&b>=30?'Losing 5–10% of body weight often helps snoring. Added a tip to Today.':'We’ll track these every 4 weeks.'}}}
 ];
 const ckOf=k=>CK.find(c=>c.k===k);
 const lastCk=k=>{const a=S.checks&&S.checks[k];return a&&a.length?a[a.length-1]:null};
-const myChecks=()=>CK.filter(c=>!(c.k==='risk'&&S.profile.path==='retest'));
+const myChecks=()=>CK.filter(c=>!(c.k==='risk'&&S.profile.path==='retest')&&!(c.k==='screen'&&!Y52));
 function pers(){const fw=lastCk('forward'),m=lastCk('mouth'),tg=lastCk('tongue'),f=lastCk('fitness'),n=lastCk('nose'),b=lastCk('body'),r=lastCk('risk');
  const h=b&&num(b.a.h),w=b&&num(b.a.w);
  return{palate:!!m&&m.a.palate==='yes',base:m?m.a.jaw==='yes':S.profile.jaw==='yes',dry:!!m&&m.a.dry==='yes',nose:n&&n.a.nose&&n.a.nose!=='clear'?n.a.nose:null,
@@ -230,11 +247,14 @@ const checkSvg='<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="tru
 const back='<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6 L18 18 M18 6 L6 18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
 
 /* ---------- state + saving ---------- */
-const blank=()=>({v:2,at:0,health:null,profile:null,nights:{},done:{},sessions:[],weekly:{},imtLevel:4,imtEasy:0,goals:[],reviews:{}});
+const blank=()=>({v:3,at:0,health:null,profile:null,nights:{},done:{},sessions:[],weekly:{},imtLevel:4,imtEasy:0,goals:[],reviews:{},levelLog:[],screen:null,rx:2});
 /* Saved-data upgrade. Only ever adds fields: nothing is renamed, re-keyed or removed. The untouched version 1 data is kept under V1KEY. */
 const V1KEY='bs-state-v1-backup';
-function keepV1(raw,r){try{if(r&&(r.v||1)<2&&r.profile&&!localStorage.getItem(V1KEY))localStorage.setItem(V1KEY,raw)}catch(e){}}
-function migrate(st){if(!Array.isArray(st.goals))st.goals=[];if(!st.reviews||typeof st.reviews!=='object')st.reviews={};if((st.v||1)<2)st.v=2;return st}
+function keepV1(raw,r){try{if(!r||!r.profile)return;const v=r.v||1,k=v<2?V1KEY:v<3?'bs-state-v2-backup':null;if(k&&!localStorage.getItem(k))localStorage.setItem(k,raw)}catch(e){}}
+function migrate(st){if(!Array.isArray(st.goals))st.goals=[];if(!st.reviews||typeof st.reviews!=='object')st.reviews={};if(!Array.isArray(st.levelLog))st.levelLog=[];if(st.screen===undefined)st.screen=null;if(!st.rx)st.rx=2;
+ /* version 3: training levels. A record made before levels existed keeps the original plan, which is now called Advanced. Nothing gets harder. */
+ if(st.profile){if(!st.profile.level){st.profile.level={s:'A',c:'A'};st.profile.levelPrompt=true}if(st.profile.weekPlan==='std')st.profile.weekPlan='full'}
+ if((st.v||1)<3)st.v=3;return st}
 const FBC=window.FIREBASE_CONFIG||null;
 let S=blank(),mode='memory',dbRef=null,saveT=null,writing=false,dirty=false,FB=null,USER=null,FBERR=null,LKEY='bs-state',PEND=null,LOCAL=false;
 try{LOCAL=localStorage.getItem('bs-local')==='1'}catch(e){}
@@ -286,13 +306,20 @@ function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show')
 async function copy(text){try{await navigator.clipboard.writeText(text);toast('Copied')}catch(e){const ta=$('#copytext');if(ta){ta.focus();ta.select()}toast('Select the text below and copy it')}}
 
 /* ---------- plan logic ---------- */
-function dayPlan(s){const w=weekOf(s),p=phaseOf(Math.max(1,w)),wd=(pd(s).getDay()+6)%7,L=w%2?['A','B','A']:['B','A','B'];
- const row=weekRow(Math.max(1,w)),mini=row.mt&&S.profile&&S.profile.weekPlan==='min';
- const m=(mini?[{k:'w',x:'A'},{k:'z2'},{k:'rest'},{k:'rest'},{k:'w',x:'B'},{k:'z2long'},{k:'rest'}]:[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},{k:p==='F'||row.lite?'z2':'int'},{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}])[wd];return{w,p,wd,m,row}}
-function info(m,p,row){row=row||{};if(m.k==='w')return{t:WK[m.x].t,s:WK[m.x].ex.length+' exercises · '+(row.lite?'3 sets · lighter week':S.profile&&S.profile.equip&&S.profile.equip!=='gym'?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:50,day:'Workout '+m.x+' day'};
- if(m.k==='z2')return{t:'Zone 2 cardio',s:'Talking pace, nose breathing only',min:p==='F'&&S.profile&&pers().walk==='no'?20:PH[p].z2,day:'Zone 2 day'};
- if(m.k==='z2long')return{t:'Long easy walk',s:'Zone 2 pace, with or without a loaded backpack',min:row.long||45,day:'Long walk day'};
- if(m.k==='int')return{t:'Intervals + breath-hold walk',s:pick(p,[6,6,8])+' × 30 s hard / 90 s easy, then '+pick(p,[5,5,8])+' holds',min:30,day:'Intervals day'};
+function dayPlan(s){const w=weekOf(s),p=phaseOf(Math.max(1,w)),wd=(pd(s).getDay()+6)%7,L=w%2?['A','B','A']:['B','A','B'],on=Y52&&!!S.profile;
+ const row=Object.assign({wk:Math.max(1,w),thu:wd===3},weekRow(Math.max(1,w))),mini=on&&S.profile.weekPlan==='min',two=on&&lvOf('s')==='F'&&w<=13;
+ const thu={k:on?thuKind(row.wk,p,row):(p==='F'||row.lite?'z2':'int')};
+ const m=(mini?[{k:'w',x:'A'},{k:'z2'},{k:'rest'},{k:'rest'},{k:'w',x:'B'},{k:'z2long'},{k:'rest'}]:two?[{k:'w',x:'A'},{k:'z2'},{k:'rest'},thu,{k:'w',x:'B'},{k:'z2long'},{k:'rest'}]:[{k:'w',x:L[0]},{k:'z2'},{k:'w',x:L[1]},thu,{k:'w',x:L[2]},{k:'z2long'},{k:'rest'}])[wd];return{w,p,wd,m,row}}
+function info(m,p,row){row=row||{};const w=row.wk||1,sl=lvOf('s'),cl=lvOf('c');
+ if(m.k==='w'){const n=WK[m.x].ex.filter(e=>keepEx(e,sl)).length,home=S.profile&&S.profile.equip&&S.profile.equip!=='gym';
+  if(sl==='A')return{t:WK[m.x].t,s:n+' exercises · '+(row.lite?'3 sets · lighter week':home?parseInt(PH[p].lift)+' × 8–15':PH[p].lift),min:strMin(w),day:'Workout '+m.x+' day'};
+  const r=liftRow(w,sl);return{t:WK[m.x].t,s:n+' exercises · '+r[1]+' × '+(home?'8–15':r[2])+(LITEW(w)?' · lighter week':''),min:r[3],day:'Workout '+m.x+' day'}}
+ if(m.k==='z2'){if(cl==='A')return{t:'Zone 2 cardio',s:'Talking pace, nose breathing only',min:p==='F'&&S.profile&&pers().walk==='no'?20:PH[p].z2,day:'Zone 2 day'};
+  const z=CAR[cl].z(w,row.thu);return{t:'Steady cardio',s:'Talking pace: you can still hold a conversation'+(z[0]!==z[1]?' · in one go or in shorter bouts':''),min:z[1],rng:z[0]!==z[1]?z[0]+'–'+z[1]:null,day:'Cardio day'}}
+ if(m.k==='z2long'){if(cl==='A')return{t:'Long easy walk',s:'Zone 2 pace, with or without a loaded backpack',min:row.long||45,day:'Long walk day'};
+  return{t:'Long easy session',s:'Easy, steady pace. Your choice of activity',min:CAR[cl].long(w),day:'Long session day'}}
+ if(m.k==='int'){if(cl==='A')return{t:'Intervals + breath-hold walk',s:pick(p,[6,6,8])+' × 30 s hard / 90 s easy, then '+pick(p,[5,5,8])+' holds',min:30,day:'Intervals day'};
+  const x=intRx(w);return{t:'Intervals',s:x.R+' × 30 s '+x.hard+' / '+(x.E===120?'2 min':x.E+' s')+' easy',min:x.R<=4?25:30,day:'Intervals day'}}
  return{t:'Rest + mobility',s:'Foam roller, wall angels, daily routine',min:15,day:'Rest day'}}
 function scored(){const src=(S.profile&&S.profile.scoreSrc)||'snorelab';return Object.keys(S.nights).sort().filter(k=>num(S.nights[k].snore)!=null&&(S.nights[k].src||'snorelab')===src)}
 function stats(){const ks=scored(),t=TODAY(),pre=ks.filter(k=>k<S.profile.start),first=(pre.length>=3?pre.slice(-14):ks.slice(0,14)).map(k=>S.nights[k].snore),base=med(first);
@@ -327,7 +354,7 @@ const imtOpts=()=>[['yes','I have a breathing trainer','A handheld IMT device, s
 function swaps(){const eqs=['gym','db','home','bw'];return`<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">See every exercise swap</summary>
  ${['A','B'].map(x=>`<div class="lab" style="margin-top:12px">${WK[x].t}</div>${WK[x].ex.filter(e=>e.alt&&e.alt!==NECK).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="small t1">${esc(e.n)}</div><div class="tiny mut">Dumbbells: ${esc(e.alt.db[0])} · Household: ${esc(e.alt.home[0])} · Bodyweight: ${esc(e.alt.bw[0])}</div></div>`).join('')}`).join('')}
 </details>`}
-const emstOn=()=>S.profile.emst!=='off';
+const emstOn=()=>S.profile.emst!=='off'&&!flagged();
 const emstSets=()=>phaseOf(Math.max(1,weekOf(TODAY())))==='F'?3:5;
 const emstOpts=()=>[['no','No device: pursed lips','Blow out hard through tightly pursed lips. Free, and a good start'],['yes','I have a breath-out trainer','An EMST device, or a two-way trainer such as The Breather'],['off','Skip breathing out','Breathing-in sessions only']];
 const emstInfo='<details class="card"><summary class="t1" style="cursor:pointer;min-height:32px">Why breathe out against resistance?</summary><p class="small">Newer trials train breathing in <i>and</i> out. Forceful breathing out works the muscles under the chin and at the back of the throat as well as the chest. It takes 2 minutes after your breathing-in sets.</p><p class="small">Skip it, and ask your GP first, if you have uncontrolled high blood pressure, a hernia, or recent eye, ear or chest surgery.</p></details>';
@@ -417,7 +444,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
  const tile=(v,l)=>`<div class="card" style="margin:0;padding:14px 12px;text-align:center"><div class="cond" style="font-size:32px;line-height:1">${v}</div><div class="tiny mut" style="margin-top:4px">${l}</div></div>`;
  return`<div class="top"><span class="small mut">${fmt(t)}</span><button class="icon" data-act="go" data-v="settings" aria-label="Settings">${gear}</button></div>
  <h1 style="margin-top:2px">${di<0?'Baseline time':'Week '+w+(w>TOTAL()?'':' of '+TOTAL())}</h1>
- <div class="small mut" style="margin:-6px 0 12px">${di<0?'Program starts '+fmt(S.profile.start)+'. Log your snore score each morning until then.':(Y52&&stageOf(w)?stageOf(w).n+' stage · ':'')+PH[p].n+' phase'+(weekRow(w).lite?' · lighter review week':'')}</div>
+ <div class="small mut" style="margin:-6px 0 12px">${di<0?'Program starts '+fmt(S.profile.start)+'. Log your snore score each morning until then.':(Y52&&stageOf(w)?stageOf(w).n+' stage · ':'')+PH[p].n+' phase'+(weekRow(w).lite?' · lighter review week':'')}</div>${Y52&&di>=0?lvLine():''}
  ${must}
  <button data-act="tab" data-v="progress" class="card" style="display:block;width:100%;text-align:left;border:0;padding:18px;background:linear-gradient(150deg,${ch==null?'#24272C':ch>=.1?'#213530':ch>-.1?'#3a321f':'#3a261f'},#24272C 70%)" aria-label="Snore score ${st.last!=null?Math.round(st.last):'none yet'}, ${word}. Open Progress">
   <div class="between" style="align-items:flex-end">
@@ -436,7 +463,7 @@ function today(){const t=TODAY(),di=dayIdx(t),st=stats(),P=pers(),rt=S.profile.p
   <button class="btn" data-act="tab" data-v="${!logged?'log':'day'}" style="margin-bottom:0">${!logged?'Log last night':'Go to today'}</button>${!logged?`<button class="btn2" data-act="tab" data-v="day" style="margin-bottom:0">See today’s sessions</button>`:''}</div>`
  :`<button class="btn" data-act="tab" data-v="log">Log last night</button>`}
  ${moreBox}
- ${Y52?reviewCard():''}<div style="margin:18px 0 6px">${tag('Your program')}</div>
+ ${Y52?levelCards()+reviewCard():''}<div style="margin:18px 0 6px">${tag('Your program')}</div>
  ${Y52?`<div class="card" style="padding:14px 16px"><div class="seg">${STAGES.map(g=>`<div style="flex:1;${w>=g.a&&w<=g.b?'background:var(--acc)':w>g.b?'background:var(--air)':''}"></div>`).join('')}</div>
    <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,52)} of 52${stageOf(w)?' · '+stageOf(w).n:''}</span><span class="mut">${w>52?'Year complete':'Review at week '+[13,26,39,52].find(x=>x>=w)}</span></div></div>`:`<div class="card" style="padding:14px 16px"><div class="seg">${[['F',2],['B',3],['S',3],['R',16]].map(([k,n])=>`<div style="flex:${n};${k===p?'background:var(--acc)':('FBSR'.indexOf(k)<'FBSR'.indexOf(p)||p==='M'?'background:var(--air)':'')}"></div>`).join('')}</div>
   <div class="between small" style="margin-top:8px"><span class="mut">Week ${Math.min(w,24)} of 24</span><span class="mut">Retest around week 24</span></div></div>`}`}
@@ -568,15 +595,15 @@ function plan(){const t=TODAY(),di=dayIdx(t),w=Math.max(1,weekOf(t)),p=phaseOf(w
  </div>
  ${daySum(sel)}
  ${up.length?`<h2>Coming up</h2>${up.map(m=>{const k=addD(S.profile.start,m.d);return`<button class="item" data-act="calday" data-v="${k}"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">${esc(m.t)}</span><span class="t2">${fmt(k)} · in ${dayIdx(k)-di} day${dayIdx(k)-di===1?'':'s'}</span></span></button>`}).join('')}`:''}
- <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing in and out + the airway routine, about 20 min, then the evening wind-down.<br>This phase: lifts at ${PH[p].lift}, stopping with 1–2 reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
- ${Y52&&weekRow(w).mt?`<div class="card small"><b>Your week:</b> ${S.profile.weekPlan==='min'?'Minimum (2 strength, 2 cardio)':'Standard (3 strength, 3 cardio)'}. From week 44 you choose the week you can keep up. Change it in Settings.</div>`:''}
+ <div class="card small"><span style="color:var(--air)">●</span> Every day: breathing in and out + the airway routine, about 20 min, then the evening wind-down.<br>This phase: lifts at ${Y52?esc(liftTxt(w)):PH[p].lift}, stopping with ${Y52?LV[lvOf('s')].rir:'1–2'} reps left. Training: ${esc(EQUIP[S.profile.equip||'gym'])}.</div>
+ ${Y52?`<div class="card small"><b>Your week:</b> ${S.profile.weekPlan==='min'?'Minimum week (2 strength, 2 cardio)':'Full week'} · <b>Level:</b> ${lvName(lvOf('s'),lvOf('c'))}. Change either in Settings.</div>`:''}
  ${Y52?RECOVERY:''}
  ${S.profile.path==='retest'?CPAPNOTE:''}
  <button class="btn2" data-act="go" data-v="settings">Settings and checks</button>`}
 function stage(){const g=STAGES.find(x=>x.k===V.k)||STAGES[0],now=Math.max(1,weekOf(TODAY()));
  return`<div class="top"><button class="icon" data-act="tab" data-v="plan" aria-label="Back to plan">${back}</button><span class="small mut">Stage ${STAGES.indexOf(g)+1} of 4 · weeks ${g.a}–${g.b}</span><span style="width:44px"></span></div>
  <h1>${g.n}</h1><p class="mut">${STAGEWHY[g.k]}</p>
- ${[...Array(g.b-g.a+1)].map((_,i)=>{const w=g.a+i,r=weekRow(w),ph=PH[r.p];return`<button class="item" data-act="week" data-v="${w}" ${w===now?'style="box-shadow:inset 3px 0 0 var(--acc)"':''}><span class="grow"><span class="t1">Week ${w}${w===now?' · now':''}${[13,26,39,52].includes(w)?' <span style="color:var(--amb)">★ review</span>':''}</span><span class="t2">${ph.n} · ${r.lite?'lighter week, 3 sets':esc(ph.lift)} · Saturday ${r.long||45} min</span></span></button>`}).join('')}
+ ${[...Array(g.b-g.a+1)].map((_,i)=>{const w=g.a+i,r=weekRow(w),ph=PH[r.p];return`<button class="item" data-act="week" data-v="${w}" ${w===now?'style="box-shadow:inset 3px 0 0 var(--acc)"':''}><span class="grow"><span class="t1">Week ${w}${w===now?' · now':''}${[13,26,39,52].includes(w)?' <span style="color:var(--amb)">★ review</span>':''}</span><span class="t2">${ph.n} · ${esc(liftTxt(w))} · Saturday ${longMin(w)} min</span></span></button>`}).join('')}
  <p class="tiny mut">Every week also has the daily airway routine, breathing trainer and evening wind-down.</p>`}
 
 function watch(){const cur=S.profile.watch||'';return`
@@ -595,6 +622,7 @@ function watch(){const cur=S.profile.watch||'';return`
 function settings(){const pr=S.profile;return`
  <div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close settings">${back}</button><span class="small mut">Settings</span><span style="width:44px"></span></div>
  <h1>Settings</h1>
+ ${Y52?`<button class="item" data-act="go" data-v="level"><span class="grow"><span class="t1">Training level: ${lvName(lvOf('s'),lvOf('c'))}</span><span class="t2">Foundation, Standard or Advanced. See what suits you, or change it</span></span><span class="small" style="color:var(--acct)">Open</span></button>`:''}
  <h2>Your path</h2>
  ${radios('path',[['snorer','Snoring program'],['retest','Road to retest','For CPAP or mouthguard users']],pr.path||'snorer')}
  ${pr.path==='retest'?CPAPNOTE:''}
@@ -604,7 +632,7 @@ function settings(){const pr=S.profile;return`
  ${Y52?`<h2>Cardio</h2>
  <p class="tiny mut" style="margin-top:0">Pick what suits your body. Same minutes, same easy effort, and any session can be split into shorter bouts.</p>
  ${radios('cardioq',Object.entries(CARDIO).map(([k,c])=>[k,c[0],c[1]]),cardioMode())}
- ${weekRow(Math.max(1,weekOf(TODAY()))).mt?`<h2>Your week</h2>${radios('weekq',[['std','Standard week','3 strength sessions and 3 cardio sessions'],['min','Minimum week','2 strength sessions and 2 cardio sessions. A level you can hold for life. Daily routines stay the same']],pr.weekPlan==='min'?'min':'std')}`:''}`:''}
+ <h2>Your week</h2>${radios('weekq',[['full','Full week','All of your level’s strength and cardio sessions'],['min','Minimum week','2 strength sessions and 2 cardio sessions, for busy or tired weeks. The daily airway, breathing and evening routines stay the same']],pr.weekPlan==='min'?'min':'full')}`:''}
  <h2>Breathing trainer</h2>
  ${radios('imtq',imtOpts(),pr.imt==='no'?'no':'yes')}
  ${imtInfo}
@@ -662,21 +690,23 @@ function ckres(){const c=ckOf(V.k),l=lastCk(V.k),r=c.res(l.a),more=V.wiz&&V.wiz.
  return`<div class="top"><button class="icon" data-act="tab" data-v="today" aria-label="Close">${back}</button><span class="small mut">${c.t}</span><span style="width:44px"></span></div>
  <h1>${esc(r.sum)}</h1>
  <div class="card"><div class="lab">What this changes</div><div>${esc(r.ch)}</div></div>
- ${more?`<button class="btn" data-act="cknext">Next check</button><button class="btn2" data-act="tab" data-v="today">Finish later</button>`:`<button class="btn" data-act="tab" data-v="today">Done</button>`}`}
+ ${more?`<button class="btn" data-act="cknext">Next check</button><button class="btn2" data-act="tab" data-v="today">Finish later</button>`:`${V.k==='screen'&&S.profile.levelNew?`<button class="btn" data-act="ck" data-v="fitness">Next: fitness check</button>`:''}${Y52&&(V.k==='fitness'||V.k==='screen')?`<button class="btn2" data-act="go" data-v="level">Training level</button>`:''}<button class="btn${V.k==='screen'&&S.profile.levelNew?'2':''}" data-act="tab" data-v="today">Done</button>`}`}
 
-function workout(){const t=TODAY(),p=dayPlan(t).p,row=dayPlan(t).row,x=V.x,wk=WK[x],eq=S.profile.equip||'gym',kgc=eq!=='bw';
- if(!W||W.x!==x||W.date!==t||W.eq!==eq){W={x,eq,date:t,ex:wk.ex.map(e=>{const a=eq!=='gym'&&e.alt?e.alt[eq]:null;let sc=a&&a[2]?pick(p,a[2]):e.s==='P'?PH[p].lift:e.log&&PH[p].ls?PH[p].ls:e.log&&PH[p].lt!=null?e.s[PH[p].lt]:pick(p,e.s);if(row.lite&&e.log)sc='3 ×'+sc.split('×')[1].split(',')[0]+', lighter week: about 90% of your recent load';const n=parseInt(sc)||3;
+function workout(){const t=TODAY(),p=dayPlan(t).p,row=dayPlan(t).row,sl=lvOf('s'),x=V.x,wk=WK[x],eq=S.profile.equip||'gym',kgc=eq!=='bw';
+ if(!W||W.x!==x||W.date!==t||W.eq!==eq||W.sl!==sl){W={x,eq,sl,date:t,ex:wk.ex.filter(e=>keepEx(e,sl)).map(e=>{const a=eq!=='gym'&&e.alt?e.alt[eq]:null;let sc=a&&a[2]?pick(p,a[2]):e.s==='P'?PH[p].lift:e.log&&PH[p].ls?PH[p].ls:e.log&&PH[p].lt!=null?e.s[PH[p].lt]:pick(p,e.s);if(row.lite&&e.log)sc='3 ×'+sc.split('×')[1].split(',')[0]+', lighter week: about 90% of your recent load';const n=parseInt(sc)||3;
   const P=pers();let nm=a?a[0]:e.n,tp=a?a[1]:e.tip;if(a&&e.log&&!a[2])sc=n+' × 8–15, slow lowering'+(row.lite?' (lighter week)':'');
   if(nm==='Push-ups'&&P.push!=null&&P.push<8){nm='Incline push-ups';tp='Hands on a kitchen bench or sturdy table. Lower the incline as you get stronger'}
   if(e.n==='Plank with chin tuck'&&p==='F'&&P.plank!=null&&P.plank<30)sc='3 × 20 s';
-  return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(n)].map(()=>({kg:'',reps:''})):[]}})}}
+  if(sl!=='A'){const o=lvEx(e,a,sl,row.wk,eq,nm,tp,sc);nm=o.nm;tp=o.tp;sc=o.sc}
+   if(e.log&&e.n!=='Dumbbell shrugs')sc=txn(sc,row.wk);
+   return{n:nm,tip:tp,sc,log:!!e.log,done:false,sets:e.log?[...Array(parseInt(sc)||n)].map(()=>({kg:'',reps:''})):[]}})}}
  const sug=n=>{if(!Y52||row.lite||dayPlan(t).w<27)return'';const has=z=>z.reps!=='';const past=[];for(let k=S.sessions.length-1;k>=0&&past.length<2;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.filter(has).length>=2);if(e)past.push(e)}
    if(past.length<2)return'';const st=past.map(e=>{const m=/×\s*(\d+)(?:–(\d+))?/.exec(e.sc||'');if(!m)return 0;const lo=+m[1],hi=+(m[2]||m[1]),r=e.sets.filter(has).map(z=>+z.reps);return r.every(x=>x>=hi)?1:r.some(x=>x<lo)?-1:0});
    return st[0]===1&&st[1]===1?`<div class="tiny" style="color:var(--air)">Top of the range two sessions running. If you had a rep or two in hand, ${kgc?'add the smallest load you can (about 2.5 kg)':'slow the lowering or add a pause'}. Your call.</div>`:st[0]===-1&&st[1]===-1?`<div class="tiny" style="color:var(--amb)">Under the range two sessions running. ${kgc?'Drop the load by 5–10%':'Use an easier version'} and build back up.</div>`:''};
   const lastOf=n=>{const has=s=>s.kg!==''||s.reps!=='';for(let k=S.sessions.length-1;k>=0;k--){const e=(S.sessions[k].ex||[]).find(z=>z.n===n&&z.sets&&z.sets.some(has));if(e){const s=e.sets.filter(has).pop();return s.kg!==''?s.kg+' kg × '+(s.reps||'?'):s.reps+' reps'}}return null};
- return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}</span><span style="width:44px"></span></div>
+ return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close workout">${back}</button><span class="small mut">Week ${dayPlan(t).w} · ${PH[p].n}${Y52?' · '+LV[sl].n:''}</span><span style="width:44px"></span></div>
  <h1>${esc(wk.t)}</h1>
- <div class="card small"><b style="color:var(--acct)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
+ <div class="card small"><b style="color:var(--acct)">Brace:</b> big belly breath, brace like you’re about to be punched, chin tucked, exhale at the top. Never hold your breath for more than one rep.${Y52?`<br><b>Effort:</b> stop each set with ${LV[sl].rir} reps left. Rest ${LV[sl].rest}.`:''}${eq!=='gym'?`<br><b style="color:var(--air)">${esc(EQUIP[eq])}:</b> pick a load or version where the last 2 reps are hard. Too easy? Slow the lowering to 3–4 s or add a pause.`:''}</div>
   ${row.lite?`<div class="card small" style="box-shadow:inset 3px 0 0 var(--air)"><b>Lighter week.</b> Three sets at about 90% of your recent loads. This is planned recovery, not a step back.</div>`:''}${Y52?RECOVERY:''}
  ${W.ex.map((e,i)=>{const L=e.log?lastOf(e.n):null,tip=e.tip;return`<div class="card">
   <div class="row" style="align-items:flex-start">${LIFT[e.n]?`<button class="icon" style="width:92px;height:77px;flex:none;padding:0" data-act="zoom" data-v="${i}" aria-label="${V.zoom===i?'Hide':'Show'} how to do ${esc(e.n)}">${liftArt(e.n)}</button>`:''}<div class="grow"><span class="t1">${esc(e.n)}</span><span class="small mut">${esc(e.sc)}</span>${LIFT[e.n]?`<span class="tiny" style="color:var(--acct)">${V.zoom===i?'Tap picture to close':'Tap picture to enlarge'}</span>`:''}</div></div>
@@ -685,26 +715,27 @@ function workout(){const t=TODAY(),p=dayPlan(t).p,row=dayPlan(t).row,x=V.x,wk=WK
   ${e.log?`${L?`<div class="tiny" style="color:var(--air)">Last time: ${esc(L)}</div>`:''}${sug(e.n)}<div class="setrow tiny mut" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span>Set</span>${kgc?'<span>kg</span>':''}<span>Reps</span></div>${e.sets.map((s,j)=>`<div class="setrow" style="${kgc?'':'grid-template-columns:44px minmax(0,1fr)'}"><span class="small">${j+1}</span>${kgc?`<input type="number" inputmode="decimal" aria-label="${esc(e.n)} set ${j+1} kg" data-set="${i}:${j}:kg" value="${esc(s.kg)}">`:''}<input type="number" inputmode="numeric" aria-label="${esc(e.n)} set ${j+1} reps" data-set="${i}:${j}:reps" value="${esc(s.reps)}"></div>`).join('')}`
   :`<label class="check" style="border:0"><input type="checkbox" data-exdone="${i}" ${e.done?'checked':''}>Done</label>`}
  </div>`}).join('')}
- <button class="btn" data-act="finish">Finish workout</button>
+ ${Y52?(W.easy?`<p class="tiny mut" style="text-align:center">Eased for today: one set fewer on each lift. That still counts.</p>`:`<button class="btn2" data-act="easier">Make today easier</button>`):''}
+  <button class="btn" data-act="finish">Finish workout</button>
  <div style="position:sticky;bottom:0;background:var(--deep);border-top:1px solid var(--card);margin:0 -16px;padding:8px 16px calc(8px + env(safe-area-inset-bottom))" class="row"><span class="cond" style="font-size:30px;width:72px" data-tmr>${T?mmss(T.left):'1:30'}</span><button class="btn2" style="margin:0" data-act="rest" data-v="90">Rest 90 s</button><button class="btn2" style="margin:0" data-act="rest" data-v="180">Rest 3 min</button></div>`}
 
 function cardio(){const t=TODAY(),d=dayPlan(t),i=info(d.m,d.p,d.row);
  if(d.m.k!=='int')return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span></span><span style="width:44px"></span></div>
-  <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.min} minutes.</p>
+  <h1>${esc(i.t)}</h1><p class="mut">${esc(i.s)}. Aim for ${i.rng||i.min} minutes.</p>
   <div class="card"><div class="lab">Timer</div><div class="huge" data-tmr>${T?mmss(T.left):mmss(i.min*60)}</div></div>
   <button class="btn2" data-act="ctimer" data-v="${i.min*60}">${T?'Restart timer':'Start timer'}</button>
   ${d.m.k==='rest'?`<div class="card small">Foam roller thoracic extension × 10, wall angels 2 × 10, then your daily routine and IMT.</div>`:`<div class="card small"><b>What’s Zone 2?</b> An easy, steady pace you can hold for a long time: you could chat but not sing, and you can breathe through your nose the whole way. If you have to open your mouth to breathe, slow down. On a watch it’s roughly 60–70% of your maximum heart rate (about 180 minus your age).</div>
   ${Y52?`<div class="card small"><b>Your choice: ${CARDIO[cardioMode()][0]}.</b> ${CARDIO[cardioMode()][1]}${cardioMode()==='walk'&&d.m.k==='z2long'?' New to the pack? Start without it.':''}<br>Can’t do it in one go? Split it into shorter bouts across the day, for example 3 × 10 minutes. It counts the same.<br><span class="tiny mut">Change your activity any time in Settings.</span></div>`:`<div class="card small"><b>${d.m.k==='z2long'?'Pick one today':'Ways to do it'}:</b><br>• <b>Plain walk:</b> brisk walk, bike or rower at Zone 2 pace.<br>• <b>Loaded walk:</b> the same walk wearing a backpack with 5–10 kg (a few water bottles or books). Stand tall, chin tucked. It adds strength to the cardio.${d.m.k==='z2long'?'<br>New to it? Start without the pack and add weight from week 3.':''}</div>`}`}
   <button class="btn" data-act="cdone">Mark done</button>`;
- const R0=pick(d.p,[6,6,8]),H0=pick(d.p,[5,5,8]);if(!N)N={r:1,ph:'ready',R:R0,H:H0,steps:[]};
+ const ix=intRx(d.row.wk);if(!N)N={r:1,ph:'ready',R:ix.R,H:ix.H,E:ix.E,steps:[]};
  return`<div class="top"><button class="icon" data-act="tab" data-v="day" aria-label="Close">${back}</button><span class="small mut">Intervals</span><span style="width:44px"></span></div>
- ${N.ph==='holds'||N.ph==='done'?`<h1>Breath-hold walk</h1>
+ ${(N.ph==='holds'||N.ph==='done')&&!N.H?`<h1>Intervals done</h1><p class="mut small">Keep moving gently for a few minutes while your breathing settles.</p><button class="btn" data-act="idone">Save session</button>`:N.ph==='holds'||N.ph==='done'?`<h1>Breath-hold walk</h1>
   <p class="mut small">Breathe out normally, pinch your nose and walk until a moderate urge to breathe. Count your steps, then breathe calmly through your nose for a minute.</p>
-  <div class="warn">Never in water, while driving or near traffic. Skip this if you have heart problems.</div>
+  <div class="warn">Never in water, while driving or near traffic. This part is optional. Skip it if you have heart problems, feel unwell or would simply rather not.</div>
   <div class="card">${[...Array(N.H)].map((_,k)=>`<label class="between" style="margin:6px 0"><span>Hold ${k+1} steps</span><input type="number" inputmode="numeric" style="width:110px" data-step="${k}" value="${esc(N.steps[k]||'')}"></label>`).join('')}</div>
   <button class="btn" data-act="idone">Save session</button>`
  :`<h1>${N.ph==='hard'?'Go hard':N.ph==='easy'?'Easy, nose breathing':'Intervals'}</h1>
-  <p class="mut small">${N.R} rounds of 30 s hard and 90 s easy on a rower, bike, sled or hill. No gym? Stair climbs, a skipping rope, burpees or a steep hill walk all work.${Y52?' Easier on the joints: bike, pool or arm bike. Pick what suits you.':''} In each easy block, slow your breathing back down.</p>
+  <p class="mut small">${N.R} rounds of 30 s ${ix.hard} and ${N.E===120?'2 min':'90 s'} easy on a rower, bike, sled or hill. No gym? Stair climbs, a skipping rope, burpees or a steep hill walk all work.${Y52?' Easier on the joints: bike, pool or arm bike. Pick what suits you.':''} In each easy block, slow your breathing back down.</p>
   <div class="card" style="text-align:center"><div class="small mut">Round ${N.r} of ${N.R}</div><div class="huge" data-tmr style="color:${N.ph==='hard'?'var(--acc)':'var(--ink)'}">${T?mmss(T.left):'0:30'}</div></div>
   ${N.ph==='ready'?`<button class="btn" data-act="istart">Start round 1</button>`:`<button class="btn2" data-act="iskip">Skip to breath-hold walk</button>`}`}`}
 
@@ -967,6 +998,7 @@ function effort(){const g={};Object.keys(S.done).forEach(k=>{if(S.done[k].main){
  return Object.keys(Object.assign({},g,sc)).map(Number).filter(w=>w>0).sort((a,b)=>a-b).slice(-8).map(w=>({w,s:g[w]||0,v:sc[w]}))}
 function alerts(){const t=TODAY(),A=[],P=pers(),cs=cpapStats(14),c7=cpapStats(7),st=stats(),rt=S.profile.path==='retest';
  const al=lastCk('alert'),en=al?ckOf('alert').res(al.a).score:null;
+ if(flagged())A.push({lv:'high',t:'See your GP before the strength and cardio sessions',why:'You answered yes on the health check. Your level is held at Foundation, and intervals and breathing-out work are paused, until you confirm you’ve been seen. Settings, then Training level.'});
  if(!rt&&(P.risk==='urgent'||P.quick==='yes')&&!S.profile.gpOk)A.push({lv:'high',t:'See your GP soon about a sleep study',why:'You reported breathing pauses or drowsy driving. Don’t drive if you feel drowsy.'});
  if(c7.ahiN>=3&&c7.ahi>10)A.push({lv:'high',t:'Contact your sleep clinic',why:'Your CPAP events per hour have averaged '+r1(c7.ahi)+' this week (above 10).'});
  if(cs.n>=5&&cs.good/cs.n<.7)A.push({lv:'med',t:'CPAP use has slipped',why:'Only '+cs.good+' of your last '+cs.n+' logged nights reached 4 hours. If the mask or pressure is the problem, your sleep clinic can help.'});
@@ -1060,7 +1092,7 @@ Resting HR ${avg7('hr')??'n/a'} bpm · breathing ${avg7('br')??'n/a'}/min · SpO
 ${(()=>{const b=lastCk('body');return b?'Neck '+(b.a.neck||'?')+' cm · weight '+(b.a.w||'?')+' kg'+(P.bmi?' · BMI '+r1(P.bmi):''):''})()}
 
 TRAINING
-Program week ${w}${w>TOTAL()?'':' of '+TOTAL()} · ${Object.values(S.done).filter(d=>d.main).length} workouts/cardio · ${Object.values(S.done).filter(d=>d.routine).length} airway routines · ${Object.values(S.done).filter(d=>d.imt).length} breathing sessions (in${emstOn()?' and out':''}) · ${Object.values(S.done).filter(d=>d.evening).length} evening wind-downs
+Program week ${w}${w>TOTAL()?'':' of '+TOTAL()}${Y52?' · training level '+lvName(lvOf('s'),lvOf('c')):''} · ${Object.values(S.done).filter(d=>d.main).length} workouts/cardio · ${Object.values(S.done).filter(d=>d.routine).length} airway routines · ${Object.values(S.done).filter(d=>d.imt).length} breathing sessions (in${emstOn()?' and out':''}) · ${Object.values(S.done).filter(d=>d.evening).length} evening wind-downs
 ${(()=>{const f=fshift(30);return f?'Overnight neck change (bedtime to waking): average '+(f.d>0?'+':'')+r1(f.d)+' cm over '+f.n+' nights':''})()}
 ${Y52?historyText():''}${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join('\n'):''}`;
  return`<div class="top"><button class="icon" data-act="tab" data-v="retest" aria-label="Close">${back}</button><span class="small mut">${rt?'Doctor summary':'GP visit summary'}</span><span style="width:44px"></span></div>
@@ -1070,6 +1102,80 @@ ${Y52?historyText():''}${H.qs.length?'\nMY QUESTIONS\n'+H.qs.map(q=>'- '+q).join
  <textarea id="copytext" readonly aria-label="Summary for your doctor" style="min-height:460px">${esc(txt)}</textarea>`}
 
 function retest(){return health()}
+
+/* ---------- training levels: Foundation, Standard, Advanced ----------
+   Advanced is the original program, untouched. Level changes strength and cardio numbers only.
+   The airway routine, breathing-trainer level, evening routine and neck holds do not depend on level. */
+const LV={F:{n:'Foundation',tag:'Start where you are.',c:'var(--air)',rir:'3–4',rest:'60–90 s, longer if you need it',who:'For men returning to exercise or wanting a gradual start. Shorter sessions, fewer sets, more left in reserve.'},
+ S:{n:'Standard',tag:'Build on what you have.',c:'var(--amb)',rir:'2–3',rest:'about 90 s',who:'For reasonably active men with some resistance-training experience. Balanced sessions and steady progression.'},
+ A:{n:'Advanced',tag:'Challenge your capabilities.',c:'var(--acc)',rir:'1–2',rest:'90 s to 3 min',who:'For men who already train strength and cardio regularly. Heavier sets and longer sessions.'}};
+const LORD='FSA';
+function flagged(){return!!(S.screen&&S.screen.flag&&!S.screen.gpOk)}
+function lvRaw(k){const l=S.profile&&S.profile.level;return l&&LV[l[k]]?l[k]:'A'}
+function lvOf(k){return!Y52||!S.profile?'A':flagged()?'F':lvRaw(k)}
+function LITEW(w){return w===26||w===39||w===52}
+/* main lifts: [sessions a week, sets, reps, minutes] */
+const LIFTS={F:w=>w<=2?[2,1,'12–15',25]:w<=5?[2,2,'12–15',30]:w<=13?[2,2,'10–12',30]:w<=17?[3,2,'10–12',30]:w<=25?[3,3,'10–12',35]:LITEW(w)?[3,2,'10–12',30]:w<=30?[3,2,'12–15',30]:w<=43?[3,3,'10–12',35]:[3,2,'10–12',30],
+ S:w=>w<=2?[3,2,'10–12',40]:w<=5?[3,3,'10–12',45]:w<=13?[3,3,'8–10',45]:w<=25?[3,4,'8–10',50]:LITEW(w)?[3,3,'8–10',45]:w<=30?[3,3,'10–12',45]:w<=38?[3,4,'8–10',50]:w<=43?[3,3,'10–12',45]:[3,3,'8–10',45]};
+function liftRow(w,lv){return LIFTS[lv](Math.max(1,w))}
+function advLift(w){return weekRow(w).lite?'3':PH[phaseOf(w)].lift}
+function setsOf(w,lv){return lv==='A'?parseInt(advLift(w)):liftRow(w,lv)[1]}
+function strMin(w){if(!Y52)return 50;const l=advLift(Math.max(1,w));return l.startsWith('4–5')?60:l.startsWith('4')?55:50}
+function liftTxt(w){const lv=lvOf('s');w=Math.max(1,w);if(lv==='A')return weekRow(w).lite?'3 sets, lighter week':PH[phaseOf(w)].lift;const r=liftRow(w,lv);return r[1]+' × '+r[2]+(LITEW(w)?', lighter week':w>=44?', hold your loads':'')}
+function transFrom(k){const tr=S.profile&&S.profile.trans&&S.profile.trans[k];return tr&&TODAY()<=tr.until?tr.from:null}
+function txn(sc,w){const f=transFrom('s');if(!f)return sc;const cur=parseInt(sc),was=setsOf(Math.max(1,w),f);return was<cur?was+sc.slice(sc.indexOf(' ×')):sc}
+const ACC={F:{carry:['2 × 20 m','2 × 30 m','3 × 30 m'],suit:['2 × 20 m/side','2 × 30 m/side','3 × 30 m/side'],splank:['2 × 20 s/side','2 × 30 s/side','3 × 30 s/side'],plank:['2 × 20 s','2 × 30 s','3 × 30 s'],face:['2 × 12','2 × 12','2 × 12']},
+ S:{carry:['3 × 30 m','3 × 30 m','3 × 40 m'],suit:['3 × 30 m/side','3 × 30 m/side','3 × 40 m/side'],splank:['3 × 30 s/side','3 × 30 s/side','3 × 40 s/side'],plank:['3 × 30 s','3 × 30 s','3 × 40 s'],face:['3 × 15','3 × 15','3 × 15']}};
+const FSKIP=['Standing overhead press','Dumbbell shrugs','Band neck extension + flexion'];
+function keepEx(e,lv){return lv!=='F'||!FSKIP.includes(e.n)||!!(S.profile&&S.profile.over&&S.profile.over.full)}
+function lvEx(e,a,lv,w,eq,nm,tp,sc){w=Math.max(1,w);const r=liftRow(w,lv),ti=w<=5?0:w<=13?1:2,lite=LITEW(w),main=e.log&&e.n!=='Dumbbell shrugs';
+ if(main){const home=!!(a&&!a[2]);sc=r[1]+' × '+(home?'8–15, slow lowering':r[2])+(lite?(home?' (lighter week)':', lighter week: about 90% of your recent load'):w>=44&&!home?', hold your loads':'')}
+ else{const k={"Farmer's carry":'carry','Suitcase carry':a&&a[2]?'splank':'suit','Face pulls':'face','Plank with chin tuck':'plank'}[e.n];if(k)sc=ACC[lv][k][ti]}
+ if(lv==='F'){if(e.n==='Chin-ups or lat pulldown'&&eq==='gym'){nm='Chest-supported or seated row';tp='Chest supported, pull to your ribs, chin tucked'}
+  if(e.n==='Goblet squat'){nm='Sit-to-stand or goblet squat';tp='Stand up from a chair without using your hands. Hold a weight at your chest once that is easy'}
+  if(nm==='Push-ups'){nm='Incline push-ups';tp='Hands on a kitchen bench or sturdy table. Lower the incline as you get stronger'}}
+ return{nm,tp,sc}}
+/* cardio minutes: z = Tuesday and Thursday steady sessions [low, high]; long = Saturday */
+const CAR={F:{z:w=>w<=2?[10,15]:w<=5?[15,20]:w<=8?[20,25]:w<=13?[25,30]:LITEW(w)||w<=38?[30,30]:[30,35],long:w=>w<=2?20:w<=5?25:w<=8?30:w<=13?35:LITEW(w)?30:w<=25?40:45},
+ S:{z:(w,thu)=>w<=2?[25,25]:w<=5?[30,30]:thu?[30,30]:w<=8?[35,35]:[40,40],long:w=>w<=2?35:w<=5?40:LITEW(w)?40:w<=30?45:50}};
+function intRx(w){const lv=lvOf('c'),p=phaseOf(Math.max(1,w));return lv==='A'?{R:pick(p,[6,6,8]),H:pick(p,[5,5,8]),E:90,hard:'hard'}:lv==='S'?{R:w<=8?4:6,H:0,E:90,hard:'hard'}:{R:4,H:0,E:120,hard:'brisk'}}
+function thuKind(w,p,row){if(flagged())return'z2';const lv=lvOf('c');return lv==='A'?(p==='F'||row.lite?'z2':'int'):lv==='S'?(w<6||LITEW(w)?'z2':'int'):(S.profile.intOK&&w>=14&&!LITEW(w)?'int':'z2')}
+function longMin(w){const cl=lvOf('c');w=Math.max(1,w);return cl==='A'?(weekRow(w).long||45):CAR[cl].long(w)}
+function recommend(a){const pu=num(a.push),pl=num(a.plank),dn=k=>LORD[Math.max(0,LORD.indexOf(k)-1)],why=[];
+ let s=a.lift==='reg'&&pu!=null&&pu>=15&&pl!=null&&pl>=60?'A':(a.lift==='some'||a.lift==='reg'||(pu!=null&&pu>=8&&pl!=null&&pl>=30))?'S':'F';
+ let c=a.days==='3'&&a.steady==='yes'?'A':a.walk==='yes'?'S':'F';
+ why.push(s==='A'?'you lift twice a week or more and passed the push-up and plank marks':s==='S'?'you have some recent strength training, or a solid push-up and plank':'you are starting or restarting strength work');
+ why.push(c==='A'?'you are active most days and can hold steady effort for 45 minutes':c==='S'?'you can walk briskly for 30 minutes':'you can’t yet walk briskly for 30 minutes, or didn’t say');
+ if((a.sore==='days'||a.away==='long')&&(s!=='F'||c!=='F')){why.push(a.away==='long'?'it has been over a year since you trained regularly, so each is set one step lower':'you stay sore for several days, so each is set one step lower');s=dn(s);c=dn(c)}
+ if(flagged()){s=c='F';why.push('the health check asks you to see your GP first')}
+ return{s,c,why}}
+function lvName(s,c){return s===c?LV[s].n:LV[s].n+' strength, '+LV[c].n+' cardio'}
+function recTxt(a){if(!Y52)return'';const r=recommend(a);return' Recommended training level: '+lvName(r.s,r.c)+'.'+(a.hours==='lo'?' With under 6 hours a week, the Minimum week in Settings may suit you.':'')}
+function setLevel(k,to,why){const t=TODAY(),L=S.profile.level||(S.profile.level={s:'A',c:'A'}),was=L[k];if(was===to)return;L[k]=to;(S.levelLog=S.levelLog||[]).push({date:t,week:Math.max(0,weekOf(t)),k,from:was,to,why});S.profile.trans=S.profile.trans||{};if(LORD.indexOf(to)>LORD.indexOf(was))S.profile.trans[k]={from:was,until:addD(t,13)};else delete S.profile.trans[k];W=null}
+function afterCk(k,a,t){if(!S.profile)return;
+ if(k==='screen'){S.screen={date:t,flag:Object.values(a).some(v=>v==='yes'),gpOk:false};W=null}
+ if(k==='fitness'){const r=recommend(a);S.profile.rec={date:t,s:r.s,c:r.c,why:r.why};
+  if(S.profile.levelNew){['s','c'].forEach(x=>{(S.levelLog=S.levelLog||[]).push({date:t,week:Math.max(0,weekOf(t)),k:x,from:S.profile.level[x],to:r[x],why:'starting assessment'});S.profile.level[x]=r[x]});S.profile.levelNew=false;W=null}}}
+const chip=k=>`<b style="color:${LV[k].c}">${LV[k].n.toUpperCase()}</b>`;
+function lvLine(){const s=lvOf('s'),c=lvOf('c');return`<div class="small" style="margin:-6px 0 12px">Training level: ${s===c?chip(s):'strength '+chip(s)+' · cardio '+chip(c)}${flagged()?' <span class="mut">(held until you’ve seen your GP)</span>':''}</div>`}
+function levelCards(){const p=S.profile,nx=S.screen?'fitness':'screen';
+ return p.levelNew?`<button class="item" data-act="ck" data-v="${nx}"><span style="color:var(--amb);font-size:20px">★</span><span class="grow"><span class="t1">Set your training level</span><span class="t2">A 2-minute check. Until then you’re on Foundation</span></span></button>`
+ :p.levelPrompt?`<div class="card"><div class="t1">Three training levels are here</div><div class="small mut" style="margin:4px 0 10px">You’re on the original plan, now called Advanced. Nothing has changed for you. A 2-minute check will show whether another level suits you better.</div><div class="grid2"><button class="btn2" data-act="ck" data-v="${nx}">Take the check</button><button class="btn2" data-act="lvdismiss">Keep my plan</button></div></div>`:''}
+function level(){const p=S.profile,rs=lvRaw('s'),rc=lvRaw('c'),rec=p.rec,w=Math.max(1,weekOf(TODAY())),up=V.up;
+ const pickRow=(k,lab,cur)=>`<div class="card"><div class="lab">${lab}</div><div class="grid3">${LORD.split('').map(x=>`<button class="chip" data-act="lvset" data-v="${k}:${x}" aria-pressed="${cur===x}" style="padding:0 6px;${cur===x?'border-color:'+LV[x].c+';color:'+LV[x].c+';font-weight:700':''}">${LV[x].n}${cur===x?' ✓':''}</button>`).join('')}</div>${transFrom(k)?`<div class="tiny mut" style="margin-top:8px">Stepping up from ${LV[transFrom(k)].n}${k==='s'?', on the lower set count,':''} until ${fmt(p.trans[k].until)}.</div>`:''}</div>`;
+ return`<div class="top"><button class="icon" data-act="go" data-v="settings" aria-label="Back to settings">${back}</button><span class="small mut">Week ${w}${stageOf(w)?' · '+stageOf(w).n:''}</span><span style="width:44px"></span></div>
+ <h1>Training level</h1>
+ ${flagged()?`<div class="warn"><b>See your GP before the strength and cardio sessions.</b> You answered yes on the health check, so your level is held at Foundation, and intervals and breathing-out work are paused.<button class="btn2" data-act="gpseen">I’ve seen my GP and can train</button></div>`:''}
+ ${pickRow('s','Strength',rs)}${pickRow('c','Cardio',rc)}
+ ${up?`<div class="warn"><b>Moving up to ${LV[up.to].n} ${up.k==='s'?'strength':'cardio'}.</b> Tick each one that is true:${['I’ve done at least three of the last four weeks’ sessions','I finish my sets with reps still in hand','No pain, and nothing new on the health check','I recover within a day or two'].map((x,i)=>`<label class="check"><input type="checkbox" id="rd${i}">${x}</label>`).join('')}<button class="btn" data-act="lvup">Move up</button><button class="btn2" data-act="lvcancel">Not yet</button><div class="tiny mut">You’ll step up over two weeks, not all at once.</div></div>`:''}
+ ${rec?`<div class="card"><div class="lab">Recommended for you · ${fmt(rec.date)}</div><div class="t1">${lvName(rec.s,rec.c)}</div><div class="small mut">Because ${esc(rec.why.join('; '))}.</div>${rec.s!==rs||rec.c!==rc?`<button class="btn2" data-act="lvrec">Use the recommended level</button>`:''}</div>`:`<div class="card small">No recommendation yet. Take the health check and the fitness check to get one.</div>`}
+ <div class="grid2"><button class="btn2" data-act="ck" data-v="fitness">Fitness check</button><button class="btn2" data-act="ck" data-v="screen">Health check</button></div>
+ <h2>The three levels</h2>
+ ${LORD.split('').map(x=>`<div class="card" style="box-shadow:inset 3px 0 0 ${LV[x].c}"><div class="t1">${LV[x].n} <span class="small mut" style="font-weight:400">· ${LV[x].tag}</span></div><div class="small mut">${LV[x].who}</div><div class="tiny" style="margin-top:6px">This week: ${x==='A'?esc(weekRow(w).lite?'3 sets, lighter week':PH[phaseOf(w)].lift):liftRow(w,x)[1]+' × '+liftRow(w,x)[2]} · stop with ${LV[x].rir} reps left</div></div>`).join('')}
+ <div class="card small"><b>What changes with level:</b> sets, reps, effort, rest, session length, a few of the harder lifts, cardio minutes and when intervals start.<br><b>What stays the same:</b> your program week and stage, the tongue and throat routine, your breathing-trainer level, the evening routine, your logs and your reviews.</div>
+ ${rs==='F'?`<label class="check card"><input type="checkbox" id="lvover" ${p.over&&p.over.full?'checked':''}><span class="grow"><span>Include overhead press, shrugs and resisted neck work</span><span class="t2">Left out at Foundation by default</span></span></label>`:''}
+ ${rc==='F'&&w>=14?`<label class="check card"><input type="checkbox" id="lvint" ${p.intOK?'checked':''}><span class="grow"><span>Add gentle intervals on Thursdays</span><span class="t2">Only if you can go 30 minutes without stopping, have done most of the last four weeks’ cardio and have no symptoms</span></span></label>`:''}
+ <p class="tiny mut">Moving down is immediate. Moving up asks a few questions first. No level is better than another: all three follow the same 52 weeks, with the same daily airway and breathing work.</p>`}
 
 /* ---------- stage reviews, goals and the year view (shown only with weeks 25-52 switched on) ---------- */
 const REVIEWS=[{k:'base',n:'Baseline',w:0},{k:'w13',n:'Awaken review',w:13,a:1,b:13},{k:'w26',n:'Build review',w:26,a:14,b:26},{k:'w39',n:'Reclaim review',w:39,a:27,b:39},{k:'w52',n:'Year-end review',w:52,a:40,b:52}];
@@ -1138,7 +1244,7 @@ function render(){const v=$('#view'),nav=$('#nav');
  if(FBC&&!USER&&!LOCAL){v.innerHTML=login();nav.style.display='none';v.className='wrap full';return}
  if(!S.profile){v.innerHTML=setup();nav.style.display='none';v.className='wrap full';return}
  if(S.profile.equip==null||S.profile.imt==null){v.innerHTML=setup2();nav.style.display='none';v.className='wrap full';return}
- const fn={today,plan,stage,review,goals,year,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
+ const fn={today,plan,stage,level,review,goals,year,log,progress,retest,record,report,workout,cardio,routine,imt,buy,watch,settings,checks,check,ckres,evening,sing,day}[V.s]||today;
  v.innerHTML=fn();const tab=TABS.includes(V.s);nav.style.display=tab?'':'none';v.className='wrap'+(tab?'':' full');
  nav.querySelectorAll('button').forEach(b=>b.toggleAttribute('aria-current',false));const cur=nav.querySelector(`[data-v="${V.s==='day'?'today':V.s}"]`);if(cur)cur.setAttribute('aria-current','page');
  const c=$('#chart');if(c){drawChart();new ResizeObserver(drawChart).observe(c)}}
@@ -1150,12 +1256,12 @@ function rHoldEnd(){const m=rMoves()[R.i];beep(m.rest?560:700,.1);
  if(R.rep>=m.reps){rNext(true);return}
  if(m.rest){R.ph='rest';startT(m.rest,()=>{R.rep++;rHold()});render()}else{R.rep++;startT(m.hold,rHoldEnd);render()}}
 function rNext(auto){const M=rMoves();T=null;if(auto)beep(990,.3);if(R.i>=M.length-1){R.ph='done';render();return}R.i++;R.rep=1;R.ph='ready';R.pan=null;render()}
-function nRound(){N.ph='hard';beep(990,.3);startT(30,()=>{N.ph='easy';beep(560,.3);startT(90,()=>{if(N.r>=N.R){N.ph='holds';beep(990,.4);render()}else{N.r++;nRound()}});render()});render()}
+function nRound(){N.ph='hard';beep(990,.3);startT(30,()=>{N.ph='easy';beep(560,.3);startT(N.E||90,()=>{if(N.r>=N.R){N.ph='holds';beep(990,.4);render()}else{N.r++;nRound()}});render()});render()}
 
 /* ---------- events ---------- */
 document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;unlock();const a=b.dataset.act,v=b.dataset.v,t=TODAY();
  if(a==='tab'){go(v);return}
- if(a==='setup'){const g=n=>{const el=document.querySelector('[name='+n+']:checked');return el?el.value:null};S.profile={start:$('#start').value||t,scoreSrc:g('src')||'snorelab',path:g('path')||'snorer',equip:g('equip')||'gym',imt:g('imtq')||'no',quickFlag:g('path')==='retest'?null:(g('quick')==='skip'?null:g('quick')),gpOk:false};S.checks=S.checks||{};save();if(v==='pers'){V={s:'check',k:myChecks()[0].k,wiz:{list:myChecks().map(c=>c.k)}};CKD={};render();window.scrollTo(0,0)}else go('today');return}
+ if(a==='setup'){const g=n=>{const el=document.querySelector('[name='+n+']:checked');return el?el.value:null};S.profile={start:$('#start').value||t,scoreSrc:g('src')||'snorelab',path:g('path')||'snorer',equip:g('equip')||'gym',imt:g('imtq')||'no',quickFlag:g('path')==='retest'?null:(g('quick')==='skip'?null:g('quick')),gpOk:false,level:{s:'F',c:'F'},levelNew:true};S.checks=S.checks||{};save();if(v==='pers'){V={s:'check',k:myChecks()[0].k,wiz:{list:myChecks().map(c=>c.k)}};CKD={};render();window.scrollTo(0,0)}else go('today');return}
  if(a==='setup2'){S.profile.equip=document.querySelector('[name=equip]:checked').value;S.profile.imt=document.querySelector('[name=imtq]:checked').value;W=null;save();go('today');return}
  if(a==='savewatch'){const w=document.querySelector('[name=watch]:checked');if(w){S.profile.watch=w.value;save();toast('Saved')}go(V.from&&V.from!=='watch'?V.from:'today');return}
  if(a==='hsave'){const H=HL();H.status=$('#hstatus').value;H.treatment=$('#htreat').value;H.pressure=$('#hpress').value;H.tStart=$('#htstart').value;H.clinic=$('#hclinic').value;save();toast('Record saved');return}
@@ -1174,6 +1280,13 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='delacct'){if(!v){V.confirmDel=true;render();return}if(v==='no'){V.confirmDel=false;render();return}(async()=>{try{if(dbRef&&FB)await FB.F.deleteDoc(dbRef)}catch(e){}try{localStorage.removeItem(LKEY)}catch(e){}dbRef=null;V.confirmDel=false;if(FB)FB.Au.signOut(FB.auth)})();return}
  if(a==='calday'){V.cd=v;V.cm=v.slice(0,7);render();return}
   if(a==='stage'){go('stage',{k:v});return}
+  if(a==='lvset'){const[k,to]=v.split(':'),cur=lvRaw(k);if(LORD.indexOf(to)<=LORD.indexOf(cur)){setLevel(k,to,'chosen');V.up=null;save();if(to!==cur)toast('Level changed');render();return}if(flagged()){toast('See your GP first');return}V.up={k,to};render();return}
+  if(a==='lvup'){if(!V.up)return;if(![0,1,2,3].every(i=>$('#rd'+i)&&$('#rd'+i).checked)){toast('Tick all four, or stay where you are for now');return}setLevel(V.up.k,V.up.to,'readiness check');V.up=null;S.profile.levelPrompt=false;save();toast('Stepping up over two weeks');render();return}
+  if(a==='lvcancel'){V.up=null;render();return}
+  if(a==='lvrec'){const r=S.profile.rec;if(!r)return;setLevel('s',r.s,'recommended');setLevel('c',r.c,'recommended');S.profile.levelPrompt=false;save();toast('Level set');render();return}
+  if(a==='lvdismiss'){S.profile.levelPrompt=false;save();render();return}
+  if(a==='gpseen'){if(S.screen){S.screen.gpOk=true;S.screen.gpDate=t}W=null;save();toast('Noted');render();return}
+  if(a==='easier'){if(W){W.ex.forEach(e=>{if(e.log&&e.sets.length>1)e.sets.pop()});W.easy=true;render()}return}
   if(a==='review'){go('review',{k:v});return}
   if(a==='goals'){go('goals',{back:v});return}
   if(a==='year'){go('year');return}
@@ -1187,7 +1300,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(
  if(a==='wiz'||a==='checkpoint'){const list=a==='wiz'?(myChecks().some(c=>!lastCk(c.k))?myChecks().filter(c=>!lastCk(c.k)):myChecks()).map(c=>c.k):myChecks().filter(c=>c.every&&lastCk(c.k)&&(pd(t)-pd(lastCk(c.k).date))/864e5>=c.every).map(c=>c.k);if(!list.length){go('today');return}CKD=Object.assign({},(lastCk(list[0])||{}).a||{});go('check',{k:list[0],wiz:{list}});return}
  if(a==='ans'){CKD[b.dataset.q]=v;b.parentElement.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));return}
  if(a==='sw'){const inp=document.getElementById(v);if(SW&&SW.id===v){inp.value=Math.round((Date.now()-SW.start)/1000);CKD[inp.dataset.num]=inp.value;SW=null}else{document.querySelectorAll('[data-num]').forEach(x=>CKD[x.dataset.num]=x.value);SW={id:v,start:Date.now()}}render();return}
- if(a==='cksave'){document.querySelectorAll('[data-num]').forEach(x=>CKD[x.dataset.num]=x.value);SW=null;S.checks=S.checks||{};(S.checks[V.k]=S.checks[V.k]||[]).push({date:t,a:Object.assign({},CKD)});if(V.k==='risk'||V.k==='quick')S.profile.gpOk=S.profile.gpOk&&ckOf('risk').res(CKD).lv!=='urgent';W=null;save();V={s:'ckres',k:V.k,wiz:V.wiz};render();window.scrollTo(0,0);return}
+ if(a==='cksave'){document.querySelectorAll('[data-num]').forEach(x=>CKD[x.dataset.num]=x.value);SW=null;S.checks=S.checks||{};(S.checks[V.k]=S.checks[V.k]||[]).push({date:t,a:Object.assign({},CKD)});afterCk(V.k,CKD,t);if(V.k==='risk'||V.k==='quick')S.profile.gpOk=S.profile.gpOk&&ckOf('risk').res(CKD).lv!=='urgent';W=null;save();V={s:'ckres',k:V.k,wiz:V.wiz};render();window.scrollTo(0,0);return}
  if(a==='ckskip'||a==='cknext'){SW=null;const w=V.wiz;if(!w){go(V.from==='settings'?'settings':'today');return}const i=w.list.indexOf(V.k);if(i>=w.list.length-1){go('today');return}const k=w.list[i+1];CKD=Object.assign({},(lastCk(k)||{}).a||{});V={s:'check',k,wiz:w};render();window.scrollTo(0,0);return}
  if(a==='ckclose'){SW=null;go(V.from==='settings'?'settings':'today');return}
  if(a==='reset'){if(!V.confirm&&!v){V.confirm=true;render();return}if(v==='yes'){S=blank();try{localStorage.removeItem('bs-state')}catch(e){}W=R=I=N=null;save();V={s:'today'};render();window.scrollTo(0,0);toast('All data deleted');return}V.confirm=false;render();return}
@@ -1238,6 +1351,8 @@ document.addEventListener('change',e=>{const el=e.target;
  if(el.id==='restorefile'&&el.files&&el.files[0]){const fr=new FileReader();fr.onload=()=>{try{const d=JSON.parse(fr.result);if(!d||typeof d!=='object'||!d.nights||!('profile' in d))throw 0;V.restore={data:d,date:d.backupAt?fmt(d.backupAt):'this file'};render()}catch(x){toast('That file isn’t a Breathe Strong backup')}};fr.readAsText(el.files[0]);return}
  if(el.name==='path'&&!S.profile){const r=el.value==='retest',a=$('#cpapnote'),q=$('#quickq');if(a)a.hidden=!r;if(q)q.hidden=r}
  if(el.dataset.exdone!=null&&W){W.ex[+el.dataset.exdone].done=el.checked}
+ if(el.id==='lvover'){S.profile.over=Object.assign({},S.profile.over,{full:el.checked});W=null;save()}
+ if(el.id==='lvint'){S.profile.intOK=el.checked;save()}
  if(el.id==='ld'){V.date=el.value;render()}});
 let LY=0;window.addEventListener('scroll',()=>{const y=window.scrollY,n=$('#nav');if(n)n.classList.toggle('mini',y>LY&&y>80);LY=y},{passive:true});
 let SX=null;document.addEventListener('touchstart',e=>{SX=e.target.closest('[data-swipe]')?e.touches[0].clientX:null},{passive:true});

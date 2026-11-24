@@ -20,6 +20,11 @@ Needs Node and Playwright with Chromium. Run from the repository root.
   and the history added to the clinician summary, including a check that no review text suggests
   reducing or stopping treatment.
 
+- `node tests/check-levels.js` covers the three training levels: every combination of strength level,
+  cardio level, equipment, week plan and week; Foundation and Standard against
+  `docs/three-levels/training-levels-plan.md`; level changes, the two-week step-up, the health check
+  and new-user set-up.
+
 The 52-week program is on by default. To see the original 24-week behaviour in a browser, run
 `localStorage.setItem('bs-year52','0')` in the console and reload; remove the key to switch back.
 
