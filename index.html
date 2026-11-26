@@ -989,7 +989,7 @@ function drawChart(){const s=$('#chart');if(!s)return;const pts=weekly(),st=stat
  h+=`<polyline points="${pts.map((p,i)=>x(i)+','+y(p.v)).join(' ')}" fill="none" stroke="#7FB7A4" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
  const step=Math.ceil(pts.length/(W<400?5:8));
  pts.forEach((p,i)=>{h+=`<circle cx="${x(i)}" cy="${y(p.v)}" r="${i===pts.length-1?6:4}" fill="#7FB7A4"/>`;if(i%step===0||i===pts.length-1)h+=`<text x="${x(i)}" y="${H-8}" fill="#B9B6B0" font-size="12" text-anchor="middle">${p.label}</text>`});
- const L=pts[pts.length-1];h+=`<text x="${x(pts.length-1)-12}" y="${y(L.v)+24}" fill="#F2F0EC" font-family="Barlow Condensed, sans-serif" font-weight="800" font-size="20" text-anchor="end">${Math.round(L.v)}</text>`;
+ const L=pts[pts.length-1],up=st.base&&L.v<st.base*5/6;/* near the target line the number sits above the point, so it does not run into the target label */h+=`<text x="${x(pts.length-1)-12}" y="${y(L.v)+(up?-12:24)}" fill="#F2F0EC" font-family="Barlow Condensed, sans-serif" font-weight="800" font-size="20" text-anchor="end">${Math.round(L.v)}</text>`;
  s.innerHTML=h}
 
 /* ---------- Phase 1: health record, CPAP, insights, alerts, doctor summary ---------- */
